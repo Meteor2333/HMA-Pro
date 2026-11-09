@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "cc.meteormc.xposedkit.template.xposed"
+    namespace = "cc.meteormc.hmapro.xposed"
     compileSdk {
         version = release(37) {
             minorApiLevel = 2

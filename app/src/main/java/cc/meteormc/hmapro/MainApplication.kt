@@ -1,4 +1,4 @@
-package cc.meteormc.xposedkit.template
+package cc.meteormc.hmapro
 
 import android.app.Application
 

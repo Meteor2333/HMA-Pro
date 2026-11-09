@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "xposedkit-template"
+rootProject.name = "HMA-Pro"
 include(":api")
 include(":app")
 include(":xposed")

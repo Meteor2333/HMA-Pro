@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">XposedKitTemplate</string>
-    <string name="app_description">A template for creating Xposed modules</string>
+    <string name="app_name">HMA-Pro</string>
+    <string name="app_description">An Xposed module to enhance Hide My AppList</string>
 </resources>

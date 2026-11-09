@@ -1,9 +1,9 @@
-package cc.meteormc.xposedkit.template.xposed.hooker
+package cc.meteormc.hmapro.xposed.hooker
 
 import cc.meteormc.xposedkit.hook.BaseHooker
 import cc.meteormc.xposedkit.hook.HookerContext
 
-object TemplateHooker : BaseHooker<HookerContext>() {
+object UIHooker : BaseHooker<HookerContext>() {
     override fun HookerContext.hook() {
 
     }

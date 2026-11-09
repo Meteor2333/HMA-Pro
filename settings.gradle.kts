@@ -1,5 +1,3 @@
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
 pluginManagement {
     repositories {
         google {
@@ -25,6 +23,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "HMA-Pro"
-include(":api")
 include(":app")
-include(":xposed")

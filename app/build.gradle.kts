@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.xposedkit)
 }
 
 android {
@@ -12,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "cc.meteormc.hmapro"
-        minSdk = 28
+        minSdk = 30
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"

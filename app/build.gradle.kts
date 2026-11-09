@@ -53,6 +53,6 @@ android {
 }
 
 dependencies {
-    api(project(":api"))
-    implementation(project(":xposed"))
+    api(projects.api)
+    implementation(projects.xposed)
 }

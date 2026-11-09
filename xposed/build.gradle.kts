@@ -22,5 +22,5 @@ android {
 }
 
 dependencies {
-    api(project(":api"))
+    api(projects.api)
 }

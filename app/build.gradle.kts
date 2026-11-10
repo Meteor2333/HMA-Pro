@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.xposedkit)
 }
 
@@ -44,16 +46,26 @@ android {
 
     buildFeatures {
         buildConfig = true
-        viewBinding = true
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        compose = true
     }
 }
 
+kotlin {
+    jvmToolchain(21)
+}
+
 dependencies {
-    api(projects.api)
-    implementation(projects.xposed)
+    implementation(libs.androidx.ktx)
+    implementation(libs.dexkit)
+
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.ui)
+
+    implementation(libs.miuix.ui)
+    implementation(libs.miuix.preference)
+    implementation(libs.miuix.icons)
+    implementation(libs.miuix.blur)
+    implementation(libs.miuix.nav)
 }

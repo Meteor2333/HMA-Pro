@@ -14,14 +14,20 @@ import cc.meteormc.xposedkit.param.SystemServerStartingParam
 object HmaProModule : XposedModule {
     const val HMA_PACKAGE = "com.tsng.hidemyapplist"
 
+    lateinit var classLoader: ClassLoader
+
     override fun onPackageLoaded(param: PackageLoadedParam) {
         if (!param.isFirstPackage) return
         if (param.packageName != HMA_PACKAGE) return
-        val context = HookerContext(param.classLoader)
+
+        classLoader = param.classLoader
+        DexMembers.init(param.appInfo)
+
+        val context = HookerContext(classLoader)
         UIHooker.installHook(context)
     }
 
     override fun onSystemServerStarting(param: SystemServerStartingParam) {
-
+        classLoader = param.classLoader
     }
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_description">用于增强隐藏应用列表的 Xposed 模块</string>
+
+    <string name="reboot_tip">（请尝试重启设备）</string>
+
+    <string name="title_description">简介</string>
+    <string name="view_source_code">查看源代码</string>
+    <string name="join_telegram">加入 Telegram 频道</string>
+</resources>

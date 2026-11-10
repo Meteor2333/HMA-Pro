@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HMA-Pro</string>
+    <string name="app_name" translatable="false">HMA-Pro</string>
     <string name="app_description">An Xposed module to enhance Hide My AppList</string>
+
+    <string name="reboot_tip"> (Try restarting your device)</string>
+
+    <string name="title_description">Description</string>
+    <string name="view_source_code">View source code</string>
+    <string name="join_telegram">Join Telegram channel</string>
 </resources>

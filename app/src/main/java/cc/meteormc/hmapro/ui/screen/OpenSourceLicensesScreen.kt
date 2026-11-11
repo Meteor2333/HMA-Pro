@@ -1,7 +1,6 @@
 package cc.meteormc.hmapro.ui.screen
 
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -101,27 +100,26 @@ fun OpenSourceLicensesScreen() {
                 scrollBehavior = scrollBehavior,
                 navigationIcon = { BackButton() }
             )
-        },
-        content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 16.dp)
-                    .verticalScrollEffect(scrollBehavior),
-                contentPadding = horizontalPadding.copy(
-                    top = paddingValues.calculateTopPadding(),
-                    bottom = paddingValues.calculateBottomPadding()
-                )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp)
+                .verticalScrollEffect(scrollBehavior),
+            contentPadding = horizontalPadding.copy(
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding()
+            )
+        ) {
+            items(
+                items = libraries,
+                key = { it.name }
             ) {
-                items(
-                    items = libraries,
-                    key = { it.name }
-                ) {
-                    LibraryCard(it)
-                }
+                LibraryCard(it)
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -130,8 +128,10 @@ private fun LibraryCard(library: Library) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp)
-            .padding(horizontal = 12.dp),
+            .padding(
+                horizontal = 12.dp,
+                vertical = 6.dp
+            ),
         onClick = { uriHandler.openUri(library.url) },
         showIndication = true
     ) {
@@ -158,14 +158,16 @@ private fun LibraryCard(library: Library) {
                     color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                 )
             ) {
-                Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                    Text(
-                        text = library.license,
-                        color = MiuixTheme.colorScheme.primary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                Text(
+                    text = library.license,
+                    modifier = Modifier.padding(
+                        horizontal = 8.dp,
+                        vertical = 4.dp
+                    ),
+                    color = MiuixTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

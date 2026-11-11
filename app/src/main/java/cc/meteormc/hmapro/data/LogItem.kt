@@ -1,8 +1,9 @@
 package cc.meteormc.hmapro.data
 
 data class LogItem(
-    val level: String,
+    val level: Int,
     val date: String,
     val tag: String,
-    val message: String
+    val message: String,
+    val raw: String
 )

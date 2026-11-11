@@ -1,6 +1,7 @@
 package cc.meteormc.hmapro.ui.page
 
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -27,14 +28,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cc.meteormc.hmapro.BuildConfig
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.data.ModuleStatus
+import cc.meteormc.hmapro.service.ConfigManager
+import cc.meteormc.hmapro.service.ServiceClient
 import cc.meteormc.hmapro.ui.nav.Route
 import cc.meteormc.hmapro.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.ui.util.LocalModuleStatus
@@ -43,6 +48,7 @@ import cc.meteormc.hmapro.ui.util.stringResourceBy
 import cc.meteormc.hmapro.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.ui.util.verticalScrollEffect
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
@@ -52,12 +58,15 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Background
+import top.yukonga.miuix.kmp.icon.extended.Backup
 import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.icon.extended.GridView
+import top.yukonga.miuix.kmp.icon.extended.Help
 import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.icon.extended.Refresh
-import top.yukonga.miuix.kmp.icon.extended.Unpin
 import top.yukonga.miuix.kmp.icon.extended.Update
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 import kotlin.math.sign
@@ -71,75 +80,97 @@ fun HomePage() {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = stringResourceFromModule(R.string.app_name),
+                title = stringResourceBy("app_name"),
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(
                         onClick = { navigator.push(Route.About) }
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Info,
+                            imageVector = MiuixIcons.Help,
                             contentDescription = "About"
                         )
                     }
                 }
             )
-        },
-        content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScrollEffect(scrollBehavior),
-                contentPadding = PaddingValues(12.dp)
-            ) {
-                item("module_status") {
-                    ModuleStatusCard()
-                }
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScrollEffect(scrollBehavior),
+            contentPadding = PaddingValues(horizontal = 12.dp)
+        ) {
+            item("spacer1") {
+                Spacer(Modifier.height(12.dp))
+            }
+
+            item("module_status") {
+                ModuleStatusCard()
+            }
+
+            item("spacer2") {
+                Spacer(Modifier.height(12.dp))
+            }
+
+            item("info") {
+                InfoCard()
+            }
+
+            item("spacer3") {
+                Spacer(Modifier.height(12.dp))
+            }
+
+            item("manage") {
+                ManageCard()
             }
         }
-    )
+    }
 }
 
 @Composable
 private fun ModuleStatusCard() {
-    val warningContainer = Color(0xFFFFF3CD)
+    val warningContainer = Color(0xCB553C25)
+    val errorContainer = Color(0xCD4E1616)
+    // todo: 浅色模式
+//    val warningContainer = Color(0xCBFFD0A6)
+//    val errorContainer = Color(0xCBFFCFCF)
 
-    val version = LocalHMAVersion.current
-    var title = stringResourceBy(
-        "home_xposed_activated",
-        version.simpleName,
-        version.code
-    )
-    var summary = ""
-    var icon: ImageVector
-    val color: Color
-    when (val status = LocalModuleStatus.current) {
+    val title: String
+    val summary: String
+    val icon: ImageVector
+    val background: Brush
+    when (LocalModuleStatus.current) {
         ModuleStatus.Disabled -> {
             title = stringResourceBy("home_xposed_not_activated")
+            summary = stringResourceBy("home_xposed_service_disabled")
             icon = MiuixIcons.Medium.Close
-            color = MiuixTheme.colorScheme.errorContainer
+            background = SolidColor(errorContainer)
         }
         ModuleStatus.OutOfDate -> {
+            title = stringResourceFromModule(R.string.module_activated)
             summary = stringResourceBy("home_xposed_service_old")
             icon = MiuixIcons.Medium.Update
-            color = warningContainer
+            background = SolidColor(warningContainer)
         }
         ModuleStatus.ServiceNotActivated -> {
+            title = stringResourceFromModule(R.string.module_activated)
             summary = stringResourceBy("home_xposed_service_off") + stringResourceFromModule(R.string.reboot_tip)
             icon = MiuixIcons.Medium.Refresh
-            color = warningContainer
-        }
-        ModuleStatus.NativeHookUnavailable -> {
-            title = stringResourceBy("home_native_hook_disabled_title")
-            summary = stringResourceBy("home_native_hook_disabled_summary")
-            icon = MiuixIcons.Medium.Unpin
-            color = warningContainer
+            background = SolidColor(warningContainer)
         }
         is ModuleStatus.Running -> {
-            summary = stringResourceBy("home_xposed_service_on", status.serviceVersion)
+            title = stringResourceFromModule(R.string.module_activated)
+            summary = stringResourceFromModule(R.string.service_running)
             icon = MiuixIcons.Medium.Ok
-            color = MiuixTheme.colorScheme.secondaryContainer
+
+            val containerColor = MiuixTheme.colorScheme.secondaryContainer
+            background = Brush.linearGradient(
+                colors = listOf(containerColor, containerColor.copy(alpha = 0.6f)),
+                start = Offset.Zero,
+                end = Offset.Infinite
+            )
         }
     }
 
@@ -154,7 +185,7 @@ private fun ModuleStatusCard() {
                 translationY = dy * 12f
                 rotationY = dx * 12f
                 rotationX = -dy * 6f
-                cameraDistance = 6f * density
+                cameraDistance = 4f * density
             }
             .pointerInput(Unit) {
                 fun curve(v: Float): Float {
@@ -188,6 +219,7 @@ private fun ModuleStatusCard() {
                             animate(
                                 initialValue = dx,
                                 targetValue = 0f,
+                                animationSpec = spring(),
                                 block = { value, _ -> dx = value }
                             )
                         }
@@ -196,6 +228,7 @@ private fun ModuleStatusCard() {
                             animate(
                                 initialValue = dy,
                                 targetValue = 0f,
+                                animationSpec = spring(),
                                 block = { value, _ -> dy = value }
                             )
                         }
@@ -209,21 +242,12 @@ private fun ModuleStatusCard() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            color.copy(alpha = 0.6f),
-                            color
-                        ),
-                        start = Offset.Zero,
-                        end = Offset.Infinite
-                    )
-                )
+                .background(brush = background)
         ) {
             Row(
                 modifier = Modifier.padding(
                     horizontal = 16.dp,
-                    vertical = 28.dp
+                    vertical = 24.dp
                 ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -244,7 +268,7 @@ private fun ModuleStatusCard() {
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(4.dp))
 
                     Text(
                         text = summary,
@@ -254,5 +278,105 @@ private fun ModuleStatusCard() {
                 }
             }
         }
+    }
+
+    if (!ServiceClient.isNativeHookSupported()) {
+        Spacer(Modifier.height(12.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.defaultColors(
+                color = MiuixTheme.colorScheme.tertiaryContainer,
+                contentColor = MiuixTheme.colorScheme.onTertiaryContainer
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = stringResourceBy("home_native_hook_disabled_title"),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = stringResourceBy("home_native_hook_disabled_summary"),
+                    fontSize = 16.sp
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun InfoCard() {
+    val version = LocalHMAVersion.current
+    val status = LocalModuleStatus.current
+    Card(
+        insideMargin = PaddingValues(
+            horizontal = 18.dp,
+            vertical = 10.dp
+        )
+    ) {
+        BasicComponent(
+            title = stringResourceFromModule(R.string.module_version),
+            summary = version.simpleName + '-' + version.code,
+            insideMargin = PaddingValues(vertical = 6.dp)
+        )
+        BasicComponent(
+            title = stringResourceFromModule(R.string.service_version),
+            summary = if (status is ModuleStatus.Running) status.serviceVersion.toString() else "Unknown",
+            insideMargin = PaddingValues(vertical = 6.dp)
+        )
+        BasicComponent(
+            title = stringResourceFromModule(R.string.hmapro_version),
+            summary = BuildConfig.VERSION_NAME,
+            insideMargin = PaddingValues(vertical = 6.dp)
+        )
+        BasicComponent(
+            title = stringResourceFromModule(R.string.force_mount),
+            summary = stringResourceBy(if (ConfigManager.forceMountData) "enabled" else "disabled"),
+            insideMargin = PaddingValues(vertical = 6.dp)
+        )
+    }
+}
+
+@Composable
+private fun ManageCard() {
+    val navigator = LocalNavigator.current
+    Card {
+        ArrowPreference(
+            title = stringResourceBy("title_app_manage"),
+            onClick = { navigator.push(Route.AppManage) },
+            startAction = {
+                Icon(
+                    imageVector = MiuixIcons.GridView,
+                    contentDescription = "App Manage"
+                )
+            }
+        )
+        ArrowPreference(
+            title = stringResourceBy("title_template_manage"),
+            onClick = { navigator.push(Route.TemplateManage) },
+            startAction = {
+                Icon(
+                    imageVector = MiuixIcons.Backup,
+                    contentDescription = "Template Manage"
+                )
+            }
+        )
+        ArrowPreference(
+            title = stringResourceFromModule(R.string.preset_overview),
+            onClick = { navigator.push(Route.PresetOverview) },
+            startAction = {
+                Icon(
+                    imageVector = MiuixIcons.Background,
+                    contentDescription = "Preset Manage"
+                )
+            }
+        )
     }
 }

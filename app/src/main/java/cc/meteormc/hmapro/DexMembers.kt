@@ -11,7 +11,9 @@ import org.luckypray.dexkit.query.matchers.ClassMatcher
 import org.luckypray.dexkit.query.matchers.FieldMatcher
 import org.luckypray.dexkit.query.matchers.MethodMatcher
 import java.io.FileInputStream
+import java.lang.reflect.Modifier
 import java.security.MessageDigest
+import java.util.concurrent.ExecutorService
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -52,6 +54,11 @@ object DexMembers {
 }
 
 object DexClasses {
+    val ConfigManager by classFinder {
+        usingEqStrings("ConfigManager")
+        addFieldForType("icu.nullptr.hidemyapplist.common.JsonConfig")
+    }
+
     val HMAService by classFinder {
         addMethod {
             name = "<init>"
@@ -71,45 +78,55 @@ object DexClasses {
 }
 
 object DexMethods {
+    val ConfigManager_saveConfig by methodFinder {
+        declaredClass = DexClasses.ConfigManager.name
+        returnType = "void"
+        modifiers = Modifier.STATIC
+        addInvoke {
+            declaredClass = ExecutorService::class.java.name
+            name = "execute"
+        }
+    }
+
     val HMAService_getServiceVersion by methodFinder {
-        declaredClass = DexClasses.HMAService.typeName
+        declaredClass = DexClasses.HMAService.name
         name = ServiceClient_getServiceVersion.name
         returnType = "int"
         paramCount = 0
     }
 
     val ServiceClient_getInstalledPackages by methodFinder {
-        declaredClass = DexClasses.ServiceClient.typeName
+        declaredClass = DexClasses.ServiceClient.name
         usingStrings("getInstalledPackages")
     }
 
     val ServiceClient_getLogs by methodFinder {
-        declaredClass = DexClasses.ServiceClient.typeName
+        declaredClass = DexClasses.ServiceClient.name
         usingEqStrings("getLogs")
     }
 
     val ServiceClient_getServiceVersion by methodFinder {
-        declaredClass = DexClasses.ServiceClient.typeName
+        declaredClass = DexClasses.ServiceClient.name
         usingEqStrings("getServiceVersion")
     }
 
     val ServiceClient_isNativeHookSupported by methodFinder {
-        declaredClass = DexClasses.ServiceClient.typeName
+        declaredClass = DexClasses.ServiceClient.name
         usingEqStrings("isNativeHookSupported")
     }
 
     val ServiceClient_clearLogs by methodFinder {
-        declaredClass = DexClasses.ServiceClient.typeName
+        declaredClass = DexClasses.ServiceClient.name
         usingStrings("clearLogs")
     }
 
     val ServiceClient_syncConfig by methodFinder {
-        declaredClass = DexClasses.ServiceClient.typeName
+        declaredClass = DexClasses.ServiceClient.name
         usingStrings("syncConfig")
     }
 
     val ServiceClient_stopService by methodFinder {
-        declaredClass = DexClasses.ServiceClient.typeName
+        declaredClass = DexClasses.ServiceClient.name
         usingStrings("stopService")
     }
 
@@ -123,6 +140,18 @@ object DexMethods {
 }
 
 object DexFields {
+    val ConfigManager_config by fieldFinder {
+        declaredClass = DexClasses.ConfigManager.name
+        type = "icu.nullptr.hidemyapplist.common.JsonConfig"
+        modifiers = Modifier.STATIC
+    }
+
+    val ConfigManager_INSTANCE by fieldFinder {
+        declaredClass = DexClasses.ConfigManager.name
+        type = DexClasses.ConfigManager.name
+        modifiers = Modifier.STATIC or Modifier.FINAL
+    }
+
     private fun fieldFinder(block: FieldMatcher.() -> Unit) = FinderDelegate {
         dexkit.getField(it) { matcher(FieldMatcher().apply(block)) }.getFieldInstance(HmaProModule.classLoader)
     }

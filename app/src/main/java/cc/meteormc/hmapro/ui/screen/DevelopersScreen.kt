@@ -98,27 +98,26 @@ fun DevelopersScreen() {
                 scrollBehavior = scrollBehavior,
                 navigationIcon = { BackButton() }
             )
-        },
-        content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 16.dp)
-                    .verticalScrollEffect(scrollBehavior),
-                contentPadding = horizontalPadding.copy(
-                    top = paddingValues.calculateTopPadding(),
-                    bottom = paddingValues.calculateBottomPadding()
-                )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp)
+                .verticalScrollEffect(scrollBehavior),
+            contentPadding = horizontalPadding.copy(
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding()
+            )
+        ) {
+            items(
+                items = developers,
+                key = { it.name }
             ) {
-                items(
-                    items = developers,
-                    key = { it.name }
-                ) {
-                    DeveloperCard(it)
-                }
+                DeveloperCard(it)
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -127,8 +126,10 @@ private fun DeveloperCard(developer: Developer) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp)
-            .padding(horizontal = 12.dp),
+            .padding(
+                horizontal = 12.dp,
+                vertical = 6.dp
+            ),
         onClick = { uriHandler.openUri(developer.link) },
         showIndication = true
     ) {

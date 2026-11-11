@@ -23,17 +23,16 @@ fun SettingsPage() {
                 title = stringResourceBy("title_settings"),
                 scrollBehavior = scrollBehavior
             )
-        },
-        content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScrollEffect(scrollBehavior),
-                contentPadding = PaddingValues(12.dp)
-            ) {
-
-            }
         }
-    )
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScrollEffect(scrollBehavior),
+            contentPadding = PaddingValues(horizontal = 12.dp)
+        ) {
+
+        }
+    }
 }

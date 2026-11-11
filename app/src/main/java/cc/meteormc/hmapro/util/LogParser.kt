@@ -1,7 +1,7 @@
 package cc.meteormc.hmapro.util
 
+import android.util.Log
 import cc.meteormc.hmapro.data.LogItem
-import cc.meteormc.xposedkit.XLog
 import java.util.regex.Pattern
 
 object LogParser {
@@ -24,14 +24,22 @@ object LogParser {
     }
 
     private fun parseItem(text: String): LogItem? {
-        XLog.i("LogParser", text)
         val matcher = pattern.matcher(text)
         if (!matcher.find()) return null
 
-        val level = matcher.group(1) ?: return null
+        val level = when (matcher.group(1)?.trim()) {
+            null -> null
+            "VERBOSE" -> Log.VERBOSE
+            "DEBUG" -> Log.DEBUG
+            "INFO" -> Log.INFO
+            "WARN" -> Log.WARN
+            "ERROR" -> Log.ERROR
+            "ASSERT" -> Log.ASSERT
+            else -> null
+        } ?: return null
         val date = matcher.group(2) ?: return null
         val tag = matcher.group(3) ?: return null
         val message = matcher.group(4) ?: return null
-        return LogItem(level, date, tag, message)
+        return LogItem(level, date, tag, message, text)
     }
 }

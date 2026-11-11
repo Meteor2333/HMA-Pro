@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_description">用于增强隐藏应用列表的 Xposed 模块</string>
-
+    <string name="app_description">增强你的隐藏应用列表模块</string>
+    <string name="force_mount">强制挂载</string>
+    <string name="hmapro_version">HMA-Pro 版本</string>
+    <string name="join_telegram">加入 Telegram 频道</string>
+    <string name="log_copied">已复制到剪贴板</string>
+    <string name="module_activated">模块已激活</string>
+    <string name="module_version">模块版本</string>
+    <string name="preset_overview">查看预设</string>
+    <string name="pull_to_refresh">下拉刷新</string>
     <string name="reboot_tip">（请尝试重启设备）</string>
-
+    <string name="refreshed">刷新完成</string>
+    <string name="refreshing">正在刷新...</string>
+    <string name="release_to_refresh">松开刷新</string>
+    <string name="service_running">系统服务运行中</string>
+    <string name="service_version">系统服务版本</string>
     <string name="title_description">简介</string>
     <string name="view_source_code">查看源代码</string>
-    <string name="join_telegram">加入 Telegram 频道</string>
 </resources>

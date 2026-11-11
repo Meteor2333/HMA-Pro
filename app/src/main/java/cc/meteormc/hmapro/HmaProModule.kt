@@ -1,6 +1,7 @@
 package cc.meteormc.hmapro
 
 import cc.meteormc.hmapro.hooker.ActivityHooker
+import cc.meteormc.hmapro.hooker.ServiceHooker
 import cc.meteormc.hmapro.hooker.UiHooker
 import cc.meteormc.xposedkit.XposedModule
 import cc.meteormc.xposedkit.annotation.ModuleRegister
@@ -26,6 +27,7 @@ object HmaProModule : XposedModule {
 
         val context = HookerContext(classLoader)
         ActivityHooker.installHook(context)
+        ServiceHooker.installHook(context)
         UiHooker.installHook(context)
     }
 

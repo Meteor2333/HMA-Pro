@@ -1,6 +1,7 @@
 package cc.meteormc.hmapro.ui.screen
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.IntOffset
 import cc.meteormc.hmapro.ui.page.HomePage
 import cc.meteormc.hmapro.ui.page.LogsPage
 import cc.meteormc.hmapro.ui.page.SettingsPage
@@ -74,43 +76,44 @@ fun MainScreen() {
                     )
                 }
             }
-        },
-        content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .layerBackdrop(backdrop),
-                contentAlignment = Alignment.Center
-            ) {
-                AnimatedContent(
-                    targetState = selectedIndex,
-                    modifier = Modifier.fillMaxSize(),
-                    transitionSpec = {
-                        if (targetState > initialState) {
-                            slideInHorizontally(
-                                animationSpec = tween(300),
-                                initialOffsetX = { width -> width }
-                            ) + fadeIn(tween(300)) togetherWith slideOutHorizontally(
-                                animationSpec = tween(300),
-                                targetOffsetX = { width -> -width }
-                            ) + fadeOut(tween(300))
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .layerBackdrop(backdrop),
+            contentAlignment = Alignment.Center
+        ) {
+            val slideSpec = tween<IntOffset>(durationMillis = 350)
+            val fadeSpec = tween<Float>(durationMillis = 300, easing = LinearOutSlowInEasing)
+            AnimatedContent(
+                targetState = selectedIndex,
+                modifier = Modifier.fillMaxSize(),
+                transitionSpec = {
+                    if (targetState > initialState) {
+                        slideInHorizontally(
+                            animationSpec = slideSpec,
+                            initialOffsetX = { width -> width }
+                        ) + fadeIn(fadeSpec) togetherWith slideOutHorizontally(
+                            animationSpec = slideSpec,
+                            targetOffsetX = { width -> -width }
+                        ) + fadeOut(fadeSpec)
 
-                        } else {
-                            slideInHorizontally(
-                                animationSpec = tween(300),
-                                initialOffsetX = { width -> -width }
-                            ) + fadeIn(tween(300)) togetherWith slideOutHorizontally(
-                                animationSpec = tween(300),
-                                targetOffsetX = { width -> width }
-                            ) + fadeOut(tween(300))
-                        }
+                    } else {
+                        slideInHorizontally(
+                            animationSpec = slideSpec,
+                            initialOffsetX = { width -> -width }
+                        ) + fadeIn(fadeSpec) togetherWith slideOutHorizontally(
+                            animationSpec = slideSpec,
+                            targetOffsetX = { width -> width }
+                        ) + fadeOut(fadeSpec)
                     }
-                ) { index ->
-                    pages[index].content()
                 }
+            ) { index ->
+                pages[index].content()
             }
         }
-    )
+    }
 }
 
 private data class NavigationPage(

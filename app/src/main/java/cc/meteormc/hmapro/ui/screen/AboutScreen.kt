@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import cc.meteormc.hmapro.R
-import cc.meteormc.hmapro.ui.effect.aurora.AuroraBackground
+import cc.meteormc.hmapro.ui.aurora.AuroraBackground
 import cc.meteormc.hmapro.ui.nav.Route
 import cc.meteormc.hmapro.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.ui.util.LocalNavigator
@@ -100,17 +100,16 @@ fun AboutScreen() {
                 scrollBehavior = scrollBehavior,
                 navigationIcon = { BackButton() }
             )
-        },
-        content = { paddingValues ->
-            AboutContent(
-                padding = paddingValues,
-                backdrop = backdrop,
-                scrollBehavior = scrollBehavior,
-                onProgressChange = { scrollProgress = it },
-                useRuntimeShader = useRuntimeShader
-            )
         }
-    )
+    ) { paddingValues ->
+        AboutContent(
+            padding = paddingValues,
+            backdrop = backdrop,
+            scrollBehavior = scrollBehavior,
+            onProgressChange = { scrollProgress = it },
+            useRuntimeShader = useRuntimeShader
+        )
+    }
 }
 
 @Composable

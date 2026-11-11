@@ -3,9 +3,27 @@
     <string name="app_name" translatable="false">HMA-Pro</string>
     <string name="app_description">An Xposed module to enhance Hide My AppList</string>
 
-    <string name="reboot_tip"> (Try restarting your device)</string>
+    <!-- Home -->
+    <string name="module_activated">Module Activated</string>
+    <string name="service_running">System service running</string>
+    <string name="module_version">Module version</string>
+    <string name="service_version">System service version</string>
+    <string name="hmapro_version">HMA-Pro version</string>
+    <string name="force_mount">Force mount</string>
+    <string name="preset_overview">Preset overview</string>
 
+    <!-- About -->
     <string name="title_description">Description</string>
     <string name="view_source_code">View source code</string>
     <string name="join_telegram">Join Telegram channel</string>
+
+    <!-- Pull To Refresh -->
+    <string name="pull_to_refresh">Pull down to refresh</string>
+    <string name="release_to_refresh">Release to refresh</string>
+    <string name="refreshing">Refreshing...</string>
+    <string name="refreshed">Refreshed successfully</string>
+
+    <!-- Misc -->
+    <string name="reboot_tip"> (Try restarting your device)</string>
+    <string name="log_copied">Copied to clipboard</string>
 </resources>

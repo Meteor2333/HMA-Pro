@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import cc.meteormc.hmapro.R
-import cc.meteormc.hmapro.ui.aurora.AuroraBackground
 import cc.meteormc.hmapro.ui.nav.Route
 import cc.meteormc.hmapro.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.ui.util.LocalNavigator
@@ -60,6 +59,7 @@ import cc.meteormc.hmapro.ui.util.stringResourceBy
 import cc.meteormc.hmapro.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.ui.weight.BackButton
+import cc.meteormc.hmapro.ui.weight.aurora.AuroraBackground
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults

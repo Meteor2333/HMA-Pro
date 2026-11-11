@@ -11,7 +11,7 @@ import cc.meteormc.xposedkit.hook.HookerContext
 import cc.meteormc.xposedkit.reflect
 import cc.meteormc.xposedkit.support.AppComponentFactoryWrapper
 
-object UIHooker : BaseHooker<HookerContext>() {
+object ActivityHooker : BaseHooker<HookerContext>() {
     override fun HookerContext.hook() {
         Instrumentation::class.reflect {
             method("getFactory")?.hookAfter {

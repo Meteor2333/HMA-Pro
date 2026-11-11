@@ -1,6 +1,7 @@
 package cc.meteormc.hmapro
 
-import cc.meteormc.hmapro.hooker.UIHooker
+import cc.meteormc.hmapro.hooker.ActivityHooker
+import cc.meteormc.hmapro.hooker.UiHooker
 import cc.meteormc.xposedkit.XposedModule
 import cc.meteormc.xposedkit.annotation.ModuleRegister
 import cc.meteormc.xposedkit.hook.HookerContext
@@ -24,7 +25,8 @@ object HmaProModule : XposedModule {
         DexMembers.init(param.appInfo)
 
         val context = HookerContext(classLoader)
-        UIHooker.installHook(context)
+        ActivityHooker.installHook(context)
+        UiHooker.installHook(context)
     }
 
     override fun onSystemServerStarting(param: SystemServerStartingParam) {

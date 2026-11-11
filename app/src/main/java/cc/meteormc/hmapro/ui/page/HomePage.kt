@@ -103,7 +103,7 @@ fun HomePage() {
                 .verticalScrollEffect(scrollBehavior),
             contentPadding = PaddingValues(horizontal = 12.dp)
         ) {
-            item("spacer1") {
+            item("head_spacer") {
                 Spacer(Modifier.height(12.dp))
             }
 
@@ -111,7 +111,7 @@ fun HomePage() {
                 ModuleStatusCard()
             }
 
-            item("spacer2") {
+            item("spacer1") {
                 Spacer(Modifier.height(12.dp))
             }
 
@@ -119,12 +119,16 @@ fun HomePage() {
                 InfoCard()
             }
 
-            item("spacer3") {
+            item("spacer2") {
                 Spacer(Modifier.height(12.dp))
             }
 
             item("manage") {
                 ManageCard()
+            }
+
+            item("tail_spacer") {
+                Spacer(Modifier.height(12.dp))
             }
         }
     }

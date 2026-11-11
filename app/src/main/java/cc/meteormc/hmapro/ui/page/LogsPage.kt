@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.data.LogItem
 import cc.meteormc.hmapro.service.ServiceClient
+import cc.meteormc.hmapro.ui.util.copy
 import cc.meteormc.hmapro.ui.util.stringResourceBy
 import cc.meteormc.hmapro.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.ui.util.verticalScrollEffect
@@ -221,7 +222,7 @@ fun LogsPage() {
                 isRefreshing = true
                 scope.launch { updateLogs() }
             },
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues.copy(bottom = 0.dp)),
             pullToRefreshState = refreshState,
             refreshTexts = listOf(
                 stringResourceFromModule(R.string.pull_to_refresh),

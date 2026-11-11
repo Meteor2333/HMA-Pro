@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cc.meteormc.hmapro.ui.util.copy
 import cc.meteormc.hmapro.ui.util.stringResourceBy
 import cc.meteormc.hmapro.ui.util.verticalScrollEffect
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -28,7 +29,7 @@ fun SettingsPage() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues.copy(bottom = 0.dp))
                 .verticalScrollEffect(scrollBehavior),
             contentPadding = PaddingValues(horizontal = 12.dp)
         ) {

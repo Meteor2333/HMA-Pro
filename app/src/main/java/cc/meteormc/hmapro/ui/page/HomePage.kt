@@ -44,6 +44,7 @@ import cc.meteormc.hmapro.ui.nav.Route
 import cc.meteormc.hmapro.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.ui.util.LocalNavigator
+import cc.meteormc.hmapro.ui.util.copy
 import cc.meteormc.hmapro.ui.util.stringResourceBy
 import cc.meteormc.hmapro.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.ui.util.verticalScrollEffect
@@ -98,7 +99,7 @@ fun HomePage() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues.copy(bottom = 0.dp))
                 .verticalScrollEffect(scrollBehavior),
             contentPadding = PaddingValues(horizontal = 12.dp)
         ) {

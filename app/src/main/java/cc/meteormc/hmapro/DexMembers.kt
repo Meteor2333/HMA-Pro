@@ -2,18 +2,22 @@
 
 package cc.meteormc.hmapro
 
-import android.content.pm.ApplicationInfo
-import cc.meteormc.hmapro.util.DexKitCache
+import cc.meteormc.xposedkit.util.AtomicBooleanDelegate
 import org.luckypray.dexkit.DexKitCacheBridge
 import org.luckypray.dexkit.DexKitCacheBridge.CacheBridgeListener
 import org.luckypray.dexkit.annotations.DexKitExperimentalApi
 import org.luckypray.dexkit.query.matchers.ClassMatcher
 import org.luckypray.dexkit.query.matchers.FieldMatcher
 import org.luckypray.dexkit.query.matchers.MethodMatcher
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.File
 import java.io.FileInputStream
 import java.lang.reflect.Modifier
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
+import kotlin.concurrent.thread
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -24,21 +28,22 @@ object DexMembers {
         System.loadLibrary("dexkit")
     }
 
-    fun init(appInfo: ApplicationInfo) {
-        DexKitCache.load()
-        DexKitCacheBridge.init(DexKitCache)
-        DexKitCacheBridge.addListener(
-            object : CacheBridgeListener() {
-                override fun onBridgeReleased(appTag: String) {
-                    DexKitCache.trySave()
+    fun init(sourceDir: String, cacheFile: File?) {
+        if (cacheFile != null) {
+            DexKitCache.load(cacheFile)
+            DexKitCacheBridge.init(DexKitCache)
+            DexKitCacheBridge.addListener(
+                object : CacheBridgeListener() {
+                    override fun onBridgeReleased(appTag: String) {
+                        DexKitCache.trySave()
+                    }
                 }
-            }
-        )
+            )
+        }
 
-        val path = appInfo.sourceDir
         val appHash = MessageDigest.getInstance("SHA-256").run {
             val buffer = ByteArray(8192)
-            FileInputStream(path).use {
+            FileInputStream(sourceDir).use {
                 while (true) {
                     val n = it.read(buffer)
                     if (n < 0) break
@@ -49,7 +54,7 @@ object DexMembers {
                 "%02x".format(it.toInt() and 0xFF)
             }
         }
-        dexkit = DexKitCacheBridge.create(appHash, path)
+        dexkit = DexKitCacheBridge.create(appHash, sourceDir)
     }
 }
 
@@ -62,6 +67,7 @@ object DexClasses {
     val HMAService by classFinder {
         addMethod {
             name = "<init>"
+            usingEqStrings("icu.nullptr.hidemyapplist.common.IHMAService")
             addInvoke {
                 name = "attachInterface"
             }
@@ -167,5 +173,109 @@ private class FinderDelegate<T : Any>(private val finder: (key: String) -> T) : 
             cachedValue = result
         }
         return cachedValue!!
+    }
+}
+
+private object DexKitCache : DexKitCacheBridge.Cache {
+    private const val MAGIC = 0x444B43
+    private const val VERSION = 1
+
+    private lateinit var file: File
+    private var dirty by AtomicBooleanDelegate(false)
+    private val single = ConcurrentHashMap<String, String>()
+    private val list = ConcurrentHashMap<String, List<String>>()
+
+    fun load(file: File) {
+        this.file = file
+        if (!file.exists() || file.length() > 10 * 1024 * 1024) {
+            file.writeBytes(ByteArray(0))
+            return
+        }
+
+        if (file.length() <= 0) return
+        DataInputStream(file.inputStream()).use { input ->
+            if (input.readInt() != MAGIC) {
+                throw IllegalStateException("DexKit cache file has invalid magic number, invalidating it")
+            }
+
+            if (input.readInt() != VERSION) {
+                throw IllegalStateException("DexKit cache file has invalid version, invalidating it")
+            }
+
+            single.clear()
+            repeat(input.readInt()) {
+                val key = input.readUTF()
+                val value = input.readUTF()
+                single[key] = value
+            }
+
+            list.clear()
+            repeat(input.readInt()) {
+                val key = input.readUTF()
+                val size = input.readInt()
+                val value = ArrayList<String>(size)
+                repeat(size) { value.add(input.readUTF()) }
+                list[key] = value
+            }
+        }
+    }
+
+    fun trySave() {
+        if (!dirty) return
+        thread { save(file) }
+    }
+
+    private fun save(file: File) {
+        DataOutputStream(file.outputStream()).use { output ->
+            output.writeInt(MAGIC)
+            output.writeInt(VERSION)
+
+            output.writeInt(single.size)
+            for ((key, value) in single) {
+                output.writeUTF(key)
+                output.writeUTF(value)
+            }
+
+            output.writeInt(list.size)
+            for ((key, value) in list) {
+                output.writeUTF(key)
+                output.writeInt(value.size)
+                value.forEach { output.writeUTF(it) }
+            }
+        }
+    }
+
+    override fun getString(key: String, default: String?): String? {
+        return single[key] ?: default
+    }
+
+    override fun putString(key: String, value: String) {
+        dirty = true
+        single[key] = value
+    }
+
+    override fun getStringList(key: String, default: List<String>?): List<String>? {
+        return list[key] ?: default
+    }
+
+    override fun putStringList(key: String, value: List<String>) {
+        dirty = true
+        list[key] = value
+    }
+
+    override fun remove(key: String) {
+        dirty = true
+        single.remove(key)
+        list.remove(key)
+    }
+
+    override fun getAllKeys(): Collection<String> {
+        return single.keys + list.keys
+    }
+
+    override fun clearAll() {
+        dirty = true
+        single.clear()
+        list.clear()
     }
 }

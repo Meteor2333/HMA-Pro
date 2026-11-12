@@ -24,10 +24,13 @@ import cc.meteormc.hmapro.ui.screen.MainScreen
 import cc.meteormc.hmapro.ui.screen.OpenSourceLicensesScreen
 import cc.meteormc.hmapro.ui.screen.PresetOverviewScreen
 import cc.meteormc.hmapro.ui.screen.TemplateManageScreen
+import cc.meteormc.hmapro.ui.util.ContainerTransformState
+import cc.meteormc.hmapro.ui.util.LocalContainerTransformState
 import cc.meteormc.hmapro.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.ui.util.LocalModuleResources
 import cc.meteormc.hmapro.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.ui.util.LocalNavigator
+import cc.meteormc.hmapro.ui.util.containerTransform
 import cc.meteormc.xposedkit.XposedKit
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.rememberNavController
@@ -62,10 +65,12 @@ private fun App() {
         }
     }
 
+    val containerTransformState = remember { ContainerTransformState() }
     val navigator = rememberNavController<Route>(Route.Main)
 
     MiuixTheme(controller = themeController) {
         CompositionLocalProvider(
+            LocalContainerTransformState provides containerTransformState,
             LocalHMAVersion provides hmaVersion,
             LocalModuleResources provides moduleResource,
             LocalModuleStatus provides moduleStatus,
@@ -91,15 +96,21 @@ private fun App() {
                     OpenSourceLicensesScreen()
                 }
 
-                entry<Route.AppManage> {
+                entry<Route.AppManage>(
+                    transition = containerTransform(containerTransformState)
+                ) {
                     AppManageScreen()
                 }
 
-                entry<Route.TemplateManage> {
+                entry<Route.TemplateManage>(
+                    transition = containerTransform(containerTransformState)
+                ) {
                     TemplateManageScreen()
                 }
 
-                entry<Route.PresetOverview> {
+                entry<Route.PresetOverview>(
+                    transition = containerTransform(containerTransformState)
+                ) {
                     PresetOverviewScreen()
                 }
             }

@@ -20,18 +20,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +45,7 @@ import cc.meteormc.hmapro.data.ModuleStatus
 import cc.meteormc.hmapro.service.ConfigManager
 import cc.meteormc.hmapro.service.ServiceClient
 import cc.meteormc.hmapro.ui.nav.Route
+import cc.meteormc.hmapro.ui.util.LocalContainerTransformState
 import cc.meteormc.hmapro.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.ui.util.LocalNavigator
@@ -352,10 +357,28 @@ private fun InfoCard() {
 @Composable
 private fun ManageCard() {
     val navigator = LocalNavigator.current
-    Card {
+    val transformState = LocalContainerTransformState.current
+
+    val colors = CardDefaults.defaultColors()
+    val cornerRadius = CardDefaults.CornerRadius
+    val appManageBounds = remember { mutableStateOf<Rect?>(null) }
+    val templateManageBounds = remember { mutableStateOf<Rect?>(null) }
+    val presetOverviewBounds = remember { mutableStateOf<Rect?>(null) }
+    Card(
+        cornerRadius = cornerRadius,
+        colors = colors
+    ) {
         ArrowPreference(
             title = stringResourceBy("title_app_manage"),
-            onClick = { navigator.push(Route.AppManage) },
+            modifier = Modifier.onGloballyPositioned {
+                appManageBounds.value = it.boundsInRoot()
+            },
+            onClick = {
+                transformState.rect = appManageBounds
+                transformState.color = mutableStateOf(colors.color)
+                transformState.cornerRadius = mutableStateOf(cornerRadius)
+                navigator.push(Route.AppManage)
+            },
             startAction = {
                 Icon(
                     imageVector = MiuixIcons.GridView,
@@ -365,7 +388,15 @@ private fun ManageCard() {
         )
         ArrowPreference(
             title = stringResourceBy("title_template_manage"),
-            onClick = { navigator.push(Route.TemplateManage) },
+            modifier = Modifier.onGloballyPositioned {
+                templateManageBounds.value = it.boundsInRoot()
+            },
+            onClick = {
+                transformState.rect = templateManageBounds
+                transformState.color = mutableStateOf(colors.color)
+                transformState.cornerRadius = mutableStateOf(cornerRadius)
+                navigator.push(Route.TemplateManage)
+            },
             startAction = {
                 Icon(
                     imageVector = MiuixIcons.Backup,
@@ -375,7 +406,15 @@ private fun ManageCard() {
         )
         ArrowPreference(
             title = stringResourceFromModule(R.string.preset_overview),
-            onClick = { navigator.push(Route.PresetOverview) },
+            modifier = Modifier.onGloballyPositioned {
+                presetOverviewBounds.value = it.boundsInRoot()
+            },
+            onClick = {
+                transformState.rect = presetOverviewBounds
+                transformState.color = mutableStateOf(colors.color)
+                transformState.cornerRadius = mutableStateOf(cornerRadius)
+                navigator.push(Route.PresetOverview)
+            },
             startAction = {
                 Icon(
                     imageVector = MiuixIcons.Background,

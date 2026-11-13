@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import cc.meteormc.hmapro.manager.ui.util.currentDeviceType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
@@ -27,7 +28,6 @@ fun AuroraBackground(
     modifier: Modifier = Modifier,
     bgModifier: Modifier = Modifier,
     isFullSize: Boolean = false,
-    deviceType: DeviceType = DeviceType.PHONE,
     effectBackground: Boolean = true,
     alpha: () -> Float = { 1f },
     content: @Composable (BoxScope.() -> Unit),
@@ -41,6 +41,8 @@ fun AuroraBackground(
         modifier = modifier,
     ) {
         val surface = MiuixTheme.colorScheme.surface
+        val deviceType = currentDeviceType()
+
         val painter = remember { AuroraEffectPainter() }
         val preset = remember(deviceType, isDarkTheme) {
             AuroraEffectConfig.get(deviceType, isDarkTheme)

@@ -49,7 +49,6 @@ import cc.meteormc.hmapro.manager.ui.util.LocalContainerTransformState
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
-import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
@@ -97,14 +96,15 @@ fun HomePage() {
                             contentDescription = "About"
                         )
                     }
-                }
+                },
+                defaultWindowInsetsPadding = false
             )
         }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues.copy(bottom = 0.dp))
+                .padding(top = paddingValues.calculateTopPadding())
                 .verticalScrollEffect(scrollBehavior),
             contentPadding = PaddingValues(horizontal = 12.dp)
         ) {

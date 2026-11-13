@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.data.LogItem
 import cc.meteormc.hmapro.manager.service.ServiceClient
-import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
@@ -207,7 +206,8 @@ fun LogsPage() {
                             contentDescription = "Save"
                         )
                     }
-                }
+                },
+                defaultWindowInsetsPadding = false
             ) {
                 LogsSearchBar(
                     logs = logs,
@@ -222,7 +222,7 @@ fun LogsPage() {
                 isRefreshing = true
                 scope.launch { updateLogs() }
             },
-            modifier = Modifier.padding(paddingValues.copy(bottom = 0.dp)),
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
             pullToRefreshState = refreshState,
             refreshTexts = listOf(
                 stringResourceFromModule(R.string.pull_to_refresh),

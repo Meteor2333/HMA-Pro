@@ -3,6 +3,8 @@
 
 package cc.meteormc.hmapro.manager.ui.weight.aurora
 
+import cc.meteormc.hmapro.manager.ui.util.DeviceType
+
 internal object AuroraEffectConfig {
     class Config(
         val points: FloatArray,

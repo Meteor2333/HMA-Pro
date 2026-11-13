@@ -4,6 +4,7 @@
 package cc.meteormc.hmapro.manager.ui.weight.aurora
 
 import androidx.compose.ui.graphics.Brush
+import cc.meteormc.hmapro.manager.ui.util.DeviceType
 import top.yukonga.miuix.kmp.blur.RuntimeShader
 import top.yukonga.miuix.kmp.blur.asBrush
 import kotlin.math.cos

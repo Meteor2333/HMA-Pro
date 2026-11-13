@@ -84,6 +84,18 @@ private val libraries = listOf(
         "liujingxing",
         LICENSE_APACHE_2,
         "https://github.com/liujingxing/rxhttp"
+    ),
+    Library(
+        "miuix",
+        "yukonga",
+        LICENSE_APACHE_2,
+        "https://github.com/compose-miuix-ui/miuix"
+    ),
+    Library(
+        "DexKit",
+        "LuckyPray",
+        LICENSE_APACHE_2,
+        "https://github.com/LuckyPray/DexKit"
     )
 )
 

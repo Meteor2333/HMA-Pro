@@ -64,23 +64,29 @@ fun MainScreen() {
     val deviceType = currentDeviceType()
     val backdrop = rememberLayerBackdrop()
     var selectedIndex by remember { mutableIntStateOf(0) }
-    val pages = listOf(
-        NavigationPage(
-            label = stringResourceBy("title_home"),
-            icon = MiuixIcons.Home,
-            content = { HomePage() }
-        ),
-        NavigationPage(
-            label = stringResourceBy("title_logs"),
-            icon = MiuixIcons.Notes,
-            content = { LogsPage() }
-        ),
-        NavigationPage(
-            label = stringResourceBy("title_settings"),
-            icon = MiuixIcons.Settings,
-            content = { SettingsPage() }
+
+    val homeTitle = stringResourceBy("title_home")
+    val logsTitle = stringResourceBy("title_logs")
+    val settingsTitle = stringResourceBy("title_settings")
+    val pages = remember {
+        listOf(
+            NavigationPage(
+                label = homeTitle,
+                icon = MiuixIcons.Home,
+                content = { HomePage() }
+            ),
+            NavigationPage(
+                label = logsTitle,
+                icon = MiuixIcons.Notes,
+                content = { LogsPage() }
+            ),
+            NavigationPage(
+                label = settingsTitle,
+                icon = MiuixIcons.Settings,
+                content = { SettingsPage() }
+            )
         )
-    )
+    }
 
     val slideSpec = tween<IntOffset>(durationMillis = 350)
     val fadeSpec = tween<Float>(durationMillis = 300, easing = LinearOutSlowInEasing)

@@ -13,11 +13,18 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
-fun Modifier.verticalScrollEffect(scrollBehavior: ScrollBehavior): Modifier {
+fun Modifier.then(block: Modifier.() -> Modifier): Modifier {
+    return this.then(Modifier.block())
+}
+
+fun Modifier.verticalScrollEffect(scrollBehavior: ScrollBehavior? = null): Modifier {
     return this
         .scrollEndHaptic()
         .overScrollVertical()
-        .nestedScroll(scrollBehavior.nestedScrollConnection)
+        .then {
+            if (scrollBehavior == null) this
+            else nestedScroll(scrollBehavior.nestedScrollConnection)
+        }
 }
 
 @Composable

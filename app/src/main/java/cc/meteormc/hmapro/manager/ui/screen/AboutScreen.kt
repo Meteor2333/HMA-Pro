@@ -1,20 +1,14 @@
 package cc.meteormc.hmapro.manager.ui.screen
 
 import android.widget.ImageView
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -63,9 +57,7 @@ import cc.meteormc.hmapro.manager.ui.weight.aurora.AuroraBackground
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
@@ -85,7 +77,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @Composable
 fun AboutScreen() {
     val backdrop = rememberLayerBackdrop()
-    val scrollBehavior = MiuixScrollBehavior()
     var scrollProgress by remember { mutableFloatStateOf(0f) }
     val useRuntimeShader = remember { isRuntimeShaderSupported() }
 
@@ -97,7 +88,6 @@ fun AboutScreen() {
                 color = MiuixTheme.colorScheme.surface.copy(
                     alpha = if (scrollProgress != 1f) 0f else 1f
                 ),
-                scrollBehavior = scrollBehavior,
                 navigationIcon = { BackButton() }
             )
         }
@@ -105,7 +95,6 @@ fun AboutScreen() {
         AboutContent(
             padding = paddingValues,
             backdrop = backdrop,
-            scrollBehavior = scrollBehavior,
             onProgressChange = { scrollProgress = it },
             useRuntimeShader = useRuntimeShader
         )
@@ -116,10 +105,10 @@ fun AboutScreen() {
 private fun AboutContent(
     padding: PaddingValues,
     backdrop: LayerBackdrop,
-    scrollBehavior: ScrollBehavior,
     onProgressChange: (Float) -> Unit,
     useRuntimeShader: Boolean
 ) {
+    val density = LocalDensity.current
     val listState = rememberLazyListState()
     var headerHeight by remember { mutableIntStateOf(0) }
     val scrollProgress by remember {
@@ -129,8 +118,9 @@ private fun AboutContent(
             } else {
                 val index = listState.firstVisibleItemIndex
                 val offset = listState.firstVisibleItemScrollOffset
+                val height = headerHeight - with(density) { padding.calculateTopPadding().toPx() }
                 if (index > 0) 1f
-                else (offset.toFloat() / headerHeight).coerceIn(0f, 1f)
+                else (offset.toFloat() / height).coerceIn(0f, 1f)
             }
         }
     }
@@ -140,10 +130,10 @@ private fun AboutContent(
     }
 
     val context = LocalContext.current
-    val density = LocalDensity.current
     val version = LocalHMAVersion.current
+    val navigator = LocalNavigator.current
+    val uriHandler = LocalUriHandler.current
     val ratio = rememberScreenHeightRatio()
-    val safePadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
     val icon = remember {
         context.findResource("ic_launcher", "mipmap") { resources, id ->
             resources.getDrawable(id, null)
@@ -166,10 +156,7 @@ private fun AboutContent(
                 .alpha(1f - scrollProgress)
                 .onSizeChanged { size -> headerHeight = size.height }
                 .padding(
-                    safePadding.copy(
-                        top = padding.calculateTopPadding() + (24 * ratio).dp,
-                        bottom = 0.dp
-                    )
+                    padding.copy(top = padding.calculateTopPadding() + (24 * ratio).dp)
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -183,12 +170,12 @@ private fun AboutContent(
                 }
             )
 
+            Spacer(modifier = Modifier.height((32 * ratio).dp))
+
             Column(
-                modifier = Modifier
-                    .padding(top = (32 * ratio).dp)
-                    .graphicsLayer {
-                        translationY = -((36 * ratio).dp.toPx() * scrollProgress)
-                    },
+                modifier = Modifier.graphicsLayer {
+                    translationY = -((36 * ratio).dp.toPx() * scrollProgress)
+                },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -225,127 +212,117 @@ private fun AboutContent(
                     textAlign = TextAlign.Center
                 )
             }
+
+            Spacer(modifier = Modifier.height(36.dp))
         }
 
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScrollEffect(scrollBehavior),
-            contentPadding = safePadding.copy(
-                top = padding.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding()
-            )
+                .verticalScrollEffect(),
+            contentPadding = padding.copy(top = 0.dp)
         ) {
-            item("spacer") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(with(density) { headerHeight.toDp() })
-                ) {
+            item("header-spacer") {
+                Spacer(modifier = Modifier.height(with(density) { headerHeight.toDp() }))
+            }
 
+            item("description-card") {
+                AboutCard(
+                    backdrop = backdrop,
+                    title = stringResourceFromModule(R.string.title_description),
+                    insideMargin = BasicComponentDefaults.InsideMargin,
+                    useRuntimeShader = useRuntimeShader
+                ) {
+                    Text(
+                        text = stringResourceBy("about_description"),
+                        fontSize = 16.sp
+                    )
                 }
             }
 
-            item("body") {
-                AboutBody(
+            item("spacer1") {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            item("usege-card") {
+                AboutCard(
                     backdrop = backdrop,
+                    title = stringResourceBy("about_how_to_use_title"),
+                    insideMargin = BasicComponentDefaults.InsideMargin,
                     useRuntimeShader = useRuntimeShader
+                ) {
+                    val line1 = stringResourceBy("about_how_to_use_description_1")
+                    val line2 = stringResourceBy("about_how_to_use_description_2")
+                    Text(
+                        text = "$line1\n\n$line2",
+                        fontSize = 16.sp
+                    )
+                }
+            }
+
+            item("spacer2") {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            item("about-card") {
+                AboutCard(
+                    backdrop = backdrop,
+                    title = stringResourceBy("title_about"),
+                    useRuntimeShader = useRuntimeShader
+                ) {
+                    ArrowPreference(
+                        title = stringResourceFromModule(R.string.view_source_code),
+                        onClick = { uriHandler.openUri("https://github.com/Dr-TSNG/Hide-My-Applist") }
+                    )
+                    ArrowPreference(
+                        title = stringResourceFromModule(R.string.join_telegram),
+                        onClick = { uriHandler.openUri("https://t.me/HideMyApplist") }
+                    )
+                    ArrowPreference(
+                        title = stringResourceBy("about_open_source"),
+                        onClick = { navigator.push(Route.OpenSourceLicenses) }
+                    )
+                    ArrowPreference(
+                        title = stringResourceBy("about_developer"),
+                        onClick = { navigator.push(Route.Developers) }
+                    )
+                }
+            }
+
+            item("spacer3") {
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+
+            item("footer") {
+                Text(
+                    text = buildAnnotatedString {
+                        append("Powered by ")
+
+                        val start = length
+                        append(stringResourceFromModule(R.string.app_name))
+                        addLink(
+                            url = LinkAnnotation.Url(
+                                url = "https://github.com/Meteor2333/HMA-Pro",
+                                styles = TextLinkStyles(
+                                    style = SpanStyle(textDecoration = TextDecoration.Underline)
+                                )
+                            ),
+                            start = start,
+                            end = length
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MiuixTheme.colorScheme.onSurfaceSecondary,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center
                 )
             }
+
+            item("footer-spacer") {
+                Spacer(modifier = Modifier.height(18.dp))
+            }
         }
-    }
-}
-
-@Composable
-private fun AboutBody(
-    backdrop: Backdrop,
-    useRuntimeShader: Boolean
-) {
-    val navigator = LocalNavigator.current
-    val uriHandler = LocalUriHandler.current
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        AboutCard(
-            backdrop = backdrop,
-            title = stringResourceFromModule(R.string.title_description),
-            insideMargin = BasicComponentDefaults.InsideMargin,
-            useRuntimeShader = useRuntimeShader
-        ) {
-            Text(
-                text = stringResourceBy("about_description"),
-                fontSize = 16.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        AboutCard(
-            backdrop = backdrop,
-            title = stringResourceBy("about_how_to_use_title"),
-            insideMargin = BasicComponentDefaults.InsideMargin,
-            useRuntimeShader = useRuntimeShader
-        ) {
-            val line1 = stringResourceBy("about_how_to_use_description_1")
-            val line2 = stringResourceBy("about_how_to_use_description_2")
-            Text(
-                text = "$line1\n\n$line2",
-                fontSize = 16.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        AboutCard(
-            backdrop = backdrop,
-            title = stringResourceBy("title_about"),
-            useRuntimeShader = useRuntimeShader
-        ) {
-            ArrowPreference(
-                title = stringResourceFromModule(R.string.view_source_code),
-                onClick = { uriHandler.openUri("https://github.com/Dr-TSNG/Hide-My-Applist") }
-            )
-            ArrowPreference(
-                title = stringResourceFromModule(R.string.join_telegram),
-                onClick = { uriHandler.openUri("https://t.me/HideMyApplist") }
-            )
-            ArrowPreference(
-                title = stringResourceBy("about_open_source"),
-                onClick = { navigator.push(Route.OpenSourceLicenses) }
-            )
-            ArrowPreference(
-                title = stringResourceBy("about_developer"),
-                onClick = { navigator.push(Route.Developers) }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = buildAnnotatedString {
-                append("Powered by ")
-
-                val start = length
-                append(stringResourceFromModule(R.string.app_name))
-                addLink(
-                    url = LinkAnnotation.Url(
-                        url = "https://github.com/Meteor2333/HMA-Pro",
-                        styles = TextLinkStyles(
-                            style = SpanStyle(textDecoration = TextDecoration.Underline)
-                        )
-                    ),
-                    start = start,
-                    end = length
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            color = MiuixTheme.colorScheme.onSurfaceSecondary,
-            fontSize = 14.sp,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

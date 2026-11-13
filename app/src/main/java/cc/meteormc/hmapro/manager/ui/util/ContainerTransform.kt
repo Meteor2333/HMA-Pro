@@ -101,7 +101,7 @@ class ContainerTransformState {
 private class ExpandingRectShape(
     private val progress: Float,
     private val rect: Rect?,
-    private val cornerRadius: Dp?,
+    private val cornerRadius: Dp?
 ) : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
         val centerX = size.width / 2f
@@ -118,7 +118,7 @@ private class ExpandingRectShape(
         top = lerp(top, full.top, progress)
         right = lerp(right, full.right, progress)
         bottom = lerp(bottom, full.bottom, progress)
-        radius *= 1f - progress
+        radius *= ((1f - progress) / 0.65f).coerceIn(0f, 1f)
         return Outline.Rounded(
             RoundRect(
                 left = left,

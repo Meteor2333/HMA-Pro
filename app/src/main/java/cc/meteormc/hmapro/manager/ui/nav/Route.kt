@@ -18,10 +18,16 @@ sealed interface Route : NavKey {
     data object OpenSourceLicenses : Route
 
     @Serializable
-    data object AppManage : Route
+    data object AppList : Route
 
     @Serializable
-    data object TemplateManage : Route
+    data object AppSettings : Route
+
+    @Serializable
+    data object TemplateList : Route
+
+    @Serializable
+    data object TemplateSettings : Route
 
     @Serializable
     data object PresetOverview : Route

@@ -228,7 +228,7 @@ fun LogsPage() {
                 stringResourceFromModule(R.string.pull_to_refresh),
                 stringResourceFromModule(R.string.release_to_refresh),
                 stringResourceFromModule(R.string.refreshing),
-                stringResourceFromModule(R.string.refreshed),
+                stringResourceFromModule(R.string.refreshed)
             )
         ) {
             LazyColumn(
@@ -264,7 +264,7 @@ fun LogsPage() {
 @Composable
 private fun LogsSearchBar(
     logs: List<LogItem>,
-    onQuery: (String) -> Unit,
+    onQuery: (String) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }

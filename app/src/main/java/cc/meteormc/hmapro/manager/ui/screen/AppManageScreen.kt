@@ -9,12 +9,27 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 
 @Composable
-fun AppManageScreen() {
+fun AppListScreen() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             SmallTopAppBar(
                 title = stringResourceBy("title_app_manage"),
+                navigationIcon = { BackButton() }
+            )
+        }
+    ) { paddingValues ->
+
+    }
+}
+
+@Composable
+fun AppSettingsScreen() {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            SmallTopAppBar(
+                title = stringResourceBy("title_app_settings"),
                 navigationIcon = { BackButton() }
             )
         }

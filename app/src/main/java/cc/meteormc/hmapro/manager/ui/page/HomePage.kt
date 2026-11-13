@@ -108,7 +108,7 @@ fun HomePage() {
                 .verticalScrollEffect(scrollBehavior),
             contentPadding = PaddingValues(horizontal = 12.dp)
         ) {
-            item("head_spacer") {
+            item("header-spacer") {
                 Spacer(Modifier.height(12.dp))
             }
 
@@ -132,7 +132,7 @@ fun HomePage() {
                 ManageCard()
             }
 
-            item("tail_spacer") {
+            item("footer-spacer") {
                 Spacer(Modifier.height(12.dp))
             }
         }
@@ -334,22 +334,22 @@ private fun InfoCard() {
         BasicComponent(
             title = stringResourceFromModule(R.string.module_version),
             summary = version.simpleName + '-' + version.code,
-            insideMargin = PaddingValues(vertical = 6.dp)
+            insideMargin = PaddingValues(vertical = 8.dp)
         )
         BasicComponent(
             title = stringResourceFromModule(R.string.service_version),
             summary = if (status is ModuleStatus.Running) status.serviceVersion.toString() else "Unknown",
-            insideMargin = PaddingValues(vertical = 6.dp)
+            insideMargin = PaddingValues(vertical = 8.dp)
         )
         BasicComponent(
             title = stringResourceFromModule(R.string.hmapro_version),
             summary = BuildConfig.VERSION_NAME,
-            insideMargin = PaddingValues(vertical = 6.dp)
+            insideMargin = PaddingValues(vertical = 8.dp)
         )
         BasicComponent(
             title = stringResourceFromModule(R.string.force_mount),
             summary = stringResourceBy(if (ConfigManager.forceMountData) "enabled" else "disabled"),
-            insideMargin = PaddingValues(vertical = 6.dp)
+            insideMargin = PaddingValues(vertical = 8.dp)
         )
     }
 }
@@ -377,7 +377,7 @@ private fun ManageCard() {
                 transformState.rect = appManageBounds
                 transformState.color = mutableStateOf(colors.color)
                 transformState.cornerRadius = mutableStateOf(cornerRadius)
-                navigator.push(Route.AppManage)
+                navigator.push(Route.AppList)
             },
             startAction = {
                 Icon(
@@ -395,7 +395,7 @@ private fun ManageCard() {
                 transformState.rect = templateManageBounds
                 transformState.color = mutableStateOf(colors.color)
                 transformState.cornerRadius = mutableStateOf(cornerRadius)
-                navigator.push(Route.TemplateManage)
+                navigator.push(Route.TemplateList)
             },
             startAction = {
                 Icon(

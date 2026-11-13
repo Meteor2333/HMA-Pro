@@ -18,12 +18,14 @@ import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.hooker.ServiceHooker
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.screen.AboutScreen
-import cc.meteormc.hmapro.manager.ui.screen.AppManageScreen
+import cc.meteormc.hmapro.manager.ui.screen.AppListScreen
+import cc.meteormc.hmapro.manager.ui.screen.AppSettingsScreen
 import cc.meteormc.hmapro.manager.ui.screen.DevelopersScreen
 import cc.meteormc.hmapro.manager.ui.screen.MainScreen
 import cc.meteormc.hmapro.manager.ui.screen.OpenSourceLicensesScreen
 import cc.meteormc.hmapro.manager.ui.screen.PresetOverviewScreen
-import cc.meteormc.hmapro.manager.ui.screen.TemplateManageScreen
+import cc.meteormc.hmapro.manager.ui.screen.TemplateListScreen
+import cc.meteormc.hmapro.manager.ui.screen.TemplateSettingsScreen
 import cc.meteormc.hmapro.manager.ui.util.ContainerTransformState
 import cc.meteormc.hmapro.manager.ui.util.LocalContainerTransformState
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
@@ -96,16 +98,24 @@ private fun App() {
                     OpenSourceLicensesScreen()
                 }
 
-                entry<Route.AppManage>(
+                entry<Route.AppList>(
                     transition = containerTransform(containerTransformState)
                 ) {
-                    AppManageScreen()
+                    AppListScreen()
                 }
 
-                entry<Route.TemplateManage>(
+                entry<Route.AppSettings> {
+                    AppSettingsScreen()
+                }
+
+                entry<Route.TemplateList>(
                     transition = containerTransform(containerTransformState)
                 ) {
-                    TemplateManageScreen()
+                    TemplateListScreen()
+                }
+
+                entry<Route.TemplateSettings> {
+                    TemplateSettingsScreen()
                 }
 
                 entry<Route.PresetOverview>(

@@ -3,15 +3,10 @@ package cc.meteormc.hmapro.manager.ui.screen
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -20,16 +15,14 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.weight.BackButton
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private data class Library(
@@ -101,15 +94,11 @@ private val libraries = listOf(
 
 @Composable
 fun OpenSourceLicensesScreen() {
-    val scrollBehavior = MiuixScrollBehavior()
-    val horizontalPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).asPaddingValues()
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            SmallTopAppBar(
                 title = stringResourceBy("about_open_source"),
-                scrollBehavior = scrollBehavior,
                 navigationIcon = { BackButton() }
             )
         }
@@ -118,11 +107,8 @@ fun OpenSourceLicensesScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 16.dp)
-                .verticalScrollEffect(scrollBehavior),
-            contentPadding = horizontalPadding.copy(
-                top = paddingValues.calculateTopPadding(),
-                bottom = paddingValues.calculateBottomPadding()
-            )
+                .verticalScrollEffect(),
+            contentPadding = paddingValues
         ) {
             items(
                 items = libraries,

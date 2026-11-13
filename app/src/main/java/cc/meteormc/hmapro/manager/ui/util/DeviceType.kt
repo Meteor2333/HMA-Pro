@@ -17,6 +17,5 @@ fun currentDeviceType(): DeviceType {
 }
 
 enum class DeviceType {
-    PHONE,
-    PAD,
+    PHONE, PAD
 }

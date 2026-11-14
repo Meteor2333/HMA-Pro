@@ -1,7 +1,9 @@
 package cc.meteormc.hmapro
 
+import android.util.Log
 import cc.meteormc.hmapro.manager.ManagerEntry
 import cc.meteormc.hmapro.system.SystemServerEntry
+import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.XposedModule
 import cc.meteormc.xposedkit.annotation.ModuleRegister
 import cc.meteormc.xposedkit.param.PackageLoadedParam
@@ -15,6 +17,12 @@ object HmaProModule : XposedModule {
     const val HMA_PACKAGE = "com.tsng.hidemyapplist"
 
     lateinit var classLoader: ClassLoader
+
+    init {
+        if (BuildConfig.DEBUG){
+            XLog.updateLevel(Log.VERBOSE)
+        }
+    }
 
     override fun onPackageLoaded(param: PackageLoadedParam) {
         if (!param.isFirstPackage) return

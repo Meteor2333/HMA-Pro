@@ -177,7 +177,7 @@ private fun ModuleStatusCard() {
 
             val containerColor = MiuixTheme.colorScheme.secondaryContainer
             background = Brush.linearGradient(
-                colors = listOf(containerColor, containerColor.copy(alpha = 0.6f)),
+                colors = listOf(containerColor, containerColor.copy(alpha = 0.8f)),
                 start = Offset.Zero,
                 end = Offset.Infinite
             )

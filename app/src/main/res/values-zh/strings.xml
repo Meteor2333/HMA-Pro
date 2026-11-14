@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_description">增强你的隐藏应用列表模块</string>
+    <string name="download">下载</string>
+    <string name="color_spec_summary">Material3 色彩规范版本</string>
+    <string name="color_spec_title">色彩规范</string>
+    <string name="enable_blur_title">启用模糊</string>
+    <string name="enable_swipe_back_gesture_summary">从屏幕边缘滑动来返回上一页</string>
+    <string name="enable_swipe_back_gesture_title">滑动返回手势</string>
     <string name="force_mount">强制挂载</string>
     <string name="hmapro_version">HMA-Pro 版本</string>
     <string name="join_telegram">加入 Telegram 频道</string>
+    <string name="log_cleared">日志已清空！</string>
     <string name="log_copied">已复制到剪贴板</string>
     <string name="module_activated">模块已激活</string>
     <string name="module_version">模块版本</string>
+    <string name="open_release_page">打开发布页</string>
+    <string name="palette_style_summary">用于推导 Material3 调色板的色调算法</string>
+    <string name="palette_style_title">调色板风格</string>
     <string name="preset_overview">查看预设</string>
     <string name="pull_to_refresh">下拉刷新</string>
     <string name="reboot_tip">（请尝试重启设备）</string>
@@ -15,6 +25,9 @@
     <string name="release_to_refresh">松开刷新</string>
     <string name="service_running">系统服务运行中</string>
     <string name="service_version">系统服务版本</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_light">浅色</string>
     <string name="title_description">简介</string>
+    <string name="use_monet">使用 Monet 主题</string>
     <string name="view_source_code">查看源代码</string>
 </resources>

@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.data.LogItem
 import cc.meteormc.hmapro.manager.service.ServiceClient
+import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
@@ -86,8 +86,6 @@ fun LogsPage() {
     val refreshState = rememberPullToRefreshState()
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     var logs by remember { mutableStateOf(LogCache.parsed) }
-    var query by remember { mutableStateOf("") }
-    var filter by remember { mutableIntStateOf(0) } // todo: 持久化
     suspend fun updateLogs() = withContext(Dispatchers.IO) {
         val raw = ServiceClient.getLogs().orEmpty()
         logs = LogParser.parse(raw)
@@ -103,47 +101,50 @@ fun LogsPage() {
     }
 
     val context = LocalContext.current
-    val scrollBehavior = MiuixScrollBehavior()
-    val dropdownItems = remember(filter) {
+    val prefs = LocalPreferencesState.current
+    var query by remember { mutableStateOf("") }
+    val dropdownItems = remember(prefs.logFilter) {
+        val filter = prefs.logFilter
         listOf(
             DropdownItem(
                 text = "ALL",
                 selected = filter == 0,
-                onClick = { filter = 0 }
+                onClick = { prefs.logFilter = 0 }
             ),
             DropdownItem(
                 text = "VERBOSE",
                 selected = filter == Log.VERBOSE,
-                onClick = { filter = Log.VERBOSE }
+                onClick = { prefs.logFilter = Log.VERBOSE }
             ),
             DropdownItem(
                 text = "DEBUG",
                 selected = filter == Log.DEBUG,
-                onClick = { filter = Log.DEBUG }
+                onClick = { prefs.logFilter = Log.DEBUG }
             ),
             DropdownItem(
                 text = "INFO",
                 selected = filter == Log.INFO,
-                onClick = { filter = Log.INFO }
+                onClick = { prefs.logFilter = Log.INFO }
             ),
             DropdownItem(
                 text = "WARNING",
                 selected = filter == Log.WARN,
-                onClick = { filter = Log.WARN }
+                onClick = { prefs.logFilter = Log.WARN }
             ),
             DropdownItem(
                 text = "ERROR",
                 selected = filter == Log.ERROR,
-                onClick = { filter = Log.ERROR }
+                onClick = { prefs.logFilter = Log.ERROR }
             ),
             DropdownItem(
                 text = "ASSERT",
                 selected = filter == Log.ASSERT,
-                onClick = { filter = Log.ASSERT }
+                onClick = { prefs.logFilter = Log.ASSERT }
             )
         )
     }
 
+    val clearedMessage = stringResourceFromModule(R.string.log_cleared)
     val failedMessage = stringResourceBy("home_export_failed")
     val successfulMessage = stringResourceBy("logs_saved")
     val safLauncher = rememberLauncherForActivityResult(
@@ -161,6 +162,7 @@ fun LogsPage() {
         }
     }
 
+    val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -177,6 +179,8 @@ fun LogsPage() {
                         )
                     }
 
+                    Spacer(modifier = Modifier.width(2.dp))
+
                     IconButton(
                         onClick = {
                             scope.launch {
@@ -185,6 +189,8 @@ fun LogsPage() {
                                 }
 
                                 updateLogs()
+
+                                Toast.makeText(context, clearedMessage, Toast.LENGTH_SHORT).show()
                             }
                         }
                     ) {
@@ -193,6 +199,8 @@ fun LogsPage() {
                             contentDescription = "Clear Logs"
                         )
                     }
+
+                    Spacer(modifier = Modifier.width(2.dp))
 
                     IconButton(
                         onClick = {
@@ -244,6 +252,7 @@ fun LogsPage() {
                     }
                 }
 
+                val filter = prefs.logFilter
                 if (filter > 0) {
                     items.removeAll {
                         it.level != filter

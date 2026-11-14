@@ -1,5 +1,6 @@
 package cc.meteormc.hmapro.manager.ui.util
 
+import android.content.res.Resources
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -9,9 +10,18 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
+import cc.meteormc.xposedkit.XposedKit
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+
+fun Resources.createResourceForModule(): Resources {
+    return XposedKit.createModuleResources(
+        metrics = displayMetrics,
+        config = configuration,
+        copyFrom = assets
+    )
+}
 
 fun Modifier.then(block: Modifier.() -> Modifier): Modifier {
     return this.then(Modifier.block())

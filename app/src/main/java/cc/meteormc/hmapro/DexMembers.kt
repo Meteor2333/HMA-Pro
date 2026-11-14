@@ -158,6 +158,15 @@ object DexFields {
         modifiers = Modifier.STATIC or Modifier.FINAL
     }
 
+    val LangList_LOCALES by fieldFinder {
+        type { descriptor = "[Ljava/lang/String;" }
+        modifiers = Modifier.STATIC or Modifier.FINAL
+        addWriteMethod {
+            name = "<clinit>"
+            usingEqStrings("SYSTEM", "en")
+        }
+    }
+
     private fun fieldFinder(block: FieldMatcher.() -> Unit) = FinderDelegate {
         dexkit.getField(it) { matcher(FieldMatcher().apply(block)) }.getFieldInstance(HmaProModule.classLoader)
     }

@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.edit
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
@@ -22,7 +22,10 @@ class PreferencesState(private val prefs: SharedPreferences) {
     var enableSwipeDismiss by boolPreferenceOf("hmapro_enable_swipe_dismiss", true)
     var hideIcon by boolPreferenceOf("hide_icon", false)
     var disableUpdate by boolPreferenceOf("disable_update", false)
-    var logFilter by intPreferenceOf("log_filter_level", 0)
+    var logFilter by intPreferenceOf("hmapro_log_filter", 0)
+    var modernUi by boolPreferenceOf("hmapro_modern_ui", true)
+    var fixUpdateChecker by boolPreferenceOf("hmapro_fix_update_checker", false)
+    var fullBackup by boolPreferenceOf("hmapro_full_backup", false)
 
     private inline fun <T> preferenceOf(
         provider: () -> T,

@@ -49,6 +49,9 @@ import cc.meteormc.hmapro.manager.ui.util.LocalContainerTransformState
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
+import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
+import cc.meteormc.hmapro.manager.ui.util.isDarkMode
+import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
@@ -78,7 +81,7 @@ import kotlin.math.sign
 import kotlin.math.tanh
 
 @Composable
-fun HomePage() {
+fun HomePage(outerPadding: PaddingValues) {
     val navigator = LocalNavigator.current
     val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
@@ -86,6 +89,7 @@ fun HomePage() {
         topBar = {
             TopAppBar(
                 title = stringResourceBy("app_name"),
+                modifier = Modifier.padding(outerPadding.only(PaddingValuesSides.Horizontal)),
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(
@@ -100,16 +104,17 @@ fun HomePage() {
                 defaultWindowInsetsPadding = false
             )
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
+                .padding(top = innerPadding.calculateTopPadding())
+                .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                 .verticalScrollEffect(scrollBehavior),
             contentPadding = PaddingValues(horizontal = 12.dp)
         ) {
             item("header-spacer") {
-                Spacer(Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             item("module_status") {
@@ -117,7 +122,7 @@ fun HomePage() {
             }
 
             item("spacer1") {
-                Spacer(Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             item("info") {
@@ -125,15 +130,19 @@ fun HomePage() {
             }
 
             item("spacer2") {
-                Spacer(Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             item("manage") {
                 ManageCard()
             }
 
-            item("footer-spacer") {
-                Spacer(Modifier.height(12.dp))
+            item("footer_spacer") {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            item("bottom_padding") {
+                Spacer(modifier = Modifier.height(outerPadding.calculateBottomPadding()))
             }
         }
     }
@@ -141,11 +150,8 @@ fun HomePage() {
 
 @Composable
 private fun ModuleStatusCard() {
-    val warningContainer = Color(0xCB553C25)
-    val errorContainer = Color(0xCD4E1616)
-    // todo: 浅色模式
-//    val warningContainer = Color(0xCBFFD0A6)
-//    val errorContainer = Color(0xCBFFCFCF)
+    val warningContainer = if (isDarkMode()) Color(0xCB553C25) else Color(0xCBFFD0A6)
+    val errorContainer = if (isDarkMode()) Color(0xCD4E1616) else Color(0xCBFFCFCF)
 
     val title: String
     val summary: String
@@ -261,7 +267,7 @@ private fun ModuleStatusCard() {
                 ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Icon(
                     imageVector = icon,
@@ -269,7 +275,7 @@ private fun ModuleStatusCard() {
                     modifier = Modifier.size(24.dp)
                 )
 
-                Spacer(Modifier.width(24.dp))
+                Spacer(modifier = Modifier.width(24.dp))
 
                 Column {
                     Text(
@@ -278,7 +284,7 @@ private fun ModuleStatusCard() {
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
                         text = summary,
@@ -291,7 +297,7 @@ private fun ModuleStatusCard() {
     }
 
     if (!ServiceClient.isNativeHookSupported()) {
-        Spacer(Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -309,7 +315,7 @@ private fun ModuleStatusCard() {
                     fontWeight = FontWeight.Medium
                 )
 
-                Spacer(Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
                     text = stringResourceBy("home_native_hook_disabled_summary"),

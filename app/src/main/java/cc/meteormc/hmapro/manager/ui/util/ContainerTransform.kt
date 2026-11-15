@@ -21,6 +21,7 @@ import top.yukonga.miuix.kmp.nav.transition.NavTransitionScope
 import top.yukonga.miuix.kmp.nav.transition.navDirectionalTransition
 import kotlin.math.pow
 
+// todo: 不能与swipeDismiss配合工作
 fun containerTransform(state: ContainerTransformState) = navDirectionalTransition(
     push = containerTransformPush(state),
     pop = containerTransformPop(state)

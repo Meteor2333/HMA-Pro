@@ -1,49 +1,87 @@
 package cc.meteormc.hmapro.manager.ui.page
 
+import android.content.ComponentName
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.DexFields
 import cc.meteormc.hmapro.R
+import cc.meteormc.hmapro.manager.service.ConfigManager
+import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
+import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
+import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
+import cc.meteormc.hmapro.manager.util.SystemProperties
 import cc.meteormc.xposedkit.get
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 import java.util.Locale
 
+private const val APP_DATA_ISOLATION_PROPERTY = "persist.zygote.app_data_isolation"
+private const val VOLD_APP_DATA_ISOLATION_PROPERTY = "persist.sys.vold_app_data_isolation_enabled"
+
 @Composable
-fun SettingsPage() {
+fun SettingsPage(outerPadding: PaddingValues) {
+    val context = LocalContext.current
     val prefs = LocalPreferencesState.current
     val uriHandler = LocalUriHandler.current
-    val scrollBehavior = MiuixScrollBehavior()
 
-    val locales = DexFields.LangList_LOCALES.get<Array<String>>(null)
-    val colorModes = arrayOf(
-        ColorSchemeMode.System,
-        ColorSchemeMode.Light,
-        ColorSchemeMode.Dark
+    val languageOptions = DexFields.LangList_LOCALES.get<Array<String>>(null).map {
+        val name = if (it == "SYSTEM") {
+            stringResourceBy("follow_system")
+        } else {
+            val locale = Locale.forLanguageTag(it)
+            locale.getDisplayName(locale)
+        }
+        it to name
+    }
+    val themeOptions = listOf(
+        ColorSchemeMode.System to stringResourceBy("follow_system"),
+        ColorSchemeMode.Light to stringResourceFromModule(R.string.theme_light),
+        ColorSchemeMode.Dark to stringResourceFromModule(R.string.theme_dark)
+    )
+    val logSizeOptions = listOf(
+        128 to "128KiB",
+        256 to "256KiB",
+        512 to "512KiB",
+        1024 to "1MiB"
     )
 
     fun isMonet(mode: ColorSchemeMode): Boolean {
@@ -72,39 +110,44 @@ fun SettingsPage() {
         }
     }
 
-    val languageOptions = locales.map {
-            if (it == "SYSTEM") {
-                stringResourceBy("follow_system")
-            } else {
-                val locale = Locale.forLanguageTag(it)
-                locale.getDisplayName(locale)
-            }
-        }
-    val themeOptions = listOf(
-        stringResourceBy("follow_system"),
-        stringResourceFromModule(R.string.theme_light),
-        stringResourceFromModule(R.string.theme_dark)
+    var detailLog by remember { mutableStateOf(ConfigManager.detailLog) }
+    var maxLogSize by remember { mutableIntStateOf(ConfigManager.maxLogSize) }
+    var forceMountData by remember { mutableStateOf(ConfigManager.forceMountData) }
+    var appDataIsolation by remember {
+        mutableStateOf(SystemProperties.getBoolean(APP_DATA_ISOLATION_PROPERTY, true))
+    }
+    var voldAppDataIsolation by remember {
+        mutableStateOf(SystemProperties.getBoolean(VOLD_APP_DATA_ISOLATION_PROPERTY, false))
+    }
+
+    var showStopSystemServiceConfirmDialog by remember { mutableStateOf(false) }
+    var showCleanEnvConfirmDialog by remember { mutableStateOf(false) }
+    StopSystemServiceConfirmDialog(
+        show = showStopSystemServiceConfirmDialog,
+        onDismiss = { showStopSystemServiceConfirmDialog = false }
     )
-//    val logSizeOptions = mapOf(
-//        128 to "128KiB",
-//        256 to "256KiB",
-//        512 to "512KiB",
-//        1024 to "1MiB"
-//    )
+    CleanEnvConfirmDialog(
+        show = showCleanEnvConfirmDialog,
+        onDismiss = { showCleanEnvConfirmDialog = false }
+    )
+
+    val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = stringResourceBy("title_settings"),
+                modifier = Modifier.padding(outerPadding.only(PaddingValuesSides.Horizontal)),
                 scrollBehavior = scrollBehavior,
                 defaultWindowInsetsPadding = false
             )
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
+                .padding(top = innerPadding.calculateTopPadding())
+                .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                 .verticalScrollEffect(scrollBehavior),
             contentPadding = PaddingValues(horizontal = 12.dp)
         ) {
@@ -112,16 +155,16 @@ fun SettingsPage() {
                 SettingsCard(title = stringResourceBy("settings_language")) {
                     OverlayDropdownPreference(
                         title = stringResourceBy("settings_language"),
-                        items = languageOptions.toList(),
-                        selectedIndex = locales.indexOfFirst { it == prefs.language },
-                        onSelectedIndexChange = { prefs.language = locales[it] }
+                        items = languageOptions.map { it.second },
+                        selectedIndex = languageOptions.indexOfFirst { it.first == prefs.language },
+                        onSelectedIndexChange = { prefs.language = languageOptions[it].first }
                     )
 
                     ArrowPreference(
                         title = stringResourceBy("settings_translate"),
                         summary = stringResourceBy("settings_translate_summary", stringResourceBy("app_name")),
                         onClick = {
-                            //todo
+                            // todo: 同时添加HMAPro的翻译链接
 
                             uriHandler.openUri("https://crowdin.com/project/hide-my-applist")
                         }
@@ -133,9 +176,9 @@ fun SettingsPage() {
                 SettingsCard(title = stringResourceBy("settings_theme")) {
                     OverlayDropdownPreference(
                         title = stringResourceBy("settings_theme"),
-                        items = themeOptions.toList(),
-                        selectedIndex = colorModes.indexOfFirst { it == useMonet(prefs.colorMode, false) },
-                        onSelectedIndexChange = { prefs.colorMode = useMonet(colorModes[it], isMonet(prefs.colorMode)) }
+                        items = themeOptions.map { it.second },
+                        selectedIndex = themeOptions.indexOfFirst { it.first == useMonet(prefs.colorMode, false) },
+                        onSelectedIndexChange = { prefs.colorMode = useMonet(themeOptions[it].first, isMonet(prefs.colorMode)) }
                     )
 
                     SwitchPreference(
@@ -148,31 +191,31 @@ fun SettingsPage() {
                         visible = isMonet(prefs.colorMode)
                     ) {
                         Column {
-                            Column {
-                                OverlayDropdownPreference(
-                                    title = stringResourceFromModule(R.string.color_spec_title),
-                                    summary = stringResourceFromModule(R.string.color_spec_summary),
-                                    items = ThemeColorSpec.entries.map { it.name },
-                                    selectedIndex = ThemeColorSpec.entries.indexOfFirst { it == prefs.colorSpec },
-                                    onSelectedIndexChange = { prefs.colorSpec = ThemeColorSpec.entries[it] }
-                                )
+                            OverlayDropdownPreference(
+                                title = stringResourceFromModule(R.string.color_spec_title),
+                                summary = stringResourceFromModule(R.string.color_spec_summary),
+                                items = ThemeColorSpec.entries.map { it.name },
+                                selectedIndex = ThemeColorSpec.entries.indexOfFirst { it == prefs.colorSpec },
+                                onSelectedIndexChange = { prefs.colorSpec = ThemeColorSpec.entries[it] }
+                            )
 
-                                OverlayDropdownPreference(
-                                    title = stringResourceFromModule(R.string.palette_style_title),
-                                    summary = stringResourceFromModule(R.string.palette_style_summary),
-                                    items = ThemePaletteStyle.entries.map { it.name },
-                                    selectedIndex = ThemePaletteStyle.entries.indexOfFirst { it == prefs.paletteStyle },
-                                    onSelectedIndexChange = { prefs.paletteStyle = ThemePaletteStyle.entries[it] }
-                                )
-                            }
+                            OverlayDropdownPreference(
+                                title = stringResourceFromModule(R.string.palette_style_title),
+                                summary = stringResourceFromModule(R.string.palette_style_summary),
+                                items = ThemePaletteStyle.entries.map { it.name },
+                                selectedIndex = ThemePaletteStyle.entries.indexOfFirst { it == prefs.paletteStyle },
+                                onSelectedIndexChange = { prefs.paletteStyle = ThemePaletteStyle.entries[it] }
+                            )
                         }
                     }
 
-                    SwitchPreference(
-                        title = stringResourceFromModule(R.string.enable_blur_title),
-                        checked = prefs.enableBlur,
-                        onCheckedChange = { prefs.enableBlur = it }
-                    )
+                    if (isRuntimeShaderSupported()) {
+                        SwitchPreference(
+                            title = stringResourceFromModule(R.string.enable_blur_title),
+                            checked = prefs.enableBlur,
+                            onCheckedChange = { prefs.enableBlur = it }
+                        )
+                    }
 
                     SwitchPreference(
                         title = stringResourceFromModule(R.string.enable_swipe_back_gesture_title),
@@ -185,19 +228,44 @@ fun SettingsPage() {
 
             item("module") {
                 SettingsCard(title = stringResourceBy("settings_module")) {
-                    // todo
-//                    OverlayDropdownPreference(
-//                        title = stringResourceBy("settings_max_log_size"),
-//                        items = logSizeOptions.values.toList(),
-//                        selectedIndex = prefs.maxLogSize,
-//                        onSelectedIndexChange = { prefs.maxLogSize = it }
-//                    )
+                    SwitchPreference(
+                        title = stringResourceBy("settings_detail_log"),
+                        checked = detailLog,
+                        onCheckedChange = {
+                            detailLog = it
+                            ConfigManager.detailLog = detailLog
+                        }
+                    )
+
+                    OverlayDropdownPreference(
+                        title = stringResourceBy("settings_max_log_size"),
+                        items = logSizeOptions.map { it.second },
+                        selectedIndex = logSizeOptions.indexOfFirst { it.first == maxLogSize },
+                        onSelectedIndexChange = {
+                            maxLogSize = logSizeOptions[it].first
+                            ConfigManager.maxLogSize = maxLogSize
+                        }
+                    )
 
                     SwitchPreference(
                         title = stringResourceBy("settings_hide_icon"),
                         summary = stringResourceBy("settings_hide_icon_summary"),
                         checked = prefs.hideIcon,
-                        onCheckedChange = { prefs.hideIcon = it }
+                        onCheckedChange = {
+                            prefs.hideIcon = it
+                            context.packageManager.setComponentEnabledSetting(
+                                ComponentName(
+                                    context,
+                                    "com.tsng.hidemyapplist.MainActivityLauncher"
+                                ),
+                                if (it) {
+                                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                                } else {
+                                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                                },
+                                PackageManager.DONT_KILL_APP
+                            )
+                        }
                     )
 
                     SwitchPreference(
@@ -205,19 +273,76 @@ fun SettingsPage() {
                         checked = prefs.disableUpdate,
                         onCheckedChange = { prefs.disableUpdate = it }
                     )
+
+                    SwitchPreference(
+                        title = stringResourceBy("settings_force_mount_data"),
+                        summary = stringResourceBy("settings_force_mount_data_summary"),
+                        checked = forceMountData,
+                        onCheckedChange = {
+                            forceMountData = it
+                            ConfigManager.forceMountData = it
+                        }
+                    )
                 }
             }
 
-            item("service") {
-                SettingsCard(title = stringResourceBy("settings_service")) {
+            item("system") {
+                SettingsCard(title = stringResourceBy("system")) {
+                    SwitchPreference(
+                        title = stringResourceBy("settings_app_data_isolation"),
+                        summary = stringResourceBy("settings_change_require_root"),
+                        checked = appDataIsolation,
+                        onCheckedChange = {
+                            appDataIsolation = it
+                            SystemProperties.set(APP_DATA_ISOLATION_PROPERTY, it.toString())
+                        }
+                    )
 
+                    SwitchPreference(
+                        title = stringResourceBy("settings_vold_app_data_isolation"),
+                        summary = stringResourceBy("settings_change_require_root"),
+                        checked = voldAppDataIsolation,
+                        onCheckedChange = {
+                            voldAppDataIsolation = it
+                            // todo: 测试可行性
+                            SystemProperties.set(VOLD_APP_DATA_ISOLATION_PROPERTY, it.toString())
+                        }
+                    )
+
+                    ArrowPreference(
+                        title = stringResourceBy("settings_stop_system_service"),
+                        summary = stringResourceBy("settings_stop_system_service_summary"),
+                        onClick = { showStopSystemServiceConfirmDialog = true }
+                    )
+
+                    ArrowPreference(
+                        title = stringResourceBy("settings_force_clean_env"),
+                        summary = stringResourceBy("settings_force_clean_env_summary"),
+                        onClick = { showCleanEnvConfirmDialog = true }
+                    )
                 }
             }
 
             item("backup_and_restore") {
                 SettingsCard(title = stringResourceBy("home_backup_and_restore")) {
+                    ArrowPreference(
+                        title = stringResourceBy("home_backup_config"),
+                        onClick = {
 
+                        }
+                    )
+
+                    ArrowPreference(
+                        title = stringResourceBy("home_restore_config"),
+                        onClick = {
+
+                        }
+                    )
                 }
+            }
+
+            item("bottom_padding") {
+                Spacer(modifier = Modifier.height(outerPadding.calculateBottomPadding()))
             }
         }
     }
@@ -236,4 +361,113 @@ private fun SettingsCard(
     Card(content = content)
 
     Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+private fun StopSystemServiceConfirmDialog(
+    show: Boolean,
+    onDismiss: () -> Unit
+) {
+    var showCleanEnvDialog by remember { mutableStateOf(false) }
+    OverlayDialog(
+        show = show,
+        title = stringResourceBy("settings_stop_system_service"),
+        summary = stringResourceBy("settings_stop_system_service_summary"),
+        onDismissRequest = onDismiss
+    ) {
+        Row {
+            TextButton(
+                text = stringResource(android.R.string.cancel),
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            )
+
+            Spacer(modifier = Modifier.width(18.dp))
+
+            TextButton(
+                text = stringResource(android.R.string.ok),
+                onClick = {
+                    onDismiss()
+                    showCleanEnvDialog = true
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+
+    val context = LocalContext.current
+    val toastMessage = stringResourceBy("settings_stop_system_service")
+    fun stopService(cleanEnv: Boolean) {
+        ServiceClient.stopService(cleanEnv)
+        Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
+    }
+
+    OverlayDialog(
+        show = showCleanEnvDialog,
+        title = stringResourceBy("settings_is_clean_env"),
+        summary = stringResourceBy("settings_is_clean_env_summary"),
+        onDismissRequest = { showCleanEnvDialog = false }
+    ) {
+        Row {
+            TextButton(
+                text = stringResourceBy("no"),
+                onClick = {
+                    showCleanEnvDialog = false
+                    stopService(false)
+                },
+                modifier = Modifier.weight(1f)
+            )
+
+            Spacer(modifier = Modifier.width(18.dp))
+
+            TextButton(
+                text = stringResourceBy("yes"),
+                onClick = {
+                    showCleanEnvDialog = false
+                    stopService(true)
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+}
+
+@Composable
+private fun CleanEnvConfirmDialog(
+    show: Boolean,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val successfulMessage = stringResourceBy("settings_force_clean_env_toast_successful")
+    val deniedMessage = stringResourceBy("settings_permission_denied")
+    OverlayDialog(
+        show = show,
+        title = stringResourceBy("settings_force_clean_env"),
+        summary = stringResourceBy("settings_is_clean_env_summary"),
+        onDismissRequest = onDismiss
+    ) {
+        Row {
+            TextButton(
+                text = stringResource(android.R.string.cancel),
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            )
+
+            Spacer(modifier = Modifier.width(18.dp))
+
+            TextButton(
+                text = stringResource(android.R.string.ok),
+                onClick = {
+                    // todo: 处理运行环境清理
+                    onDismiss()
+                    Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
 }

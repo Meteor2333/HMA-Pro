@@ -16,7 +16,7 @@ import java.io.FileInputStream
 import java.lang.reflect.Modifier
 import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executor
 import kotlin.concurrent.thread
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
@@ -64,6 +64,10 @@ object DexClasses {
         addFieldForType("icu.nullptr.hidemyapplist.common.JsonConfig")
     }
 
+    val Fragment by classFinder {
+        usingStrings("Fragment", "not attached to")
+    }
+
     val HMAService by classFinder {
         addMethod {
             name = "<init>"
@@ -89,9 +93,15 @@ object DexMethods {
         returnType = "void"
         modifiers = Modifier.STATIC
         addInvoke {
-            declaredClass = ExecutorService::class.java.name
+            declaredClass = Executor::class.java.name
             name = "execute"
         }
+    }
+
+    val Fragment_getContext by methodFinder {
+        declaredClass = DexClasses.Fragment.name
+        returnType = "android.content.Context"
+        usingEqStrings(" not attached to a context.")
     }
 
     val HMAService_getServiceVersion by methodFinder {
@@ -134,6 +144,13 @@ object DexMethods {
     val ServiceClient_stopService by methodFinder {
         declaredClass = DexClasses.ServiceClient.name
         usingStrings("stopService")
+    }
+
+    val SettingsPreferenceFragment_onCreate by methodFinder {
+        declaredClass = $$"icu.nullptr.hidemyapplist.ui.fragment.SettingsFragment$SettingsPreferenceFragment"
+        addInvoke {
+            usingEqStrings("This should be called after super.onCreate.")
+        }
     }
 
     private fun constructorFinder(block: MethodMatcher.() -> Unit) = FinderDelegate {

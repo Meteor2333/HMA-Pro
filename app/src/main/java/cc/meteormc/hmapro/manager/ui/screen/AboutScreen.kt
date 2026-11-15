@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -32,6 +33,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -46,11 +48,15 @@ import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
+import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.findResource
-import cc.meteormc.hmapro.manager.ui.util.rememberScreenHeightRatio
+import cc.meteormc.hmapro.manager.ui.util.isDarkMode
+import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
+import cc.meteormc.hmapro.manager.ui.util.then
+import cc.meteormc.hmapro.manager.ui.util.useBlur
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.weight.BackButton
 import cc.meteormc.hmapro.manager.ui.weight.aurora.AuroraBackground
@@ -66,8 +72,6 @@ import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurBlendMode
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.BlurDefaults
-import top.yukonga.miuix.kmp.blur.LayerBackdrop
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
@@ -76,10 +80,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun AboutScreen() {
-    val backdrop = rememberLayerBackdrop()
     var scrollProgress by remember { mutableFloatStateOf(0f) }
-    val useRuntimeShader = remember { isRuntimeShaderSupported() }
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -94,9 +95,7 @@ fun AboutScreen() {
     ) { paddingValues ->
         AboutContent(
             padding = paddingValues,
-            backdrop = backdrop,
-            onProgressChange = { scrollProgress = it },
-            useRuntimeShader = useRuntimeShader
+            onProgressChange = { scrollProgress = it }
         )
     }
 }
@@ -104,9 +103,7 @@ fun AboutScreen() {
 @Composable
 private fun AboutContent(
     padding: PaddingValues,
-    backdrop: LayerBackdrop,
-    onProgressChange: (Float) -> Unit,
-    useRuntimeShader: Boolean
+    onProgressChange: (Float) -> Unit
 ) {
     val density = LocalDensity.current
     val listState = rememberLazyListState()
@@ -129,11 +126,14 @@ private fun AboutContent(
         onProgressChange(scrollProgress)
     }
 
+    val useBlur = useBlur()
+    val backdrop = rememberLayerBackdrop()
     val context = LocalContext.current
     val version = LocalHMAVersion.current
     val navigator = LocalNavigator.current
     val uriHandler = LocalUriHandler.current
-    val ratio = rememberScreenHeightRatio()
+    val windowInfo = LocalWindowInfo.current
+    val ratio = windowInfo.containerSize.height / 800f
     val icon = remember {
         context.findResource("ic_launcher", "mipmap") { resources, id ->
             resources.getDrawable(id, null)
@@ -141,13 +141,11 @@ private fun AboutContent(
     }
 
     AuroraBackground(
-        // TODO: 浅色模式
-        isDarkTheme = true,
+        isDarkTheme = isDarkMode(),
         dynamicBackground = true,
         modifier = Modifier.fillMaxSize(),
-        bgModifier = Modifier.layerBackdrop(backdrop),
-        isFullSize = true,
-        effectBackground = useRuntimeShader,
+        bgModifier = Modifier.then { if (useBlur) layerBackdrop(backdrop) else this },
+        effectBackground = useBlur,
         alpha = { 1f - scrollProgress }
     ) {
         Column(
@@ -156,7 +154,7 @@ private fun AboutContent(
                 .alpha(1f - scrollProgress)
                 .onSizeChanged { size -> headerHeight = size.height }
                 .padding(
-                    padding.copy(top = padding.calculateTopPadding() + (24 * ratio).dp)
+                    padding.only(PaddingValuesSides.Top) + PaddingValues(top = (32 * ratio).dp)
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -170,11 +168,11 @@ private fun AboutContent(
                 }
             )
 
-            Spacer(modifier = Modifier.height((32 * ratio).dp))
+            Spacer(modifier = Modifier.height((18 * ratio).dp))
 
             Column(
                 modifier = Modifier.graphicsLayer {
-                    translationY = -((36 * ratio).dp.toPx() * scrollProgress)
+                    translationY = -((24 * ratio).dp.toPx() * scrollProgress)
                 },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -183,20 +181,41 @@ private fun AboutContent(
                         .textureBlur(
                             backdrop = backdrop,
                             shape = RectangleShape,
-                            colors = BlurColors(
-                                blendColors = listOf(
-                                    BlendColorEntry(
-                                        Color.White.copy(alpha = 0.25f),
-                                        BlurBlendMode.LinearLight
-                                    ),
-                                    BlendColorEntry(
-                                        MiuixTheme.colorScheme.onSecondary,
-                                        BlurBlendMode.ColorDodge
+                            colors = BlurDefaults.blurColors(
+                                blendColors = if (isDarkMode()) {
+                                    listOf(
+                                        BlendColorEntry(
+                                            color = Color(0xe6a1a1a1),
+                                            mode = BlurBlendMode.ColorDodge
+                                        ),
+                                        BlendColorEntry(
+                                            color = Color(0x4de6e6e6),
+                                            mode =  BlurBlendMode.LinearLight
+                                        ),
+                                        BlendColorEntry(
+                                            color = Color(0xff1af500),
+                                            mode =  BlurBlendMode.Lab
+                                        ),
                                     )
-                                )
+                                } else {
+                                    listOf(
+                                        BlendColorEntry(
+                                            color = Color(0xcc4a4a4a),
+                                            mode = BlurBlendMode.ColorBurn
+                                        ),
+                                        BlendColorEntry(
+                                            color = Color(0xff4f4f4f),
+                                            mode =  BlurBlendMode.LinearLight
+                                        ),
+                                        BlendColorEntry(
+                                            color = Color(0xff1af200),
+                                            mode =  BlurBlendMode.Lab
+                                        ),
+                                    )
+                                }
                             ),
                             contentBlendMode = BlendMode.DstIn,
-                            enabled = useRuntimeShader
+                            enabled = useBlur
                         ),
                     text = stringResourceBy("app_name"),
                     fontWeight = FontWeight.Bold,
@@ -213,7 +232,7 @@ private fun AboutContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(120.dp))
         }
 
         LazyColumn(
@@ -232,7 +251,7 @@ private fun AboutContent(
                     backdrop = backdrop,
                     title = stringResourceFromModule(R.string.title_description),
                     insideMargin = BasicComponentDefaults.InsideMargin,
-                    useRuntimeShader = useRuntimeShader
+                    useBlur = useBlur
                 ) {
                     Text(
                         text = stringResourceBy("about_description"),
@@ -250,7 +269,7 @@ private fun AboutContent(
                     backdrop = backdrop,
                     title = stringResourceBy("about_how_to_use_title"),
                     insideMargin = BasicComponentDefaults.InsideMargin,
-                    useRuntimeShader = useRuntimeShader
+                    useBlur = useBlur
                 ) {
                     val line1 = stringResourceBy("about_how_to_use_description_1")
                     val line2 = stringResourceBy("about_how_to_use_description_2")
@@ -269,7 +288,7 @@ private fun AboutContent(
                 AboutCard(
                     backdrop = backdrop,
                     title = stringResourceBy("title_about"),
-                    useRuntimeShader = useRuntimeShader
+                    useBlur = useBlur
                 ) {
                     ArrowPreference(
                         title = stringResourceFromModule(R.string.view_source_code),
@@ -331,7 +350,7 @@ private fun AboutCard(
     backdrop: Backdrop,
     title: String,
     insideMargin: PaddingValues = CardDefaults.InsideMargin,
-    useRuntimeShader: Boolean,
+    useBlur: Boolean,
     content: @Composable ColumnScope.() -> Unit
 ) {
     SmallTitle(title)
@@ -343,23 +362,28 @@ private fun AboutCard(
                 shape = RoundedCornerShape(CardDefaults.CornerRadius),
                 blurRadius = BlurDefaults.MaxBlurRadius,
                 colors = BlurColors(
-                    blendColors = listOf(
-                        BlendColorEntry(Color(0x4DA9A9A9), BlurBlendMode.Luminosity),
-                        BlendColorEntry(Color(0x1A9C9C9C), BlurBlendMode.PlusDarker)
-                    )
-
-                    // TODO: 适配浅色模式
-                    // listOf(
-                    //     BlendColorEntry(Color(0x340034F9), BlurBlendMode.Overlay),
-                    //     BlendColorEntry(Color(0xB3FFFFFF), BlurBlendMode.HardLight)
-                    // )
+                    blendColors = if (isDarkMode()) {
+                        listOf(
+                            BlendColorEntry(Color(0x4DA9A9A9), BlurBlendMode.Luminosity),
+                            BlendColorEntry(Color(0x1A9C9C9C), BlurBlendMode.PlusDarker)
+                        )
+                    } else {
+                        listOf(
+                            BlendColorEntry(Color(0x340034F9), BlurBlendMode.Overlay),
+                            BlendColorEntry(Color(0xB3FFFFFF), BlurBlendMode.HardLight)
+                        )
+                    }
                 ),
-                enabled = useRuntimeShader
+                enabled = useBlur
             ),
         insideMargin = insideMargin,
-        colors = CardDefaults.defaultColors(
-            color = Color.Transparent
-        ),
+        colors = if (!useBlur) {
+            CardDefaults.defaultColors()
+        } else {
+            CardDefaults.defaultColors(
+                color = Color.Transparent
+            )
+        },
         content = content
     )
 }

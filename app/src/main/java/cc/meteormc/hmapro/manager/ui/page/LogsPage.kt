@@ -42,6 +42,8 @@ import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.data.LogItem
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
+import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
+import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
@@ -81,7 +83,7 @@ private object LogCache {
 }
 
 @Composable
-fun LogsPage() {
+fun LogsPage(outerPadding: PaddingValues) {
     val scope = rememberCoroutineScope()
     val refreshState = rememberPullToRefreshState()
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
@@ -168,6 +170,7 @@ fun LogsPage() {
         topBar = {
             TopAppBar(
                 title = stringResourceBy("title_logs"),
+                modifier = Modifier.padding(outerPadding.only(PaddingValuesSides.Horizontal)),
                 scrollBehavior = scrollBehavior,
                 actions = {
                     OverlayIconDropdownMenu(
@@ -223,14 +226,14 @@ fun LogsPage() {
                 )
             }
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
         PullToRefresh(
             isRefreshing = isRefreshing,
             onRefresh = {
                 isRefreshing = true
                 scope.launch { updateLogs() }
             },
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+            modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
             pullToRefreshState = refreshState,
             refreshTexts = listOf(
                 stringResourceFromModule(R.string.pull_to_refresh),
@@ -242,6 +245,7 @@ fun LogsPage() {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                     .verticalScrollEffect(scrollBehavior),
                 contentPadding = PaddingValues(horizontal = 12.dp)
             ) {
@@ -264,6 +268,10 @@ fun LogsPage() {
                     key = { it.toString() }
                 ) {
                     LogItemComponent(it)
+                }
+
+                item("bottom_padding") {
+                    Spacer(modifier = Modifier.height(outerPadding.calculateBottomPadding()))
                 }
             }
         }

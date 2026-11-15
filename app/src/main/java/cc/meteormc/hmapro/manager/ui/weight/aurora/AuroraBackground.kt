@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import cc.meteormc.hmapro.manager.ui.util.currentDeviceType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.floor
 import kotlin.time.Duration.Companion.milliseconds

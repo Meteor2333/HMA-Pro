@@ -203,7 +203,7 @@ private fun readSystemSeedColor(context: Context): Color {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val json = Settings.Secure.getString(
             context.contentResolver,
-            "theme_customization_overlay_packages",
+            "theme_customization_overlay_packages"
         )?.let { JSONObject(it) }
         if (json != null) {
             val palette = json.optString("android.theme.customization.system_palette", "")

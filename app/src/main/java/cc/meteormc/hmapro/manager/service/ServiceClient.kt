@@ -42,11 +42,11 @@ object ServiceClient {
         DexMethods.ServiceClient_clearLogs.call<Unit>(INSTANCE)
     }
 
-    fun syncConfig() {
-        DexMethods.ServiceClient_syncConfig.call<Unit>(INSTANCE)
+    fun syncConfig(json: String) {
+        DexMethods.ServiceClient_syncConfig.call<Unit>(INSTANCE, json)
     }
 
-    fun stopService() {
-        DexMethods.ServiceClient_stopService.call<Unit>(INSTANCE)
+    fun stopService(cleanEnv: Boolean) {
+        DexMethods.ServiceClient_stopService.call<Unit>(INSTANCE, cleanEnv)
     }
 }

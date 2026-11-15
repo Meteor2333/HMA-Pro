@@ -8,7 +8,6 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
@@ -46,6 +45,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -69,9 +69,14 @@ import cc.meteormc.hmapro.manager.ui.page.LogsPage
 import cc.meteormc.hmapro.manager.ui.page.SettingsPage
 import cc.meteormc.hmapro.manager.ui.util.DeviceType
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
+import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
+import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.currentDeviceType
+import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
+import cc.meteormc.hmapro.manager.ui.util.then
+import cc.meteormc.hmapro.manager.ui.util.useBlur
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
@@ -81,6 +86,8 @@ import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.blur.BlendColorEntry
+import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
@@ -95,9 +102,14 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun MainScreen() {
+    val useBlur = useBlur()
     val deviceType = currentDeviceType()
-    val backdrop = rememberLayerBackdrop()
+    val surfaceColor = MiuixTheme.colorScheme.surface
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
+    val backdrop = rememberLayerBackdrop {
+        drawRect(surfaceColor)
+        drawContent()
+    }
 
     val homeTitle = stringResourceBy("title_home")
     val logsTitle = stringResourceBy("title_logs")
@@ -107,17 +119,17 @@ fun MainScreen() {
             NavigationPage(
                 label = homeTitle,
                 icon = MiuixIcons.Home,
-                content = { HomePage() }
+                content = { HomePage(it) }
             ),
             NavigationPage(
                 label = logsTitle,
                 icon = MiuixIcons.Notes,
-                content = { LogsPage() }
+                content = { LogsPage(it) }
             ),
             NavigationPage(
                 label = settingsTitle,
                 icon = MiuixIcons.Settings,
-                content = { SettingsPage() }
+                content = { SettingsPage(it) }
             )
         )
     }
@@ -128,10 +140,6 @@ fun MainScreen() {
     if (deviceType == DeviceType.PAD) {
         Row {
             NavigationRail(
-                modifier = Modifier.textureBlur(
-                    backdrop = backdrop,
-                    shape = RectangleShape
-                ),
                 expanded = true,
                 expandedWidth = 160.dp
             ) {
@@ -159,6 +167,7 @@ fun MainScreen() {
             val insets = WindowInsets.systemBars.union(WindowInsets.displayCutout)
             MainScreenContent(
                 paddingValues = insets.only(WindowInsetsSides.End).asPaddingValues(),
+                useBlur = useBlur,
                 backdrop = backdrop,
                 selectedIndex = selectedIndex,
                 pages = pages,
@@ -167,18 +176,18 @@ fun MainScreen() {
                         slideInVertically(
                             animationSpec = slideSpec,
                             initialOffsetY = { height -> height }
-                        ) + fadeIn(fadeSpec) togetherWith slideOutVertically(
+                        ) togetherWith slideOutVertically(
                             animationSpec = slideSpec,
                             targetOffsetY = { height -> -height }
-                        ) + fadeOut(fadeSpec)
+                        ) + fadeOut(animationSpec = fadeSpec, targetAlpha = 0.8f)
                     } else {
                         slideInVertically(
                             animationSpec = slideSpec,
                             initialOffsetY = { height -> -height }
-                        ) + fadeIn(fadeSpec) togetherWith slideOutVertically(
+                        ) togetherWith slideOutVertically(
                             animationSpec = slideSpec,
                             targetOffsetY = { height -> height }
-                        ) + fadeOut(fadeSpec)
+                        ) + fadeOut(animationSpec = fadeSpec, targetAlpha = 0.8f)
                     }
                 }
             )
@@ -189,8 +198,16 @@ fun MainScreen() {
                 NavigationBar(
                     modifier = Modifier.textureBlur(
                         backdrop = backdrop,
-                        shape = RectangleShape
+                        shape = RectangleShape,
+                        blurRadius = 25f,
+                        colors = BlurDefaults.blurColors(
+                            blendColors = listOf(
+                                BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.8f))
+                            )
+                        ),
+                        enabled = useBlur
                     ),
+                    color = if (useBlur) Color.Transparent else surfaceColor,
                     mode = NavigationBarDisplayMode.IconWithSelectedLabel
                 ) {
                     pages.forEachIndexed { index, page ->
@@ -205,7 +222,8 @@ fun MainScreen() {
             }
         ) { paddingValues ->
             MainScreenContent(
-                paddingValues = PaddingValues(bottom = paddingValues.calculateBottomPadding()),
+                paddingValues = paddingValues.only(PaddingValuesSides.Bottom),
+                useBlur = useBlur,
                 backdrop = backdrop,
                 selectedIndex = selectedIndex,
                 pages = pages,
@@ -214,18 +232,18 @@ fun MainScreen() {
                         slideInHorizontally(
                             animationSpec = slideSpec,
                             initialOffsetX = { width -> width }
-                        ) + fadeIn(fadeSpec) togetherWith slideOutHorizontally(
+                        ) togetherWith slideOutHorizontally(
                             animationSpec = slideSpec,
                             targetOffsetX = { width -> -width }
-                        ) + fadeOut(fadeSpec)
+                        ) + fadeOut(animationSpec = fadeSpec, targetAlpha = 0.8f)
                     } else {
                         slideInHorizontally(
                             animationSpec = slideSpec,
                             initialOffsetX = { width -> -width }
-                        ) + fadeIn(fadeSpec) togetherWith slideOutHorizontally(
+                        ) togetherWith slideOutHorizontally(
                             animationSpec = slideSpec,
                             targetOffsetX = { width -> width }
-                        ) + fadeOut(fadeSpec)
+                        ) + fadeOut(animationSpec = fadeSpec, targetAlpha = 0.8f)
                     }
                 }
             )
@@ -238,6 +256,7 @@ fun MainScreen() {
 @Composable
 private fun MainScreenContent(
     paddingValues: PaddingValues,
+    useBlur: Boolean,
     backdrop: LayerBackdrop,
     selectedIndex: Int,
     pages: List<NavigationPage>,
@@ -246,22 +265,26 @@ private fun MainScreenContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
-            .layerBackdrop(backdrop),
+            .then { if (useBlur) layerBackdrop(backdrop) else this },
         contentAlignment = Alignment.Center
     ) {
         AnimatedContent(
             targetState = selectedIndex,
-            modifier = Modifier.fillMaxSize(),
             transitionSpec = transitionSpec
         ) { index ->
-            pages[index].content()
+            // todo: content中的组件在Activty重建后疑似不能正常恢复
+            pages[index].content(paddingValues)
         }
     }
 }
 
 @Composable
 private fun UpdateDialog() {
+    val prefs = LocalPreferencesState.current
+    if (prefs.disableUpdate) {
+        return
+    }
+
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val currentVersion = LocalHMAVersion.current
@@ -325,7 +348,7 @@ private fun UpdateDialog() {
                 modifier = Modifier.weight(1f)
             )
 
-            Spacer(Modifier.width(18.dp))
+            Spacer(modifier = Modifier.width(18.dp))
 
             if (asset != null) {
                 TextButton(
@@ -369,5 +392,5 @@ private fun UpdateDialog() {
 private data class NavigationPage(
     val label: String,
     val icon: ImageVector,
-    val content: @Composable () -> Unit
+    val content: @Composable (outerPadding: PaddingValues) -> Unit
 )

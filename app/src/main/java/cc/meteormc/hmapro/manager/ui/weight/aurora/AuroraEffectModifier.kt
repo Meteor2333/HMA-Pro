@@ -1,9 +1,13 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
+@file:RequiresApi(Build.VERSION_CODES.TIRAMISU)
+
 package cc.meteormc.hmapro.manager.ui.weight.aurora
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color

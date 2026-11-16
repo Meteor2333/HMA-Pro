@@ -3,6 +3,8 @@
 
 package cc.meteormc.hmapro.manager.ui.weight.aurora
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
@@ -16,12 +18,12 @@ import androidx.compose.ui.Modifier
 import cc.meteormc.hmapro.manager.ui.util.currentDeviceType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import top.yukonga.miuix.kmp.shader.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.floor
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun AuroraBackground(
     isDarkTheme: Boolean,
     dynamicBackground: Boolean,
@@ -32,11 +34,6 @@ fun AuroraBackground(
     alpha: () -> Float = { 1f },
     content: @Composable (BoxScope.() -> Unit),
 ) {
-    val shaderSupported = remember { isRuntimeShaderSupported() }
-    if (!shaderSupported) {
-        Box(modifier = modifier, content = content)
-        return
-    }
     Box(
         modifier = modifier,
     ) {

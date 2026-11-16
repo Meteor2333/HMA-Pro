@@ -55,6 +55,7 @@ import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
+import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -64,7 +65,6 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Background
 import top.yukonga.miuix.kmp.icon.extended.Backup
@@ -87,9 +87,9 @@ fun HomePage(outerPadding: PaddingValues) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            PageTopAppBar(
                 title = stringResourceBy("app_name"),
-                modifier = Modifier.padding(outerPadding.only(PaddingValuesSides.Horizontal)),
+                padding = outerPadding,
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(
@@ -100,8 +100,7 @@ fun HomePage(outerPadding: PaddingValues) {
                             contentDescription = "About"
                         )
                     }
-                },
-                defaultWindowInsetsPadding = false
+                }
             )
         }
     ) { innerPadding ->

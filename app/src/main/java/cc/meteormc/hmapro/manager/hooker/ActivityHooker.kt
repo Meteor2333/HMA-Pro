@@ -5,6 +5,7 @@ import android.app.AppComponentFactory
 import android.app.Instrumentation
 import android.content.Intent
 import cc.meteormc.hmapro.HmaProModule
+import cc.meteormc.hmapro.manager.ManagerEntry
 import cc.meteormc.hmapro.manager.ui.MainActivity
 import cc.meteormc.xposedkit.hook.BaseHooker
 import cc.meteormc.xposedkit.hook.HookerContext
@@ -32,7 +33,7 @@ object ActivityHooker : BaseHooker<HookerContext>() {
 
     private class ActivityInterceptor(base: AppComponentFactory) : AppComponentFactoryWrapper(base) {
         override fun instantiateActivity(cl: ClassLoader, className: String, intent: Intent?): Activity {
-            if (className != "icu.nullptr.hidemyapplist.ui.activity.MainActivity") {
+            if (className != ManagerEntry.MAIN_ACTIVITY || !ManagerEntry.preferences.modernUi) {
                 return super.instantiateActivity(cl, className, intent)
             }
 

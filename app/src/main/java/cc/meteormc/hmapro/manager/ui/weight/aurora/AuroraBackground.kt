@@ -3,8 +3,6 @@
 
 package cc.meteormc.hmapro.manager.ui.weight.aurora
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
@@ -23,7 +21,6 @@ import kotlin.math.floor
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun AuroraBackground(
     isDarkTheme: Boolean,
     dynamicBackground: Boolean,

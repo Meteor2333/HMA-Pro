@@ -4,7 +4,7 @@ import cc.meteormc.xposedkit.get
 import cc.meteormc.xposedkit.put
 import cc.meteormc.xposedkit.reflect
 
-class HMAConfig(config: Any) {
+class HMAConfig(internal val config: Any) {
     private val delegate = FieldAccessor(config)
 
     var detailLog: Boolean

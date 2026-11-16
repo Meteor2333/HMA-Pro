@@ -48,6 +48,7 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.weight.CancelSearchButton
+import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
 import cc.meteormc.hmapro.manager.util.LogParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -65,7 +66,6 @@ import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Clear
@@ -168,9 +168,9 @@ fun LogsPage(outerPadding: PaddingValues) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            PageTopAppBar(
                 title = stringResourceBy("title_logs"),
-                modifier = Modifier.padding(outerPadding.only(PaddingValuesSides.Horizontal)),
+                padding = outerPadding,
                 scrollBehavior = scrollBehavior,
                 actions = {
                     OverlayIconDropdownMenu(
@@ -217,8 +217,7 @@ fun LogsPage(outerPadding: PaddingValues) {
                             contentDescription = "Save"
                         )
                     }
-                },
-                defaultWindowInsetsPadding = false
+                }
             ) {
                 LogsSearchBar(
                     logs = logs,

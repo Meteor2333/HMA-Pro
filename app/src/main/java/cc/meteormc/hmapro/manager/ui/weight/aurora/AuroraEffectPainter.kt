@@ -99,15 +99,18 @@ private const val BG_FRAG = """
     }
 """
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 internal class AuroraEffectPainter {
+    @delegate:RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @get:RequiresApi(Build.VERSION_CODES.TIRAMISU)
     val runtimeShader by lazy {
         RuntimeShader(BG_FRAG).also {
             initStaticUniforms(it)
         }
     }
 
-    val brush: Brush get() = runtimeShader.asBrush()
+    val brush: Brush
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        get() = runtimeShader.asBrush()
 
     private val resolution = FloatArray(2)
     private val bound = FloatArray(4)
@@ -145,6 +148,7 @@ internal class AuroraEffectPainter {
         shader.setFloatUniform("uAlphaMulti", U_ALPHA_MULTI)
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun updateResolution(width: Float, height: Float) {
         if (resolution[0] == width && resolution[1] == height) return
         resolution[0] = width
@@ -152,12 +156,14 @@ internal class AuroraEffectPainter {
         runtimeShader.setFloatUniform("uResolution", resolution)
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun updateAnimTime(time: Float) {
         if (animTime == time) return
         animTime = time
         runtimeShader.setFloatUniform("uAnimTime", animTime)
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun updatePointsAnim(time: Float, preset: AuroraEffectConfig.Config) {
         if (cachedPointsAnimTime == time && cachedPointsAnimPreset === preset) return
 
@@ -178,6 +184,7 @@ internal class AuroraEffectPainter {
         cachedPointsAnimPreset = preset
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun updateColors(preset: AuroraEffectConfig.Config, stage: Float) {
         if (cachedColorsPreset === preset && cachedColorStage == stage) return
 
@@ -200,6 +207,7 @@ internal class AuroraEffectPainter {
         else -> preset.colors2
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun updateBoundIfNeeded(
         logoHeight: Float,
         totalHeight: Float,
@@ -220,6 +228,7 @@ internal class AuroraEffectPainter {
         cachedTotalWidth = totalWidth
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun updatePresetIfNeeded(deviceType: DeviceType, isDark: Boolean) {
         if (presetApplied && isDarkCached == isDark && deviceTypeCached == deviceType) return
 
@@ -230,6 +239,7 @@ internal class AuroraEffectPainter {
         presetApplied = true
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun applyPreset(deviceType: DeviceType, isDark: Boolean) {
         val preset = AuroraEffectConfig.get(deviceType, isDark)
 

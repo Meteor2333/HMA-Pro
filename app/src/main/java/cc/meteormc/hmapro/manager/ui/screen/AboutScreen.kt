@@ -145,7 +145,7 @@ private fun AboutContent(
         dynamicBackground = true,
         modifier = Modifier.fillMaxSize(),
         bgModifier = Modifier.then { if (useBlur) layerBackdrop(backdrop) else this },
-        effectBackground = useBlur,
+        effectBackground = true,
         alpha = { 1f - scrollProgress }
     ) {
         Column(
@@ -195,7 +195,7 @@ private fun AboutContent(
                                         BlendColorEntry(
                                             color = Color(0xff1af500),
                                             mode =  BlurBlendMode.Lab
-                                        ),
+                                        )
                                     )
                                 } else {
                                     listOf(
@@ -210,7 +210,7 @@ private fun AboutContent(
                                         BlendColorEntry(
                                             color = Color(0xff1af200),
                                             mode =  BlurBlendMode.Lab
-                                        ),
+                                        )
                                     )
                                 }
                             ),

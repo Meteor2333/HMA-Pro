@@ -1,16 +1,19 @@
 package cc.meteormc.hmapro.manager.ui
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.LayoutDirection
+import cc.meteormc.hmapro.manager.ManagerEntry
 import cc.meteormc.hmapro.manager.data.HMAVersion
 import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.hooker.ServiceHooker
@@ -43,68 +47,93 @@ import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.containerTransform
-import cc.meteormc.hmapro.manager.ui.util.createResourceForModule
+import cc.meteormc.xposedkit.XposedKit
 import org.json.JSONObject
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
 import top.yukonga.miuix.kmp.nav.core.rememberNavController
 import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
+import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
 
 class MainActivity : ComponentActivity() {
+    private val preferences = ManagerEntry.preferences
+
+    override fun attachBaseContext(newBase: Context?) {
+        var newContext = newBase
+        if (newBase != null) {
+            val language = preferences.language
+            val locales = if (language == "SYSTEM") {
+                LocaleList.getEmptyLocaleList()
+            } else {
+                LocaleList.forLanguageTags(language)
+            }
+
+            val configuration = Configuration(newBase.resources.configuration)
+            @Suppress("UsePropertyAccessSyntax")
+            configuration.setLocales(locales)
+            newContext = newBase.createConfigurationContext(configuration)
+        }
+
+        super.attachBaseContext(newContext)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        setContent {
+            val isSystemInDark = isSystemInDarkTheme()
+            DisposableEffect(preferences.colorMode, isSystemInDark) {
+                val isDark = when (preferences.colorMode) {
+                    ColorSchemeMode.System, ColorSchemeMode.MonetSystem -> isSystemInDark
+                    ColorSchemeMode.Light, ColorSchemeMode.MonetLight -> false
+                    ColorSchemeMode.Dark, ColorSchemeMode.MonetDark -> true
+                }
+                val style = if (isDark) {
+                    SystemBarStyle.dark(0x0)
+                } else {
+                    SystemBarStyle.light(0x0, 0x0)
+                }
 
-        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
-        setContent { App(prefs) }
+                enableEdgeToEdge(style, style)
+                onDispose { }
+            }
+
+            App(preferences)
+        }
     }
 }
 
 @Composable
-private fun App(preferences: SharedPreferences) {
+private fun App(preferences: PreferencesState) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val layoutDirection = LocalLayoutDirection.current
     val hmaVersion = HMAVersion.current(context)
-    var moduleResource by remember {
-        mutableStateOf(resources.createResourceForModule())
+    val moduleResource = remember(resources) {
+        XposedKit.createModuleResources(
+            metrics = resources.displayMetrics,
+            config = resources.configuration,
+            copyFrom = resources.assets
+        )
     }
     var moduleStatus by remember {
         mutableStateOf<ModuleStatus>(ModuleStatus.Disabled)
     }
 
     val containerTransformState = remember { ContainerTransformState() }
-    val prefsState = remember { PreferencesState(preferences) }
     val navigator = rememberNavController<Route>(Route.Main)
 
     val themeController = remember(
-        prefsState.colorMode,
-        prefsState.colorSpec,
-        prefsState.paletteStyle
+        preferences.colorMode,
+        preferences.colorSpec,
+        preferences.paletteStyle
     ) {
         ThemeController(
-            colorSchemeMode = prefsState.colorMode,
+            colorSchemeMode = preferences.colorMode,
             keyColor = readSystemSeedColor(context),
-            colorSpec = prefsState.colorSpec,
-            paletteStyle = prefsState.paletteStyle
+            colorSpec = preferences.colorSpec,
+            paletteStyle = preferences.paletteStyle
         )
-    }
-
-    LaunchedEffect(prefsState.language) {
-        val language = prefsState.language
-        val config = resources.configuration
-        @Suppress("UsePropertyAccessSyntax")
-        config.setLocales(
-            if (language == "SYSTEM") LocaleList.getEmptyLocaleList()
-            else LocaleList.forLanguageTags(language)
-        )
-        @Suppress("DEPRECATION")
-        resources.updateConfiguration(config, resources.displayMetrics)
-
-        if (config.locales != moduleResource.configuration.locales) {
-            moduleResource = resources.createResourceForModule()
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -120,10 +149,10 @@ private fun App(preferences: SharedPreferences) {
             LocalModuleResources provides moduleResource,
             LocalModuleStatus provides moduleStatus,
             LocalNavigator provides navigator,
-            LocalPreferencesState provides prefsState
+            LocalPreferencesState provides preferences
         ) {
-            val swipeDismiss = remember(prefsState.enableSwipeDismiss) {
-                if (prefsState.enableSwipeDismiss) {
+            val swipeDismiss = remember(preferences.enableSwipeDismiss) {
+                if (preferences.enableSwipeDismiss) {
                     if (layoutDirection == LayoutDirection.Rtl) {
                         NavSwipeDirection.RightToLeft
                     } else {

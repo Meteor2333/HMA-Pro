@@ -77,6 +77,7 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.then
 import cc.meteormc.hmapro.manager.ui.util.useBlur
+import cc.meteormc.hmapro.manager.util.UpdateChecker
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
@@ -292,7 +293,7 @@ private fun UpdateDialog() {
     var showUpdateDialog by remember { mutableStateOf(false) }
     var updateInfo by remember { mutableStateOf(UpdateInfo("", "", "", null)) }
     LaunchedEffect(Unit) {
-        val result = UpdateInfo.checkUpdate(currentVersion) ?: return@LaunchedEffect
+        val result = UpdateChecker.checkUpdate(currentVersion) ?: return@LaunchedEffect
         updateInfo = result
         showUpdateDialog = true
     }
@@ -367,10 +368,12 @@ private fun UpdateDialog() {
                         val manager = context.getSystemService<DownloadManager>()
                         val taskId = manager?.enqueue(request) ?: -1
                         if (taskId < 0L) {
+                            //todo
                             Toast.makeText(context, "Failed to start download", Toast.LENGTH_SHORT).show()
                             return@TextButton
                         }
 
+                        //todo
                         Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier.weight(1f),

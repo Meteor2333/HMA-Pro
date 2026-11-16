@@ -48,7 +48,7 @@ object SystemProperties {
         }
     }
 
-    fun set(key: String, value: String) {
+    fun set(key: String, value: String) = runCatching {
         CLASS.reflect {
             method(
                 "set",
@@ -56,5 +56,5 @@ object SystemProperties {
                 String::class.java
             )!!.call<Unit>(null, key, value)
         }
-    }
+    }.isSuccess
 }

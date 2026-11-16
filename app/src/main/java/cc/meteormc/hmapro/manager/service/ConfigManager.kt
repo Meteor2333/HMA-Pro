@@ -5,16 +5,29 @@ import cc.meteormc.hmapro.DexMethods
 import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.xposedkit.call
 import cc.meteormc.xposedkit.get
+import cc.meteormc.xposedkit.put
 
 object ConfigManager {
-    private val config by lazy {
-        val cm = DexFields.ConfigManager_INSTANCE.get<Any>(null)
-        val delegate = DexFields.ConfigManager_config.get<Any?>(cm)
-            ?: throw IllegalStateException("ConfigManager.config is null")
-        return@lazy HMAConfig(delegate)
-    }
+    private lateinit var _config: HMAConfig
+    internal var config: HMAConfig
+        get() {
+            if (!::_config.isInitialized) {
+                val cm = DexFields.ConfigManager_INSTANCE.get<Any>(null)
+                val delegate = DexFields.ConfigManager_config.get<Any?>(cm)
+                    ?: throw IllegalStateException("ConfigManager.config is null")
+                _config = HMAConfig(delegate)
+            }
 
-    private fun saveConfig() {
+            return _config
+        }
+        set(value) {
+            _config = value
+            val cm = DexFields.ConfigManager_INSTANCE.get<Any>(null)
+            DexFields.ConfigManager_config.put(cm, value.config)
+            saveConfig()
+        }
+
+    fun saveConfig() {
         DexMethods.ConfigManager_saveConfig.call<Unit>(config)
     }
 

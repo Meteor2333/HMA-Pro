@@ -65,7 +65,11 @@ object DexClasses {
     }
 
     val Fragment by classFinder {
-        usingStrings("Fragment", "not attached to")
+        usingStrings(
+            "Fragment",
+            "not attached to an activity.",
+            "not attached to a context.",
+        )
     }
 
     val HMAService by classFinder {
@@ -109,6 +113,11 @@ object DexMethods {
         name = ServiceClient_getServiceVersion.name
         returnType = "int"
         paramCount = 0
+    }
+
+    val JsonConfig_parse by methodFinder {
+        declaredClass = $$"icu.nullptr.hidemyapplist.common.JsonConfig$Companion"
+        name = "parse"
     }
 
     val ServiceClient_getInstalledPackages by methodFinder {
@@ -172,6 +181,12 @@ object DexFields {
     val ConfigManager_INSTANCE by fieldFinder {
         declaredClass = DexClasses.ConfigManager.name
         type = DexClasses.ConfigManager.name
+        modifiers = Modifier.STATIC or Modifier.FINAL
+    }
+
+    val JsonConfig_Companion by fieldFinder {
+        declaredClass = "icu.nullptr.hidemyapplist.common.JsonConfig"
+        type = $$"icu.nullptr.hidemyapplist.common.JsonConfig$Companion"
         modifiers = Modifier.STATIC or Modifier.FINAL
     }
 

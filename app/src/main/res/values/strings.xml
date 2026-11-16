@@ -28,7 +28,10 @@
     <string name="palette_style_summary">Tonal algorithm used to derive the Material3 palette</string>
     <string name="enable_blur_title">Enable blur</string>
     <string name="enable_swipe_back_gesture_title">Swipe back gesture</string>
-    <string name="enable_swipe_back_gesture_summary">Swipe back gesture</string>
+    <string name="enable_swipe_back_gesture_summary">Swipe from the edge to return to the previous page</string>
+    <string name="modern_ui_title">Modern UI</string>
+    <string name="fix_update_checker_title">Fix update checker</string>
+    <string name="full_backup_title">Full backup</string>
 
     <!-- Pull To Refresh -->
     <string name="pull_to_refresh">Pull down to refresh</string>
@@ -41,4 +44,5 @@
     <string name="log_copied">Copied to clipboard</string>
     <string name="log_cleared">Logs cleared!</string>
     <string name="download">Download</string>
+    <string name="confirm_action">Are you sure you want to proceed with this action?</string>
 </resources>

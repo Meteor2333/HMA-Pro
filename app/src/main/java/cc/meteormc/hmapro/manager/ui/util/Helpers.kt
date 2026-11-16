@@ -1,5 +1,8 @@
 package cc.meteormc.hmapro.manager.ui.util
 
+import android.app.Activity
+import android.content.Intent
+import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,7 +15,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cc.meteormc.xposedkit.XposedKit
+import cc.meteormc.hmapro.manager.ManagerEntry
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
@@ -20,12 +23,22 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
-fun Resources.createResourceForModule(): Resources {
-    return XposedKit.createModuleResources(
-        metrics = displayMetrics,
-        config = configuration,
-        copyFrom = assets
-    )
+fun Activity.restart() {
+    val intent = Intent().apply {
+        setClassName(
+            this@restart,
+            ManagerEntry.MAIN_ACTIVITY
+        )
+    }
+    finishAffinity()
+    startActivity(intent)
+}
+
+fun Resources.updateConfiguration(block: Configuration.() -> Unit) {
+    val config = configuration
+    config.block()
+    @Suppress("DEPRECATION")
+    updateConfiguration(config, displayMetrics)
 }
 
 fun Modifier.then(block: Modifier.() -> Modifier): Modifier {

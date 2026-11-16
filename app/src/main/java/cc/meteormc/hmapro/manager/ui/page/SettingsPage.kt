@@ -3,6 +3,9 @@ package cc.meteormc.hmapro.manager.ui.page
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -19,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,24 +30,28 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.DexFields
+import cc.meteormc.hmapro.HmaProModule
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.only
+import cc.meteormc.hmapro.manager.ui.util.restart
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
+import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
+import cc.meteormc.hmapro.manager.util.ConfigBackuper
 import cc.meteormc.hmapro.manager.util.SystemProperties
 import cc.meteormc.xposedkit.get
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -59,6 +67,7 @@ private const val VOLD_APP_DATA_ISOLATION_PROPERTY = "persist.sys.vold_app_data_
 
 @Composable
 fun SettingsPage(outerPadding: PaddingValues) {
+    val activity = LocalActivity.current
     val context = LocalContext.current
     val prefs = LocalPreferencesState.current
     val uriHandler = LocalUriHandler.current
@@ -120,8 +129,37 @@ fun SettingsPage(outerPadding: PaddingValues) {
         mutableStateOf(SystemProperties.getBoolean(VOLD_APP_DATA_ISOLATION_PROPERTY, false))
     }
 
+    val deniedMessage = stringResourceBy("settings_permission_denied")
+    var showAppDataIsolationConfirmDialog by remember { mutableStateOf(false) }
+    var showVoldAppDataIsolationConfirmDialog by remember { mutableStateOf(false) }
     var showStopSystemServiceConfirmDialog by remember { mutableStateOf(false) }
     var showCleanEnvConfirmDialog by remember { mutableStateOf(false) }
+    ConfirmDialog(
+        show = showAppDataIsolationConfirmDialog,
+        onCancel = { showAppDataIsolationConfirmDialog = false },
+        onConfirm = {
+            val newValue = !appDataIsolation
+            if (SystemProperties.set(APP_DATA_ISOLATION_PROPERTY, newValue.toString())) {
+                appDataIsolation = newValue
+                showAppDataIsolationConfirmDialog = false
+            } else {
+                Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+    ConfirmDialog(
+        show = showVoldAppDataIsolationConfirmDialog,
+        onCancel = { showVoldAppDataIsolationConfirmDialog = false },
+        onConfirm = {
+            val newValue = !voldAppDataIsolation
+            if (SystemProperties.set(VOLD_APP_DATA_ISOLATION_PROPERTY, newValue.toString())) {
+                voldAppDataIsolation = newValue
+                showAppDataIsolationConfirmDialog = false
+            } else {
+                Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
     StopSystemServiceConfirmDialog(
         show = showStopSystemServiceConfirmDialog,
         onDismiss = { showStopSystemServiceConfirmDialog = false }
@@ -131,15 +169,63 @@ fun SettingsPage(outerPadding: PaddingValues) {
         onDismiss = { showCleanEnvConfirmDialog = false }
     )
 
+    val scope = rememberCoroutineScope()
+    val exportSuccessfulMessage = stringResourceBy("home_exported")
+    val exportFailedMessage = stringResourceBy("home_export_failed")
+    val importSuccessfulMessage = stringResourceBy("home_import_successful")
+    val importFailedMessage = stringResourceBy("home_import_failed")
+    val backupSAFLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) {
+        if (it == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val isSuccess = ConfigBackuper.backup(context, it)
+            if (isSuccess) {
+                Toast.makeText(
+                    context,
+                    exportSuccessfulMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                Toast.makeText(
+                    context,
+                    exportFailedMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+    val restoreSAFLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) {
+        if (it == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val isSuccess = ConfigBackuper.restore(context, it)
+            if (isSuccess) {
+                Toast.makeText(
+                    context,
+                    importSuccessfulMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+                activity!!.recreate()
+            } else {
+                Toast.makeText(
+                    context,
+                    importFailedMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            PageTopAppBar(
                 title = stringResourceBy("title_settings"),
-                modifier = Modifier.padding(outerPadding.only(PaddingValuesSides.Horizontal)),
-                scrollBehavior = scrollBehavior,
-                defaultWindowInsetsPadding = false
+                padding = outerPadding,
+                scrollBehavior = scrollBehavior
             )
         }
     ) { innerPadding ->
@@ -157,7 +243,10 @@ fun SettingsPage(outerPadding: PaddingValues) {
                         title = stringResourceBy("settings_language"),
                         items = languageOptions.map { it.second },
                         selectedIndex = languageOptions.indexOfFirst { it.first == prefs.language },
-                        onSelectedIndexChange = { prefs.language = languageOptions[it].first }
+                        onSelectedIndexChange = {
+                            prefs.language = languageOptions[it].first
+                            activity!!.recreate()
+                        }
                     )
 
                     ArrowPreference(
@@ -223,6 +312,15 @@ fun SettingsPage(outerPadding: PaddingValues) {
                         checked = prefs.enableSwipeDismiss,
                         onCheckedChange = { prefs.enableSwipeDismiss = it }
                     )
+
+                    SwitchPreference(
+                        title = stringResourceFromModule(R.string.modern_ui_title),
+                        checked = prefs.modernUi,
+                        onCheckedChange = {
+                            prefs.modernUi = it
+                            activity!!.restart()
+                        }
+                    )
                 }
             }
 
@@ -256,7 +354,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                             context.packageManager.setComponentEnabledSetting(
                                 ComponentName(
                                     context,
-                                    "com.tsng.hidemyapplist.MainActivityLauncher"
+                                    HmaProModule.HMA_PACKAGE + ".MainActivityLauncher"
                                 ),
                                 if (it) {
                                     PackageManager.COMPONENT_ENABLED_STATE_DISABLED
@@ -292,21 +390,14 @@ fun SettingsPage(outerPadding: PaddingValues) {
                         title = stringResourceBy("settings_app_data_isolation"),
                         summary = stringResourceBy("settings_change_require_root"),
                         checked = appDataIsolation,
-                        onCheckedChange = {
-                            appDataIsolation = it
-                            SystemProperties.set(APP_DATA_ISOLATION_PROPERTY, it.toString())
-                        }
+                        onCheckedChange = { showAppDataIsolationConfirmDialog = true }
                     )
 
                     SwitchPreference(
                         title = stringResourceBy("settings_vold_app_data_isolation"),
                         summary = stringResourceBy("settings_change_require_root"),
                         checked = voldAppDataIsolation,
-                        onCheckedChange = {
-                            voldAppDataIsolation = it
-                            // todo: 测试可行性
-                            SystemProperties.set(VOLD_APP_DATA_ISOLATION_PROPERTY, it.toString())
-                        }
+                        onCheckedChange = { showVoldAppDataIsolationConfirmDialog = true }
                     )
 
                     ArrowPreference(
@@ -327,16 +418,12 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 SettingsCard(title = stringResourceBy("home_backup_and_restore")) {
                     ArrowPreference(
                         title = stringResourceBy("home_backup_config"),
-                        onClick = {
-
-                        }
+                        onClick = { backupSAFLauncher.launch("HMA_Config.json") }
                     )
 
                     ArrowPreference(
                         title = stringResourceBy("home_restore_config"),
-                        onClick = {
-
-                        }
+                        onClick = { restoreSAFLauncher.launch("application/json") }
                     )
                 }
             }
@@ -364,21 +451,23 @@ private fun SettingsCard(
 }
 
 @Composable
-private fun StopSystemServiceConfirmDialog(
+private fun ConfirmDialog(
     show: Boolean,
-    onDismiss: () -> Unit
+    title: String? = stringResourceBy("settings_warning"),
+    summary: String? = stringResourceFromModule(R.string.confirm_action),
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit
 ) {
-    var showCleanEnvDialog by remember { mutableStateOf(false) }
     OverlayDialog(
         show = show,
-        title = stringResourceBy("settings_stop_system_service"),
-        summary = stringResourceBy("settings_stop_system_service_summary"),
-        onDismissRequest = onDismiss
+        title = title,
+        summary = summary,
+        onDismissRequest = onCancel
     ) {
         Row {
             TextButton(
                 text = stringResource(android.R.string.cancel),
-                onClick = onDismiss,
+                onClick = onCancel,
                 modifier = Modifier.weight(1f)
             )
 
@@ -386,19 +475,38 @@ private fun StopSystemServiceConfirmDialog(
 
             TextButton(
                 text = stringResource(android.R.string.ok),
-                onClick = {
-                    onDismiss()
-                    showCleanEnvDialog = true
-                },
+                onClick = onConfirm,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary()
             )
         }
     }
+}
+
+@Composable
+private fun StopSystemServiceConfirmDialog(
+    show: Boolean,
+    onDismiss: () -> Unit
+) {
+    var showCleanEnvDialog by remember { mutableStateOf(false) }
+    ConfirmDialog(
+        show = show,
+        onCancel = onDismiss,
+        onConfirm = {
+            onDismiss()
+            showCleanEnvDialog = true
+        }
+    )
 
     val context = LocalContext.current
     val toastMessage = stringResourceBy("settings_stop_system_service")
+    val offMessage = stringResourceBy("home_xposed_service_off")
     fun stopService(cleanEnv: Boolean) {
+        if (ServiceClient.getServiceVersion() == 0) {
+            Toast.makeText(context,  offMessage, Toast.LENGTH_SHORT).show()
+            return
+        }
+
         ServiceClient.stopService(cleanEnv)
         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
     }
@@ -442,32 +550,16 @@ private fun CleanEnvConfirmDialog(
     val context = LocalContext.current
     val successfulMessage = stringResourceBy("settings_force_clean_env_toast_successful")
     val deniedMessage = stringResourceBy("settings_permission_denied")
-    OverlayDialog(
+    ConfirmDialog(
         show = show,
         title = stringResourceBy("settings_force_clean_env"),
         summary = stringResourceBy("settings_is_clean_env_summary"),
-        onDismissRequest = onDismiss
-    ) {
-        Row {
-            TextButton(
-                text = stringResource(android.R.string.cancel),
-                onClick = onDismiss,
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.width(18.dp))
-
-            TextButton(
-                text = stringResource(android.R.string.ok),
-                onClick = {
-                    // todo: 处理运行环境清理
-                    onDismiss()
-                    Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show()
-                    Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
-            )
+        onCancel = onDismiss,
+        onConfirm = {
+            // todo: 处理运行环境清理
+            onDismiss()
+            Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
         }
-    }
+    )
 }

@@ -225,7 +225,6 @@ fun LogsPage(outerPadding: PaddingValues) {
                 }
             ) {
                 LogsSearchBar(
-                    logs = logs,
                     onQuery = { query = it.trim() }
                 )
             }
@@ -279,10 +278,7 @@ fun LogsPage(outerPadding: PaddingValues) {
 }
 
 @Composable
-private fun LogsSearchBar(
-    logs: List<LogItem>,
-    onQuery: (String) -> Unit
-) {
+private fun LogsSearchBar(onQuery: (String) -> Unit) {
     var query by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     SearchBar(

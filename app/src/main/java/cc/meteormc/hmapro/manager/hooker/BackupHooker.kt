@@ -1,0 +1,11 @@
+package cc.meteormc.hmapro.manager.hooker
+
+import cc.meteormc.hmapro.manager.ManagerMain
+import cc.meteormc.xposedkit.hook.BaseHooker
+import cc.meteormc.xposedkit.hook.HookerContext
+
+object BackupHooker : BaseHooker<HookerContext>() {
+    override fun HookerContext.hook() {
+        ManagerMain.preferences.fullBackup
+    }
+}

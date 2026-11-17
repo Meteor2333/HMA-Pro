@@ -8,13 +8,16 @@
     <string name="enable_blur_title">启用模糊</string>
     <string name="enable_swipe_back_gesture_summary">从屏幕边缘滑动来返回上一页</string>
     <string name="enable_swipe_back_gesture_title">滑动返回手势</string>
+    <string name="fix_update_checker_summary">将版本检查通道改为 Github Releases 源</string>
     <string name="fix_update_checker_title">修复更新检查</string>
     <string name="force_mount">强制挂载</string>
+    <string name="full_backup_summary">允许备份与还原所有的模块设置</string>
     <string name="full_backup_title">全量备份</string>
     <string name="hmapro_version">HMA-Pro 版本</string>
     <string name="join_telegram">加入 Telegram 频道</string>
     <string name="log_cleared">日志已清空！</string>
     <string name="log_copied">已复制到剪贴板</string>
+    <string name="modern_ui_summary">使用 miuix 风格的用户界面</string>
     <string name="modern_ui_title">现代化UI</string>
     <string name="module_activated">模块已激活</string>
     <string name="module_version">模块版本</string>

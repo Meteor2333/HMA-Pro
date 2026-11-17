@@ -30,8 +30,11 @@
     <string name="enable_swipe_back_gesture_title">Swipe back gesture</string>
     <string name="enable_swipe_back_gesture_summary">Swipe from the edge to return to the previous page</string>
     <string name="modern_ui_title">Modern UI</string>
+    <string name="modern_ui_summary">Use a Miuix-style user interface</string>
     <string name="fix_update_checker_title">Fix update checker</string>
+    <string name="fix_update_checker_summary">Change the version check channel to GitHub Releases</string>
     <string name="full_backup_title">Full backup</string>
+    <string name="full_backup_summary">Allow backup and restore of all module settings</string>
 
     <!-- Pull To Refresh -->
     <string name="pull_to_refresh">Pull down to refresh</string>

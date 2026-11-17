@@ -1,8 +1,8 @@
 package cc.meteormc.hmapro
 
 import android.util.Log
-import cc.meteormc.hmapro.manager.ManagerEntry
-import cc.meteormc.hmapro.system.SystemServerEntry
+import cc.meteormc.hmapro.manager.ManagerMain
+import cc.meteormc.hmapro.system.SystemServerMain
 import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.XposedModule
 import cc.meteormc.xposedkit.annotation.ModuleRegister
@@ -28,11 +28,11 @@ object HmaProModule : XposedModule {
         if (!param.isFirstPackage) return
         if (param.packageName != HMA_PACKAGE) return
         classLoader = param.classLoader
-        ManagerEntry.init(classLoader, param.appInfo)
+        ManagerMain.init(classLoader, param.appInfo)
     }
 
     override fun onSystemServerStarting(param: SystemServerStartingParam) {
         classLoader = param.classLoader
-        SystemServerEntry.init(classLoader)
+        SystemServerMain.init(classLoader)
     }
 }

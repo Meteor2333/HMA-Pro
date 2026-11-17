@@ -50,6 +50,7 @@ import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
+import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.isDarkMode
 import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
@@ -110,38 +111,28 @@ fun HomePage(outerPadding: PaddingValues) {
                 .padding(top = innerPadding.calculateTopPadding())
                 .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                 .verticalScrollEffect(scrollBehavior),
-            contentPadding = PaddingValues(horizontal = 12.dp)
+            contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
         ) {
-            item("header-spacer") {
+            item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            item("module_status") {
-                ModuleStatusCard()
-            }
+            item { ModuleStatusCard() }
 
-            item("spacer1") {
+            item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            item("info") {
-                InfoCard()
-            }
+            item { InfoCard() }
 
-            item("spacer2") {
+            item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            item("manage") {
-                ManageCard()
-            }
+            item { ManageCard() }
 
-            item("footer_spacer") {
+            item {
                 Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            item("bottom_padding") {
-                Spacer(modifier = Modifier.height(outerPadding.calculateBottomPadding()))
             }
         }
     }

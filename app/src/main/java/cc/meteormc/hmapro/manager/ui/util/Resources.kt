@@ -40,10 +40,11 @@ fun painterResourceBy(resName: String): Painter {
 @SuppressLint("DiscouragedApi")
 inline fun <T> Context.findResource(
     resName: String,
-    type: String,
+    type: String?,
+    pkg: String? = packageName,
     action: (Resources, Int) -> T
 ): T {
-    val id = resources.getIdentifier(resName, type, packageName)
+    val id = resources.getIdentifier(resName, type, pkg)
     if (id <= 0) {
         throw IllegalArgumentException("Resource not found: $resName")
     }

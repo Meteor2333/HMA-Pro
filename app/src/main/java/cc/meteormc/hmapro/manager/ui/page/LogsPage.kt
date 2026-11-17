@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +44,8 @@ import cc.meteormc.hmapro.manager.data.LogItem
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
+import cc.meteormc.hmapro.manager.ui.util.copy
+import cc.meteormc.hmapro.manager.ui.util.isDarkMode
 import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
@@ -85,6 +88,7 @@ private object LogCache {
 @Composable
 fun LogsPage(outerPadding: PaddingValues) {
     val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
     val refreshState = rememberPullToRefreshState()
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     var logs by remember { mutableStateOf(LogCache.parsed) }
@@ -100,6 +104,7 @@ fun LogsPage(outerPadding: PaddingValues) {
     LaunchedEffect(Unit) {
         delay(500.milliseconds)
         updateLogs()
+        listState.scrollToItem(0)
     }
 
     val context = LocalContext.current
@@ -246,7 +251,8 @@ fun LogsPage(outerPadding: PaddingValues) {
                     .fillMaxSize()
                     .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                     .verticalScrollEffect(scrollBehavior),
-                contentPadding = PaddingValues(horizontal = 12.dp)
+                state = listState,
+                contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
             ) {
                 val items = logs.toMutableList()
                 if (query.isNotBlank()) {
@@ -262,16 +268,11 @@ fun LogsPage(outerPadding: PaddingValues) {
                     }
                 }
 
-                items(
-                    items = items,
-                    key = { it.toString() }
-                ) {
+                items(items = items) {
                     LogItemComponent(it)
                 }
 
-                item("bottom_padding") {
-                    Spacer(modifier = Modifier.height(outerPadding.calculateBottomPadding()))
-                }
+                item { Spacer(modifier = Modifier.height(4.dp)) }
             }
         }
     }
@@ -344,13 +345,13 @@ private fun LogItemComponent(item: LogItem) {
                     cornerRadius = 4.dp,
                     colors = CardDefaults.defaultColors(
                         color = when (item.level) {
-                            Log.VERBOSE -> Color(0xFFD6D6D6)
-                            Log.DEBUG -> Color(0xFF305D78)
-                            Log.INFO -> Color(0xFF6A8759)
-                            Log.WARN -> Color(0xFFBBB529)
-                            Log.ERROR -> Color(0xFFCF5B56)
-                            Log.ASSERT -> Color(0xFF8B3C3C)
-                            else -> Color.White
+                            Log.VERBOSE -> if (isDarkMode()) Color(0xFFAAAAAA) else Color(0xFFD6D6D6)
+                            Log.DEBUG -> if (isDarkMode()) Color(0xFF305D78) else Color(0xFFCFE7FF)
+                            Log.INFO -> if (isDarkMode()) Color(0xFF6A8759) else Color(0xFFD7F6CF)
+                            Log.WARN -> if (isDarkMode()) Color(0xFFBBB529) else Color(0xFFF6E8B1)
+                            Log.ERROR -> if (isDarkMode()) Color(0xFFCF5B56) else Color(0xFFCF5B56)
+                            Log.ASSERT -> if (isDarkMode()) Color(0xFF8B3C3C) else Color(0xFF7F0000)
+                            else -> MiuixTheme.colorScheme.surfaceContainer
                         }
                     )
                 ) {

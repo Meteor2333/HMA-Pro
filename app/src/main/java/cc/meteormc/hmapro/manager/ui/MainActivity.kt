@@ -24,10 +24,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.LayoutDirection
-import cc.meteormc.hmapro.manager.ManagerEntry
+import cc.meteormc.hmapro.manager.ManagerMain
+import cc.meteormc.hmapro.manager.ManagerMain.preferences
 import cc.meteormc.hmapro.manager.data.HMAVersion
 import cc.meteormc.hmapro.manager.data.ModuleStatus
-import cc.meteormc.hmapro.manager.hooker.ServiceHooker
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.preference.PreferencesState
 import cc.meteormc.hmapro.manager.ui.screen.AboutScreen
@@ -57,8 +57,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
 
 class MainActivity : ComponentActivity() {
-    private val preferences = ManagerEntry.preferences
-
     override fun attachBaseContext(newBase: Context?) {
         var newContext = newBase
         if (newBase != null) {
@@ -137,7 +135,7 @@ private fun App(preferences: PreferencesState) {
     }
 
     LaunchedEffect(Unit) {
-        ServiceHooker.eventFlow.collect {
+        ManagerMain.serviceBindEvent.collect {
             moduleStatus = ModuleStatus.current(context)
         }
     }

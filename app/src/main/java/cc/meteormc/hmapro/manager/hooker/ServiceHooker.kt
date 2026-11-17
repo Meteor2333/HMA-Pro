@@ -1,12 +1,10 @@
 package cc.meteormc.hmapro.manager.hooker
 
+import cc.meteormc.hmapro.manager.ManagerMain
 import cc.meteormc.xposedkit.hook.BaseHooker
 import cc.meteormc.xposedkit.hook.HookerContext
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 object ServiceHooker : BaseHooker<HookerContext>() {
-    val eventFlow = MutableSharedFlow<Unit>(replay = 1)
-
     override fun HookerContext.hook() {
         "io.github.libxposed.service.XposedProvider".reflect {
             method("call")?.hookAfter {
@@ -14,7 +12,7 @@ object ServiceHooker : BaseHooker<HookerContext>() {
                     return@hookAfter
                 }
 
-                eventFlow.tryEmit(Unit)
+                ManagerMain.serviceBindEvent.tryEmit(Unit)
             }
         }
     }

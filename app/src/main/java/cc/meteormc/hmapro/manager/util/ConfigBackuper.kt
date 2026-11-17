@@ -6,7 +6,7 @@ import androidx.core.content.edit
 import cc.meteormc.hmapro.DexFields
 import cc.meteormc.hmapro.DexMethods
 import cc.meteormc.hmapro.common.HMAConfig
-import cc.meteormc.hmapro.manager.ManagerEntry
+import cc.meteormc.hmapro.manager.ManagerMain
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.call
@@ -32,7 +32,7 @@ object ConfigBackuper {
         val preferences = JSONObject().apply {
             json.put(EXTRA_PREFERENCES, this)
         }
-        ManagerEntry.preferences
+        ManagerMain.preferences
             .storage
             .all
             .entries
@@ -78,7 +78,7 @@ object ConfigBackuper {
         val map = mutableMapOf<String, Any>()
         val preferences = json.optJSONObject(EXTRA_PREFERENCES) ?: return@withContext true
         preferences.keys().forEach { map[it] = preferences.get(it) }
-        ManagerEntry.preferences.storage.edit {
+        ManagerMain.preferences.storage.edit {
             clear()
             map.forEach { (key, value) ->
                 when (value) {

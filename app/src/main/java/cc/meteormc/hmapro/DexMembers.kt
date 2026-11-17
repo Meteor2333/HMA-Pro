@@ -2,10 +2,14 @@
 
 package cc.meteormc.hmapro
 
+import android.app.Activity
+import android.content.Context
+import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.util.AtomicBooleanDelegate
 import org.luckypray.dexkit.DexKitCacheBridge
 import org.luckypray.dexkit.DexKitCacheBridge.CacheBridgeListener
 import org.luckypray.dexkit.annotations.DexKitExperimentalApi
+import org.luckypray.dexkit.query.enums.UsingType
 import org.luckypray.dexkit.query.matchers.ClassMatcher
 import org.luckypray.dexkit.query.matchers.FieldMatcher
 import org.luckypray.dexkit.query.matchers.MethodMatcher
@@ -24,11 +28,14 @@ import kotlin.reflect.KProperty
 private lateinit var dexkit: DexKitCacheBridge.RecyclableBridge
 
 object DexMembers {
+    const val TAG = "DexMembers"
+
     init {
         System.loadLibrary("dexkit")
     }
 
     fun init(sourceDir: String, cacheFile: File?) {
+        val startTime = System.currentTimeMillis()
         if (cacheFile != null) {
             DexKitCache.load(cacheFile)
             DexKitCacheBridge.init(DexKitCache)
@@ -55,6 +62,7 @@ object DexMembers {
             }
         }
         dexkit = DexKitCacheBridge.create(appHash, sourceDir)
+        XLog.d(TAG, "DexKit initialized in ${System.currentTimeMillis() - startTime}ms")
     }
 }
 
@@ -64,12 +72,15 @@ object DexClasses {
         addFieldForType("icu.nullptr.hidemyapplist.common.JsonConfig")
     }
 
-    val Fragment by classFinder {
-        usingStrings(
-            "Fragment",
-            "not attached to an activity.",
-            "not attached to a context.",
-        )
+    val CoroutineSingletons by classFinder {
+        superClass = Enum::class.java.name
+        addMethod {
+            usingEqStrings(
+                "COROUTINE_SUSPENDED",
+                "UNDECIDED",
+                "RESUMED"
+            )
+        }
     }
 
     val HMAService by classFinder {
@@ -82,8 +93,31 @@ object DexClasses {
         }
     }
 
+    val OnPreferenceChangeListener by classFinder {
+        modifiers = Modifier.INTERFACE
+        methodCount(1)
+        addMethod {
+            addParamType("androidx.preference.Preference")
+            addParamType(Any::class.java)
+            returnType = "boolean"
+        }
+    }
+
     val ServiceClient by classFinder {
         usingEqStrings("ServiceClient")
+    }
+
+    val UpdateInfo by classFinder {
+        addFieldForType(String::class.java)
+        addFieldForType(Int::class.javaPrimitiveType!!)
+        addFieldForType(String::class.java)
+        addFieldForType(String::class.java)
+        addMethod {
+            name = "<init>"
+            addCaller(
+                MethodMatcher.create(DexMethods.UpdateInfo_fetchLatestUpdate)
+            )
+        }
     }
 
     private fun classFinder(block: ClassMatcher.() -> Unit) = FinderDelegate {
@@ -102,9 +136,37 @@ object DexMethods {
         }
     }
 
-    val Fragment_getContext by methodFinder {
-        declaredClass = DexClasses.Fragment.name
-        returnType = "android.content.Context"
+    val Continuation_resumeWith by methodFinder {
+        val matcher = MethodMatcher().apply {
+            paramTypes(Any::class.java)
+            returnType = "void"
+        }
+        declaredClass {
+            modifiers = Modifier.INTERFACE
+            methodCount(2)
+            addMethod {
+                paramCount = 0
+                returnType {
+                    modifiers = Modifier.INTERFACE
+                }
+            }
+            addMethod(matcher)
+        }
+
+        allOf(matcher)
+    }
+
+    val Fragment_requireActivity by methodFinder {
+        returnType {
+            superClass {
+                superClass = Activity::class.java.name
+            }
+        }
+        usingEqStrings(" not attached to an activity.")
+    }
+
+    val Fragment_requireContext by methodFinder {
+        returnType(Context::class.java)
         usingEqStrings(" not attached to a context.")
     }
 
@@ -118,6 +180,27 @@ object DexMethods {
     val JsonConfig_parse by methodFinder {
         declaredClass = $$"icu.nullptr.hidemyapplist.common.JsonConfig$Companion"
         name = "parse"
+    }
+
+    val PreferenceFragmentCompat_findPreference by methodFinder {
+        declaredClass {
+            superClass {
+                addMethod(
+                    MethodMatcher.create(Fragment_requireActivity)
+                )
+                addMethod(
+                    MethodMatcher.create(Fragment_requireContext)
+                )
+            }
+        }
+
+        paramTypes(String::class.java)
+        returnType = "androidx.preference.Preference"
+    }
+
+    val ServiceClient_clearLogs by methodFinder {
+        declaredClass = DexClasses.ServiceClient.name
+        usingStrings("clearLogs")
     }
 
     val ServiceClient_getInstalledPackages by methodFinder {
@@ -140,9 +223,9 @@ object DexMethods {
         usingEqStrings("isNativeHookSupported")
     }
 
-    val ServiceClient_clearLogs by methodFinder {
+    val ServiceClient_stopService by methodFinder {
         declaredClass = DexClasses.ServiceClient.name
-        usingStrings("clearLogs")
+        usingStrings("stopService")
     }
 
     val ServiceClient_syncConfig by methodFinder {
@@ -150,16 +233,31 @@ object DexMethods {
         usingStrings("syncConfig")
     }
 
-    val ServiceClient_stopService by methodFinder {
-        declaredClass = DexClasses.ServiceClient.name
-        usingStrings("stopService")
-    }
-
-    val SettingsPreferenceFragment_onCreate by methodFinder {
+    val SettingsPreferenceFragment_onCreatePreferences by methodFinder {
         declaredClass = $$"icu.nullptr.hidemyapplist.ui.fragment.SettingsFragment$SettingsPreferenceFragment"
         addInvoke {
             usingEqStrings("This should be called after super.onCreate.")
         }
+    }
+
+    val TwoStatePreference_setChecked by methodFinder {
+        declaredClass = "androidx.preference.TwoStatePreference"
+        paramTypes(Boolean::class.javaPrimitiveType!!)
+        returnType = "void"
+        addUsingField {
+            usingType = UsingType.Read
+            type = "boolean"
+        }
+        addUsingField {
+            usingType = UsingType.Write
+            type = "boolean"
+        }
+    }
+
+    val UpdateInfo_fetchLatestUpdate by methodFinder {
+        usingStrings("https://api.nullptr.icu/")
+        paramCount = 1
+        returnType(Any::class.java)
     }
 
     private fun constructorFinder(block: MethodMatcher.() -> Unit) = FinderDelegate {
@@ -199,6 +297,11 @@ object DexFields {
         }
     }
 
+    val MyApp_hmaApp by fieldFinder {
+        type = "icu.nullptr.hidemyapplist.MyApp"
+        modifiers = Modifier.STATIC
+    }
+
     private fun fieldFinder(block: FieldMatcher.() -> Unit) = FinderDelegate {
         dexkit.getField(it) { matcher(FieldMatcher().apply(block)) }.getFieldInstance(HmaProModule.classLoader)
     }
@@ -209,9 +312,11 @@ private class FinderDelegate<T : Any>(private val finder: (key: String) -> T) : 
 
     override fun getValue(thisRef: Any, property: KProperty<*>): T {
         if (cachedValue == null) {
+            val startTime = System.currentTimeMillis()
             val name = property.name
             val result = finder(name)
             cachedValue = result
+            XLog.d(DexMembers.TAG, "Found $name in ${System.currentTimeMillis() - startTime}ms: $result")
         }
         return cachedValue!!
     }

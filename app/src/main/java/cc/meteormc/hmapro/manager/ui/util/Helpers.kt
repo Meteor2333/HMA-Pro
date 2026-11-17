@@ -15,7 +15,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cc.meteormc.hmapro.manager.ManagerEntry
+import cc.meteormc.hmapro.manager.ManagerMain
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
@@ -27,7 +27,7 @@ fun Activity.restart() {
     val intent = Intent().apply {
         setClassName(
             this@restart,
-            ManagerEntry.MAIN_ACTIVITY
+            ManagerMain.MAIN_ACTIVITY
         )
     }
     finishAffinity()

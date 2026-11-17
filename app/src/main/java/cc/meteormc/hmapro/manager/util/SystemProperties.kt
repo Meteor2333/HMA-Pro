@@ -49,6 +49,7 @@ object SystemProperties {
     }
 
     fun set(key: String, value: String) = runCatching {
+        // todo: 这个方法不能绕过selinux 即使已经在root下
         CLASS.reflect {
             method(
                 "set",

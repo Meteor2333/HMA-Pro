@@ -242,11 +242,11 @@ private fun AboutContent(
                 .verticalScrollEffect(),
             contentPadding = padding.copy(top = 0.dp)
         ) {
-            item("header-spacer") {
+            item {
                 Spacer(modifier = Modifier.height(with(density) { headerHeight.toDp() }))
             }
 
-            item("description-card") {
+            item {
                 AboutCard(
                     backdrop = backdrop,
                     title = stringResourceFromModule(R.string.title_description),
@@ -260,11 +260,11 @@ private fun AboutContent(
                 }
             }
 
-            item("spacer1") {
+            item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            item("usege-card") {
+            item {
                 AboutCard(
                     backdrop = backdrop,
                     title = stringResourceBy("about_how_to_use_title"),
@@ -280,11 +280,11 @@ private fun AboutContent(
                 }
             }
 
-            item("spacer2") {
+            item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            item("about-card") {
+            item {
                 AboutCard(
                     backdrop = backdrop,
                     title = stringResourceBy("title_about"),
@@ -309,11 +309,11 @@ private fun AboutContent(
                 }
             }
 
-            item("spacer3") {
+            item {
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
-            item("footer") {
+            item {
                 Text(
                     text = buildAnnotatedString {
                         append("Powered by ")
@@ -338,7 +338,7 @@ private fun AboutContent(
                 )
             }
 
-            item("footer-spacer") {
+            item {
                 Spacer(modifier = Modifier.height(18.dp))
             }
         }

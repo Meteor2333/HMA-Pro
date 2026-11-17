@@ -6,7 +6,7 @@ import cc.meteormc.hmapro.system.hooker.SystemContextHooker
 import cc.meteormc.hmapro.system.hooker.TestHooker
 import cc.meteormc.xposedkit.hook.HookerContext
 
-object SystemServerEntry {
+object SystemServerMain {
     fun init(classLoader: ClassLoader) {
         val context = HookerContext(classLoader)
         SystemContextHooker.installHook(context)

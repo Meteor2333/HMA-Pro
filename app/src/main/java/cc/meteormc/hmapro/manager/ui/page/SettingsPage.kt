@@ -36,6 +36,7 @@ import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
+import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.restart
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
@@ -235,9 +236,9 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 .padding(top = innerPadding.calculateTopPadding())
                 .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                 .verticalScrollEffect(scrollBehavior),
-            contentPadding = PaddingValues(horizontal = 12.dp)
+            contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
         ) {
-            item("language") {
+            item {
                 SettingsCard(title = stringResourceBy("settings_language")) {
                     OverlayDropdownPreference(
                         title = stringResourceBy("settings_language"),
@@ -261,7 +262,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 }
             }
 
-            item("theme") {
+            item {
                 SettingsCard(title = stringResourceBy("settings_theme")) {
                     OverlayDropdownPreference(
                         title = stringResourceBy("settings_theme"),
@@ -315,6 +316,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
 
                     SwitchPreference(
                         title = stringResourceFromModule(R.string.modern_ui_title),
+                        summary = stringResourceFromModule(R.string.modern_ui_summary),
                         checked = prefs.modernUi,
                         onCheckedChange = {
                             prefs.modernUi = it
@@ -324,7 +326,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 }
             }
 
-            item("module") {
+            item {
                 SettingsCard(title = stringResourceBy("settings_module")) {
                     SwitchPreference(
                         title = stringResourceBy("settings_detail_log"),
@@ -384,7 +386,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 }
             }
 
-            item("system") {
+            item {
                 SettingsCard(title = stringResourceBy("system")) {
                     SwitchPreference(
                         title = stringResourceBy("settings_app_data_isolation"),
@@ -414,7 +416,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 }
             }
 
-            item("backup_and_restore") {
+            item {
                 SettingsCard(title = stringResourceBy("home_backup_and_restore")) {
                     ArrowPreference(
                         title = stringResourceBy("home_backup_config"),
@@ -428,9 +430,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 }
             }
 
-            item("bottom_padding") {
-                Spacer(modifier = Modifier.height(outerPadding.calculateBottomPadding()))
-            }
+            item { Spacer(modifier = Modifier.height(4.dp)) }
         }
     }
 }

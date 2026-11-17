@@ -18,6 +18,10 @@ object ServiceClient {
         }!!.get<Any>(null)
     }
 
+    fun clearLogs() {
+        DexMethods.ServiceClient_clearLogs.call<Unit>(INSTANCE)
+    }
+
     fun getInstalledPackages(): List<PackageInfo>? {
         val method = DexMethods.ServiceClient_getInstalledPackages
         val result = method.call<Any>(INSTANCE)
@@ -38,15 +42,11 @@ object ServiceClient {
         return DexMethods.ServiceClient_isNativeHookSupported.call(INSTANCE)
     }
 
-    fun clearLogs() {
-        DexMethods.ServiceClient_clearLogs.call<Unit>(INSTANCE)
+    fun stopService(cleanEnv: Boolean) {
+        DexMethods.ServiceClient_stopService.call<Unit>(INSTANCE, cleanEnv)
     }
 
     fun syncConfig(json: String) {
         DexMethods.ServiceClient_syncConfig.call<Unit>(INSTANCE, json)
-    }
-
-    fun stopService(cleanEnv: Boolean) {
-        DexMethods.ServiceClient_stopService.call<Unit>(INSTANCE, cleanEnv)
     }
 }

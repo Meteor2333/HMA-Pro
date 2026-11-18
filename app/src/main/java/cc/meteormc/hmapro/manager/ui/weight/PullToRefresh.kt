@@ -40,11 +40,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -146,6 +148,7 @@ fun PullToRefresh(
     content: @Composable () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val hapticFeedback = LocalHapticFeedback.current
     val overScrollState = LocalOverScrollState.current
     val currentOnRefresh by rememberUpdatedState(onRefresh)
     val currentIsRefreshing by rememberUpdatedState(isRefreshing)
@@ -170,7 +173,7 @@ fun PullToRefresh(
             // Independent job: the Refreshing -> RefreshComplete re-key would cancel a direct
             // suspend call mid completion animation.
             coroutineScope.launch {
-                pullToRefreshState.finishRefreshing(isRefreshingNow)
+                pullToRefreshState.finishRefreshing(isRefreshingNow, hapticFeedback)
             }
         } else if (isRefreshing && pullToRefreshState.refreshState == RefreshState.Idle) {
             // Rising edge while idle: show the indicator programmatically.
@@ -379,6 +382,8 @@ class PullToRefreshState(
     internal var isGestureActive = false
     internal var isRebounding by mutableStateOf(false)
     private var isProcessingRelease = false
+    private val checkmarkProgressState = mutableFloatStateOf(0f)
+    internal val checkmarkProgress: Float get() = checkmarkProgressState.floatValue
     private val refreshCompleteAnimProgressState = mutableFloatStateOf(1f)
     internal val refreshCompleteAnimProgress: Float get() = refreshCompleteAnimProgressState.floatValue
 
@@ -484,7 +489,10 @@ class PullToRefreshState(
      * Called when the hoisted `isRefreshing` state becomes false.
      * Triggers the completion animation and resets the state.
      */
-    internal suspend fun finishRefreshing(isRefreshingNow: () -> Boolean) {
+    internal suspend fun finishRefreshing(
+        isRefreshingNow: () -> Boolean,
+        hapticFeedback: HapticFeedback
+    ) {
         // Re-check at run time: a re-raised level keeps the spinner; the next falling edge retries.
         if (isRefreshing && !isRefreshingNow()) {
             // Stop a running programmatic expansion; the completion animation picks dragOffset
@@ -493,7 +501,7 @@ class PullToRefreshState(
             // Cleared before the first suspension so queued duplicates no-op on the guard above.
             isRefreshing = false
             internalRefreshState = RefreshState.RefreshComplete
-            startManualRefreshCompleteAnimation()
+            startManualRefreshCompleteAnimation(hapticFeedback)
         }
     }
 
@@ -524,7 +532,7 @@ class PullToRefreshState(
         }
     }
 
-    private suspend fun startManualRefreshCompleteAnimation() {
+    private suspend fun startManualRefreshCompleteAnimation(hapticFeedback: HapticFeedback) {
         // Height-continuous handoff when completing mid-expansion; 0 once settled at the
         // threshold. Must be the exact inverse of the drive formula below so the first frame
         // re-derives the dragOffset the cancelled spring left behind.
@@ -534,10 +542,24 @@ class PullToRefreshState(
             1f
         }
         refreshCompleteAnimProgressState.floatValue = initialProgress
+        checkmarkProgressState.floatValue = 0f
+
+        Animatable(0f).animateTo(
+            targetValue = 1f,
+            animationSpec = tween(300),
+        ) {
+            checkmarkProgressState.floatValue = value
+        }
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
+
         val animatedValue = Animatable(initialProgress)
         animatedValue.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0f, 0f, 0f, 0.37f)),
+            animationSpec = tween(
+                durationMillis = 200,
+                delayMillis = 300,
+                easing = CubicBezierEasing(0f, 0f, 0f, 0.37f)
+            ),
         ) {
             refreshCompleteAnimProgressState.floatValue = this.value
             // Drive dragOffset so indicatorHeight tracks the continuous else formula
@@ -719,6 +741,10 @@ private fun RefreshHeader(
     LaunchedEffect(pullToRefreshState.refreshState) {
         if (pullToRefreshState.refreshState == RefreshState.ThresholdReached) {
             hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+        }
+
+        if (pullToRefreshState.refreshState == RefreshState.RefreshComplete) {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         }
     }
 
@@ -909,6 +935,7 @@ private fun RefreshIndicator(
                         ringStrokeWidthPx,
                         color,
                         pullToRefreshState.refreshCompleteAnimProgress,
+                        pullToRefreshState.checkmarkProgress,
                     )
                 }
             }
@@ -1018,17 +1045,47 @@ private fun DrawScope.drawRefreshCompleteIndicator(
     radius: Float,
     strokeWidth: Float,
     color: Color,
-    progress: Float,
+    animProgress: Float,
+    checkmarkProgress: Float,
 ) {
-    val animatedRadius = radius * (1f - progress).coerceAtLeast(0.9f)
-    val alphaColor = color.copy(alpha = (1f - progress - 0.35f).coerceAtLeast(0f))
-    val y = center.y - radius - strokeWidth + animatedRadius
+    val animatedRadius = radius * (1f - animProgress).coerceAtLeast(0.9f)
+    val alphaColor = color.copy(alpha = (1f - animProgress).coerceAtLeast(0f))
     drawCircle(
         color = alphaColor,
         radius = animatedRadius,
-        center = Offset(center.x, y),
+        center = center,
         style = Stroke(strokeWidth, cap = StrokeCap.Round),
     )
+    if (animProgress < 1f && checkmarkProgress > 0f) {
+        val start = Offset(center.x - radius * 0.5f, center.y)
+        val middle = Offset(center.x - radius * 0.12f, center.y + radius * 0.34f)
+        val end = Offset(center.x + radius * 0.52f, center.y - radius * 0.38f)
+
+        val firstLength = (middle - start).getDistance()
+        val secondLength = (end - middle).getDistance()
+        val drawnLength = (firstLength + secondLength) * checkmarkProgress
+        if (drawnLength > 0f) {
+            val firstProgress = (drawnLength / firstLength).coerceIn(0f, 1f)
+            drawLine(
+                color = alphaColor,
+                start = start,
+                end = lerp(start, middle, firstProgress),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+
+            val secondProgress = ((drawnLength - firstLength) / secondLength).coerceIn(0f, 1f)
+            if (secondProgress > 0f) {
+                drawLine(
+                    color = alphaColor,
+                    start = middle,
+                    end = lerp(middle, end, secondProgress),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+            }
+        }
+    }
 }
 
 private object SpringMath {

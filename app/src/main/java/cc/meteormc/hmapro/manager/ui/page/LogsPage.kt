@@ -91,7 +91,7 @@ fun LogsPage(outerPadding: PaddingValues) {
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     var logs by remember { mutableStateOf(LogCache.parsed) }
     suspend fun updateLogs() {
-        delay(1000.milliseconds)
+        delay(350.milliseconds)
         val raw = withContext(Dispatchers.IO) {
             ServiceClient.getLogs().orEmpty()
         }
@@ -103,7 +103,6 @@ fun LogsPage(outerPadding: PaddingValues) {
     }
 
     LaunchedEffect(Unit) {
-        delay(500.milliseconds)
         updateLogs()
         listState.scrollToItem(0)
     }

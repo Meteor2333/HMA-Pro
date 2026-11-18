@@ -9,7 +9,6 @@ import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.useBlur
-import top.yukonga.miuix.kmp.basic.BlurTopAppBar
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.BlurDefaults
@@ -26,7 +25,7 @@ fun PageTopAppBar(
     if (useBlur()) {
         BlurTopAppBar(
             title = title,
-            largeTitleBlurRadius = BlurDefaults.BlurRadius.dp,
+            blurRadius = BlurDefaults.BlurRadius.dp,
             modifier = Modifier.padding(horizontalPadding),
             scrollBehavior = scrollBehavior,
             actions = actions,

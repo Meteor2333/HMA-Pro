@@ -37,10 +37,10 @@
     <string name="full_backup_summary">Allow backup and restore of all module settings</string>
 
     <!-- Pull To Refresh -->
-    <string name="pull_to_refresh">Pull down to refresh</string>
-    <string name="release_to_refresh">Release to refresh</string>
+    <string name="pulling">Pull down to refresh</string>
+    <string name="threshold_reached">Release to refresh</string>
     <string name="refreshing">Refreshing...</string>
-    <string name="refreshed">Refreshed successfully</string>
+    <string name="refresh_complete">Refreshed successfully</string>
 
     <!-- Misc -->
     <string name="reboot_tip"> (Try restarting your device)</string>

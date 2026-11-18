@@ -235,7 +235,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
                 .padding(outerPadding.only(PaddingValuesSides.Horizontal))
-                .verticalScrollEffect(scrollBehavior),
+                .verticalScrollEffect(scrollBehavior = scrollBehavior),
             contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
         ) {
             item {

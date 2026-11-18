@@ -45,10 +45,16 @@ fun Modifier.then(block: Modifier.() -> Modifier): Modifier {
     return this.then(Modifier.block())
 }
 
-fun Modifier.verticalScrollEffect(scrollBehavior: ScrollBehavior? = null): Modifier {
+fun Modifier.verticalScrollEffect(
+    enableOverScroll: Boolean = true,
+    scrollBehavior: ScrollBehavior? = null
+): Modifier {
     return this
         .scrollEndHaptic()
-        .overScrollVertical()
+        .then {
+            if (!enableOverScroll) this
+            else overScrollVertical()
+        }
         .then {
             if (scrollBehavior == null) this
             else nestedScroll(scrollBehavior.nestedScrollConnection)

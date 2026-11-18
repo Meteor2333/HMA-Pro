@@ -52,6 +52,7 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.weight.CancelSearchButton
 import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
+import cc.meteormc.hmapro.manager.ui.weight.PullToRefresh
 import cc.meteormc.hmapro.manager.util.LogParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -65,11 +66,9 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Clear
 import top.yukonga.miuix.kmp.icon.extended.Filter
@@ -89,16 +88,18 @@ private object LogCache {
 fun LogsPage(outerPadding: PaddingValues) {
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
-    val refreshState = rememberPullToRefreshState()
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     var logs by remember { mutableStateOf(LogCache.parsed) }
-    suspend fun updateLogs() = withContext(Dispatchers.IO) {
-        val raw = ServiceClient.getLogs().orEmpty()
-        logs = LogParser.parse(raw)
-        isRefreshing = false
+    suspend fun updateLogs() {
+        delay(1000.milliseconds)
+        val raw = withContext(Dispatchers.IO) {
+            ServiceClient.getLogs().orEmpty()
+        }
 
         LogCache.raw = raw
-        LogCache.parsed = logs
+        LogCache.parsed = LogParser.parse(raw)
+        logs = LogCache.parsed
+        isRefreshing = false
     }
 
     LaunchedEffect(Unit) {
@@ -236,20 +237,16 @@ fun LogsPage(outerPadding: PaddingValues) {
                 isRefreshing = true
                 scope.launch { updateLogs() }
             },
-            modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
-            pullToRefreshState = refreshState,
-            refreshTexts = listOf(
-                stringResourceFromModule(R.string.pull_to_refresh),
-                stringResourceFromModule(R.string.release_to_refresh),
-                stringResourceFromModule(R.string.refreshing),
-                stringResourceFromModule(R.string.refreshed)
-            )
+            modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(outerPadding.only(PaddingValuesSides.Horizontal))
-                    .verticalScrollEffect(scrollBehavior),
+                    .verticalScrollEffect(
+                        enableOverScroll = false,
+                        scrollBehavior = scrollBehavior
+                    ),
                 state = listState,
                 contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
             ) {

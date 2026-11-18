@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
 import android.provider.Settings
+import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -78,6 +79,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.attributes.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         setContent {
             val isSystemInDark = isSystemInDarkTheme()
             DisposableEffect(preferences.colorMode, isSystemInDark) {
@@ -165,9 +167,7 @@ private fun App(preferences: PreferencesState) {
                 backStack = navigator.backStack,
                 onBack = { navigator.pop() }
             ) {
-                entry<Route.Main>(
-                    swipeDismiss = swipeDismiss
-                ) {
+                entry<Route.Main> {
                     MainScreen()
                 }
 

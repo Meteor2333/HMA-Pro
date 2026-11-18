@@ -368,13 +368,11 @@ private fun UpdateDialog() {
                         val manager = context.getSystemService<DownloadManager>()
                         val taskId = manager?.enqueue(request) ?: -1
                         if (taskId < 0L) {
-                            //todo
-                            Toast.makeText(context, "Failed to start download", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, R.string.download_start_failed, Toast.LENGTH_SHORT).show()
                             return@TextButton
                         }
 
-                        //todo
-                        Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, R.string.download_started, Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColorsPrimary()

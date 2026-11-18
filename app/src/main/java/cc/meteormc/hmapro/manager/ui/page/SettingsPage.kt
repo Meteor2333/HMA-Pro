@@ -155,7 +155,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
             val newValue = !voldAppDataIsolation
             if (SystemProperties.set(VOLD_APP_DATA_ISOLATION_PROPERTY, newValue.toString())) {
                 voldAppDataIsolation = newValue
-                showAppDataIsolationConfirmDialog = false
+                showVoldAppDataIsolationConfirmDialog = false
             } else {
                 Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
             }

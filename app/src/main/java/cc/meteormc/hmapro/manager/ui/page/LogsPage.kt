@@ -109,7 +109,7 @@ fun LogsPage(outerPadding: PaddingValues) {
 
     val context = LocalContext.current
     val prefs = LocalPreferencesState.current
-    var query by remember { mutableStateOf("") }
+    var query by rememberSaveable { mutableStateOf("") }
     val dropdownItems = remember(prefs.logFilter) {
         val filter = prefs.logFilter
         listOf(

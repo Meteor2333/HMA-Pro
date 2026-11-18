@@ -47,5 +47,7 @@
     <string name="log_copied">Copied to clipboard</string>
     <string name="log_cleared">Logs cleared!</string>
     <string name="download">Download</string>
+    <string name="download_started">Download started</string>
+    <string name="download_start_failed">Failed to start download</string>
     <string name="confirm_action">Are you sure you want to proceed with this action?</string>
 </resources>

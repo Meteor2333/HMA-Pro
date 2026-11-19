@@ -65,4 +65,12 @@ object ConfigManager {
             config.templates = value
             saveConfig()
         }
+
+    fun isScopeEnabled(packageName: String): Boolean {
+        return config.scopes.contains(packageName)
+    }
+
+    fun hasTemplate(name: String): Boolean {
+        return config.templates.contains(name)
+    }
 }

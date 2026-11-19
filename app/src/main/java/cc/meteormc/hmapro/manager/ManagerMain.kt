@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context.MODE_PRIVATE
 import android.content.pm.ApplicationInfo
 import cc.meteormc.hmapro.DexMembers
+import cc.meteormc.hmapro.HmaProModule
 import cc.meteormc.hmapro.manager.hooker.ActivityHooker
 import cc.meteormc.hmapro.manager.hooker.BackupHooker
 import cc.meteormc.hmapro.manager.hooker.ServiceHooker
@@ -16,6 +17,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import java.io.File
 
 object ManagerMain {
+    @SuppressLint("SdCardPath")
+    const val CACHE_DIR = "/data/data/${HmaProModule.HMA_PACKAGE}/cache"
     const val MAIN_ACTIVITY = "icu.nullptr.hidemyapplist.ui.activity.MainActivity"
 
     lateinit var preferences: PreferencesState
@@ -25,7 +28,7 @@ object ManagerMain {
         @SuppressLint("SdCardPath")
         DexMembers.init(
             appInfo.sourceDir,
-            File("/data/data/${appInfo.packageName}/files/hmapro_cache.dat")
+            File(CACHE_DIR, "hmapro_cache.dat")
         )
         val context = HookerContext(classLoader)
         ActivityHooker.installHook(context)

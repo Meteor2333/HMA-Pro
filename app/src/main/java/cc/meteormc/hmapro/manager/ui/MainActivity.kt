@@ -32,12 +32,12 @@ import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.preference.PreferencesState
 import cc.meteormc.hmapro.manager.ui.screen.AboutScreen
-import cc.meteormc.hmapro.manager.ui.screen.AppListScreen
-import cc.meteormc.hmapro.manager.ui.screen.AppSettingsScreen
 import cc.meteormc.hmapro.manager.ui.screen.DevelopersScreen
 import cc.meteormc.hmapro.manager.ui.screen.MainScreen
 import cc.meteormc.hmapro.manager.ui.screen.OpenSourceLicensesScreen
 import cc.meteormc.hmapro.manager.ui.screen.PresetOverviewScreen
+import cc.meteormc.hmapro.manager.ui.screen.ScopeListScreen
+import cc.meteormc.hmapro.manager.ui.screen.ScopeSettingsScreen
 import cc.meteormc.hmapro.manager.ui.screen.TemplateListScreen
 import cc.meteormc.hmapro.manager.ui.screen.TemplateSettingsScreen
 import cc.meteormc.hmapro.manager.ui.util.ContainerTransformState
@@ -190,17 +190,17 @@ private fun App(preferences: PreferencesState) {
                     OpenSourceLicensesScreen()
                 }
 
-                entry<Route.AppList>(
+                entry<Route.ScopeList>(
                     transition = containerTransform(containerTransformState),
                     swipeDismiss = swipeDismiss
                 ) {
-                    AppListScreen()
+                    ScopeListScreen()
                 }
 
-                entry<Route.AppSettings>(
+                entry<Route.ScopeSettings>(
                     swipeDismiss = swipeDismiss
                 ) {
-                    AppSettingsScreen()
+                    ScopeSettingsScreen(it.title, it.packageName)
                 }
 
                 entry<Route.TemplateList>(

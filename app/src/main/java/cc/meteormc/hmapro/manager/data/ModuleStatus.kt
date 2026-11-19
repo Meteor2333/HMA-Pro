@@ -26,7 +26,7 @@ sealed class ModuleStatus {
             val serviceVersion = ServiceClient.getServiceVersion()
             return when {
                 !isHooked -> Disabled
-                serviceVersion == 0 -> ServiceNotActivated
+                serviceVersion == 0 -> ServiceNotRunning
                 serviceVersion < expectedServiceVersion -> OutOfDate
                 else -> Running(serviceVersion)
             }
@@ -37,7 +37,7 @@ sealed class ModuleStatus {
 
     object OutOfDate : ModuleStatus()
 
-    object ServiceNotActivated : ModuleStatus()
+    object ServiceNotRunning : ModuleStatus()
 
     class Running(val serviceVersion: Int) : ModuleStatus()
 }

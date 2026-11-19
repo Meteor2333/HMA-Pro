@@ -39,7 +39,7 @@ fun TemplateListScreen() {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navigator.push(Route.TemplateSettings)
+                    navigator.push(Route.TemplateSettings(""))
                 }
             ) {
                 Icon(

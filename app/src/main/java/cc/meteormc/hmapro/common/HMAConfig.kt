@@ -1,5 +1,7 @@
 package cc.meteormc.hmapro.common
 
+import cc.meteormc.hmapro.HmaProModule
+import cc.meteormc.xposedkit.allocate
 import cc.meteormc.xposedkit.get
 import cc.meteormc.xposedkit.put
 import cc.meteormc.xposedkit.reflect
@@ -30,12 +32,18 @@ class HMAConfig(internal val config: Any) {
     class ScopeConfig(internal val config: Any) {
         private val delegate = FieldAccessor(config)
 
-        fun init() {
-            aggressiveFilter = false
-            useWhitelist = false
-            excludeSystemApps = true
-            applyTemplates = mutableSetOf()
-            extraAppList = mutableSetOf()
+        companion object {
+            fun new(): ScopeConfig {
+                return HmaProModule.classLoader.reflect($$"icu.nullptr.hidemyapplist.common.JsonConfig$AppConfig") {
+                    ScopeConfig(type.allocate())
+                }!!.apply {
+                    aggressiveFilter = false
+                    useWhitelist = false
+                    excludeSystemApps = true
+                    applyTemplates = mutableSetOf()
+                    extraAppList = mutableSetOf()
+                }
+            }
         }
 
         var aggressiveFilter: Boolean
@@ -50,11 +58,11 @@ class HMAConfig(internal val config: Any) {
             get() = delegate["excludeSystemApps"]
             set(value) { delegate["excludeSystemApps"] = value }
 
-        var applyTemplates: MutableSet<String>
+        var applyTemplates: Set<String>
             get() = delegate["applyTemplates"]
             set(value) { delegate["applyTemplates"] = value }
 
-        var extraAppList: MutableSet<String>
+        var extraAppList: Set<String>
             get() = delegate["extraAppList"]
             set(value) { delegate["extraAppList"] = value }
     }
@@ -62,9 +70,15 @@ class HMAConfig(internal val config: Any) {
     class TemplateConfig(internal val config: Any) {
         private val delegate = FieldAccessor(config)
 
-        fun init() {
-            isWhitelist = false
-            appList = emptySet()
+        companion object {
+            fun new(): TemplateConfig {
+                return HmaProModule.classLoader.reflect($$"icu.nullptr.hidemyapplist.common.JsonConfig$Template") {
+                    TemplateConfig(type.allocate())
+                }!!.apply {
+                    isWhitelist = false
+                    appList = emptySet()
+                }
+            }
         }
 
         var isWhitelist: Boolean

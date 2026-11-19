@@ -46,6 +46,7 @@
     <string name="reboot_tip"> (Try restarting your device)</string>
     <string name="log_copied">Copied to clipboard</string>
     <string name="log_cleared">Logs cleared!</string>
+    <string name="sort_method">Sort method</string>
     <string name="download">Download</string>
     <string name="download_started">Download started</string>
     <string name="download_start_failed">Failed to start download</string>

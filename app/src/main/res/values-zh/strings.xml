@@ -34,6 +34,7 @@
     <string name="threshold_reached">松开刷新</string>
     <string name="service_running">系统服务运行中</string>
     <string name="service_version">系统服务版本</string>
+    <string name="sort_method">排序方式</string>
     <string name="theme_dark">深色</string>
     <string name="theme_light">浅色</string>
     <string name="title_description">简介</string>

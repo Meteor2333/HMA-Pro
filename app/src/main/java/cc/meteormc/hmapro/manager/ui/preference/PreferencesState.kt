@@ -24,6 +24,9 @@ class PreferencesState(val storage: SharedPreferences) {
     var hideIcon by boolPreferenceOf("hide_icon", false)
     var disableUpdate by boolPreferenceOf("disable_update", false)
     var logFilter by intPreferenceOf("hmapro_log_filter", 0)
+    var scopeSort by enumPreferenceOf("hmapro_scope_sort", AppSortMethod.BY_LABEL)
+    var scopeReverseOrder by boolPreferenceOf("app_filter_reverse_order", false)
+    var showSystemApp by boolPreferenceOf("app_filter_show_system", false)
     var fixUpdateChecker by boolPreferenceOf("hmapro_fix_update_checker", false)
     var fullBackup by boolPreferenceOf("hmapro_full_backup", false)
 

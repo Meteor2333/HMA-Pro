@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.data.LogItem
+import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.service.ServiceClient
+import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.copy
@@ -87,7 +88,6 @@ private object LogCache {
 @Composable
 fun LogsPage(outerPadding: PaddingValues) {
     val scope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     var logs by remember { mutableStateOf(LogCache.parsed) }
     suspend fun updateLogs() {
@@ -104,10 +104,10 @@ fun LogsPage(outerPadding: PaddingValues) {
 
     LaunchedEffect(Unit) {
         updateLogs()
-        listState.scrollToItem(0)
     }
 
     val context = LocalContext.current
+    val moduleStatus = LocalModuleStatus.current
     val prefs = LocalPreferencesState.current
     var query by rememberSaveable { mutableStateOf("") }
     val dropdownItems = remember(prefs.logFilter) {
@@ -230,6 +230,20 @@ fun LogsPage(outerPadding: PaddingValues) {
             }
         }
     ) { innerPadding ->
+        if (moduleStatus == ModuleStatus.ServiceNotRunning) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResourceBy("home_xposed_service_off"),
+                    color = MiuixTheme.colorScheme.onSecondary,
+                    fontSize = 18.sp
+                )
+            }
+            return@Scaffold
+        }
+
         PullToRefresh(
             isRefreshing = isRefreshing,
             onRefresh = {
@@ -246,7 +260,6 @@ fun LogsPage(outerPadding: PaddingValues) {
                         enableOverScroll = false,
                         scrollBehavior = scrollBehavior
                     ),
-                state = listState,
                 contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
             ) {
                 val items = logs.toMutableList()
@@ -396,4 +409,9 @@ private fun LogItemComponent(item: LogItem) {
     }
 
     Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+private fun ServiceUnavailable() {
+
 }

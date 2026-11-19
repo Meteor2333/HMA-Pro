@@ -160,7 +160,7 @@ private fun ModuleStatusCard() {
             icon = MiuixIcons.Medium.Update
             background = SolidColor(warningContainer)
         }
-        ModuleStatus.ServiceNotActivated -> {
+        ModuleStatus.ServiceNotRunning -> {
             title = stringResourceFromModule(R.string.module_activated)
             summary = stringResourceBy("home_xposed_service_off") + stringResourceFromModule(R.string.reboot_tip)
             icon = MiuixIcons.Medium.Refresh
@@ -357,7 +357,7 @@ private fun ManageCard() {
 
     val colors = CardDefaults.defaultColors()
     val cornerRadius = CardDefaults.CornerRadius
-    val appManageBounds = remember { mutableStateOf<Rect?>(null) }
+    val scopeManageBounds = remember { mutableStateOf<Rect?>(null) }
     val templateManageBounds = remember { mutableStateOf<Rect?>(null) }
     val presetOverviewBounds = remember { mutableStateOf<Rect?>(null) }
     Card(
@@ -367,18 +367,18 @@ private fun ManageCard() {
         ArrowPreference(
             title = stringResourceBy("title_app_manage"),
             modifier = Modifier.onGloballyPositioned {
-                appManageBounds.value = it.boundsInRoot()
+                scopeManageBounds.value = it.boundsInRoot()
             },
             onClick = {
-                transformState.rect = appManageBounds
+                transformState.rect = scopeManageBounds
                 transformState.color = mutableStateOf(colors.color)
                 transformState.cornerRadius = mutableStateOf(cornerRadius)
-                navigator.push(Route.AppList)
+                navigator.push(Route.ScopeList)
             },
             startAction = {
                 Icon(
                     imageVector = MiuixIcons.GridView,
-                    contentDescription = "App Manage"
+                    contentDescription = "Scope Manage"
                 )
             }
         )

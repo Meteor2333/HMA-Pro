@@ -1,6 +1,6 @@
 package cc.meteormc.hmapro.manager.ui.screen
 
-import android.widget.ImageView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
@@ -60,6 +59,7 @@ import cc.meteormc.hmapro.manager.ui.util.useBlur
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.weight.BackButton
 import cc.meteormc.hmapro.manager.ui.weight.aurora.AuroraBackground
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -158,14 +158,10 @@ private fun AboutContent(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AndroidView(
-                modifier = Modifier.size(128.dp),
-                factory = { context ->
-                    ImageView(context).apply {
-                        setImageDrawable(icon)
-                        scaleType = ImageView.ScaleType.FIT_CENTER
-                    }
-                }
+            Image(
+                painter = rememberDrawablePainter(icon),
+                contentDescription = null,
+                modifier = Modifier.size(128.dp)
             )
 
             Spacer(modifier = Modifier.height((18 * ratio).dp))

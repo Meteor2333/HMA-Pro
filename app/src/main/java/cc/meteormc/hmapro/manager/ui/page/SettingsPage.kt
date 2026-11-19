@@ -74,6 +74,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
     val prefs = LocalPreferencesState.current
     val uriHandler = LocalUriHandler.current
 
+    // todo: 添加remember
     val languageOptions = DexFields.LangList_LOCALES.get<Array<String>>(null).map {
         val name = if (it == "SYSTEM") {
             stringResourceBy("follow_system")

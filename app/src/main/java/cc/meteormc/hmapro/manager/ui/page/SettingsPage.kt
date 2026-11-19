@@ -44,6 +44,7 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
 import cc.meteormc.hmapro.manager.util.ConfigBackuper
+import cc.meteormc.hmapro.manager.util.Shell
 import cc.meteormc.hmapro.manager.util.SystemProperties
 import cc.meteormc.xposedkit.get
 import kotlinx.coroutines.launch
@@ -130,6 +131,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
         mutableStateOf(SystemProperties.getBoolean(VOLD_APP_DATA_ISOLATION_PROPERTY, false))
     }
 
+    val scope = rememberCoroutineScope()
     val deniedMessage = stringResourceBy("settings_permission_denied")
     var showAppDataIsolationConfirmDialog by remember { mutableStateOf(false) }
     var showVoldAppDataIsolationConfirmDialog by remember { mutableStateOf(false) }
@@ -140,11 +142,14 @@ fun SettingsPage(outerPadding: PaddingValues) {
         onCancel = { showAppDataIsolationConfirmDialog = false },
         onConfirm = {
             val newValue = !appDataIsolation
-            if (SystemProperties.set(APP_DATA_ISOLATION_PROPERTY, newValue.toString())) {
-                appDataIsolation = newValue
-                showAppDataIsolationConfirmDialog = false
-            } else {
-                Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+            scope.launch {
+                val isSuccess = SystemProperties.set(APP_DATA_ISOLATION_PROPERTY, if (newValue) "1" else "0")
+                if (isSuccess) {
+                    appDataIsolation = newValue
+                    showAppDataIsolationConfirmDialog = false
+                } else {
+                    Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     )
@@ -153,11 +158,14 @@ fun SettingsPage(outerPadding: PaddingValues) {
         onCancel = { showVoldAppDataIsolationConfirmDialog = false },
         onConfirm = {
             val newValue = !voldAppDataIsolation
-            if (SystemProperties.set(VOLD_APP_DATA_ISOLATION_PROPERTY, newValue.toString())) {
-                voldAppDataIsolation = newValue
-                showVoldAppDataIsolationConfirmDialog = false
-            } else {
-                Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+            scope.launch {
+                val isSuccess = SystemProperties.set(VOLD_APP_DATA_ISOLATION_PROPERTY, if (newValue) "1" else "0")
+                if (isSuccess) {
+                    voldAppDataIsolation = newValue
+                    showVoldAppDataIsolationConfirmDialog = false
+                } else {
+                    Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     )
@@ -170,7 +178,6 @@ fun SettingsPage(outerPadding: PaddingValues) {
         onDismiss = { showCleanEnvConfirmDialog = false }
     )
 
-    val scope = rememberCoroutineScope()
     val exportSuccessfulMessage = stringResourceBy("home_exported")
     val exportFailedMessage = stringResourceBy("home_export_failed")
     val importSuccessfulMessage = stringResourceBy("home_import_successful")
@@ -254,8 +261,6 @@ fun SettingsPage(outerPadding: PaddingValues) {
                         title = stringResourceBy("settings_translate"),
                         summary = stringResourceBy("settings_translate_summary", stringResourceBy("app_name")),
                         onClick = {
-                            // todo: 同时添加HMAPro的翻译链接
-
                             uriHandler.openUri("https://crowdin.com/project/hide-my-applist")
                         }
                     )
@@ -556,10 +561,17 @@ private fun CleanEnvConfirmDialog(
         summary = stringResourceBy("settings_is_clean_env_summary"),
         onCancel = onDismiss,
         onConfirm = {
-            // todo: 处理运行环境清理
             onDismiss()
-            Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show()
-            Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+            Shell.exec(
+                "rm -rf /data/misc/systemkeys/hide_my_applist* /data/misc/hide_my_applist* /data/system/hide_my_applist*",
+                root = true
+            ) {
+                if (it.isSuccess) {
+                    Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     )
 }

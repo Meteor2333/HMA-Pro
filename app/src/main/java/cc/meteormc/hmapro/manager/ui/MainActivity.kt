@@ -83,15 +83,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isSystemInDark = isSystemInDarkTheme()
             DisposableEffect(preferences.colorMode, isSystemInDark) {
+                val transparent = android.graphics.Color.TRANSPARENT
                 val isDark = when (preferences.colorMode) {
                     ColorSchemeMode.System, ColorSchemeMode.MonetSystem -> isSystemInDark
                     ColorSchemeMode.Light, ColorSchemeMode.MonetLight -> false
                     ColorSchemeMode.Dark, ColorSchemeMode.MonetDark -> true
                 }
                 val style = if (isDark) {
-                    SystemBarStyle.dark(0x0)
+                    SystemBarStyle.dark(transparent)
                 } else {
-                    SystemBarStyle.light(0x0, 0x0)
+                    SystemBarStyle.light(transparent, transparent)
                 }
 
                 enableEdgeToEdge(style, style)

@@ -3,6 +3,8 @@ package cc.meteormc.hmapro.manager.util
 import android.annotation.SuppressLint
 import cc.meteormc.xposedkit.call
 import cc.meteormc.xposedkit.reflect
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 object SystemProperties {
     @SuppressLint("PrivateApi")
@@ -48,14 +50,14 @@ object SystemProperties {
         }
     }
 
-    fun set(key: String, value: String) = runCatching {
-        // todo: 这个方法不能绕过selinux 即使已经在root下
-        CLASS.reflect {
-            method(
-                "set",
-                String::class.java,
-                String::class.java
-            )!!.call<Unit>(null, key, value)
+    suspend fun set(key: String, value: String): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            Shell.exec(
+                "setprop $key $value",
+                root = true
+            ) {
+                continuation.resume(it.isSuccess)
+            }
         }
-    }.isSuccess
+    }
 }

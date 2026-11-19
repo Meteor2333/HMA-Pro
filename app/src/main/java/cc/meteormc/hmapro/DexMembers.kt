@@ -334,6 +334,7 @@ private object DexKitCache : DexKitCacheBridge.Cache {
     fun load(file: File) {
         this.file = file
         if (!file.exists() || file.length() > 10 * 1024 * 1024) {
+            file.parentFile?.mkdirs()
             file.writeBytes(ByteArray(0))
             return
         }

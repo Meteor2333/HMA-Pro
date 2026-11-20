@@ -2,12 +2,12 @@
 accompanist = "0.37.3"
 agp = "9.5.1"
 composeActivity = "1.13.0"
-composeBom = "2026.09.00"
+composeBom = "2026.11.01"
 coreKtx = "1.19.1"
 dexkit = "2.3.0"
 kotlin = "2.4.21"
 libsu = "6.0.0"
-miuix = "0.9.5-5ff41ba9-SNAPSHOT"
+miuix = "0.9.5-beta02"
 xposedkit = "1.0.0"
 
 [plugins]

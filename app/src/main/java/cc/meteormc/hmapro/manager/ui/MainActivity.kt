@@ -40,14 +40,11 @@ import cc.meteormc.hmapro.manager.ui.screen.ScopeListScreen
 import cc.meteormc.hmapro.manager.ui.screen.ScopeSettingsScreen
 import cc.meteormc.hmapro.manager.ui.screen.TemplateListScreen
 import cc.meteormc.hmapro.manager.ui.screen.TemplateSettingsScreen
-import cc.meteormc.hmapro.manager.ui.util.ContainerTransformState
-import cc.meteormc.hmapro.manager.ui.util.LocalContainerTransformState
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleResources
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
-import cc.meteormc.hmapro.manager.ui.util.containerTransform
 import cc.meteormc.xposedkit.XposedKit
 import org.json.JSONObject
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
@@ -121,7 +118,6 @@ private fun App(preferences: PreferencesState) {
         mutableStateOf<ModuleStatus>(ModuleStatus.Disabled)
     }
 
-    val containerTransformState = remember { ContainerTransformState() }
     val navigator = rememberNavController<Route>(Route.Main)
 
     val themeController = remember(
@@ -145,7 +141,6 @@ private fun App(preferences: PreferencesState) {
 
     MiuixTheme(controller = themeController) {
         CompositionLocalProvider(
-            LocalContainerTransformState provides containerTransformState,
             LocalHMAVersion provides hmaVersion,
             LocalModuleResources provides moduleResource,
             LocalModuleStatus provides moduleStatus,
@@ -191,33 +186,26 @@ private fun App(preferences: PreferencesState) {
                 }
 
                 entry<Route.ScopeList>(
-                    transition = containerTransform(containerTransformState),
                     swipeDismiss = swipeDismiss
                 ) {
                     ScopeListScreen()
                 }
 
-                entry<Route.ScopeSettings>(
-                    swipeDismiss = swipeDismiss
-                ) {
+                entry<Route.ScopeSettings> {
                     ScopeSettingsScreen(it.title, it.packageName)
                 }
 
                 entry<Route.TemplateList>(
-                    transition = containerTransform(containerTransformState),
                     swipeDismiss = swipeDismiss
                 ) {
                     TemplateListScreen()
                 }
 
-                entry<Route.TemplateSettings>(
-                    swipeDismiss = swipeDismiss
-                ) {
+                entry<Route.TemplateSettings> {
                     TemplateSettingsScreen()
                 }
 
                 entry<Route.PresetOverview>(
-                    transition = containerTransform(containerTransformState),
                     swipeDismiss = swipeDismiss
                 ) {
                     PresetOverviewScreen()

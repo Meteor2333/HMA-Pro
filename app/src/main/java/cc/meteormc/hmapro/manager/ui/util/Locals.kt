@@ -8,10 +8,6 @@ import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.ui.preference.PreferencesState
 import top.yukonga.miuix.kmp.nav.core.NavController
 
-val LocalContainerTransformState = staticCompositionLocalOf<ContainerTransformState> {
-    error("ContainerTransformState not provided")
-}
-
 val LocalHMAVersion = staticCompositionLocalOf {
     HMAVersion(
         fullName = "Unknown",

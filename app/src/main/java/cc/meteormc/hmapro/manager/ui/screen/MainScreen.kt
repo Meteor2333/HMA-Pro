@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -77,8 +76,8 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.then
 import cc.meteormc.hmapro.manager.ui.util.useBlur
+import cc.meteormc.hmapro.manager.ui.weight.DialogButtonPair
 import cc.meteormc.hmapro.manager.util.UpdateChecker
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
@@ -86,7 +85,6 @@ import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurDefaults
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
@@ -342,50 +340,39 @@ private fun UpdateDialog() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Row {
-            TextButton(
-                text = stringResource(android.R.string.cancel),
-                onClick = { showUpdateDialog = false },
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.width(18.dp))
-
-            if (asset != null) {
-                TextButton(
-                    text = stringResourceFromModule(R.string.download),
-                    onClick = {
-                        showUpdateDialog = false
-                        val request = DownloadManager.Request(asset.downloadUrl.toUri())
-                        request.setTitle(asset.name)
-                        request.setNotificationVisibility(
-                            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                        )
-                        request.setDestinationInExternalPublicDir(
-                            Environment.DIRECTORY_DOWNLOADS,
-                            asset.name
-                        )
-                        val manager = context.getSystemService<DownloadManager>()
-                        val taskId = manager?.enqueue(request) ?: -1
-                        if (taskId < 0L) {
-                            Toast.makeText(context, R.string.download_start_failed, Toast.LENGTH_SHORT).show()
-                            return@TextButton
-                        }
-
-                        Toast.makeText(context, R.string.download_started, Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.textButtonColorsPrimary()
-                )
+        DialogButtonPair(
+            leftText = stringResource(android.R.string.cancel),
+            rightText = if (asset != null) {
+                stringResourceFromModule(R.string.download)
             } else {
-                TextButton(
-                    text = stringResourceFromModule(R.string.open_release_page),
-                    onClick = { uriHandler.openUri(updateInfo.releaseUrl) },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.textButtonColorsPrimary()
-                )
+                stringResourceFromModule(R.string.open_release_page)
+            },
+            onLeftClick = { showUpdateDialog = false },
+            onRightClick = {
+                if (asset != null) {
+                    showUpdateDialog = false
+                    val request = DownloadManager.Request(asset.downloadUrl.toUri())
+                    request.setTitle(asset.name)
+                    request.setNotificationVisibility(
+                        DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+                    )
+                    request.setDestinationInExternalPublicDir(
+                        Environment.DIRECTORY_DOWNLOADS,
+                        asset.name
+                    )
+                    val manager = context.getSystemService<DownloadManager>()
+                    val taskId = manager?.enqueue(request) ?: -1
+                    if (taskId < 0L) {
+                        Toast.makeText(context, R.string.download_start_failed, Toast.LENGTH_SHORT).show()
+                        return@DialogButtonPair
+                    }
+
+                    Toast.makeText(context, R.string.download_started, Toast.LENGTH_SHORT).show()
+                } else {
+                    uriHandler.openUri(updateInfo.releaseUrl)
+                }
             }
-        }
+        )
     }
 }
 

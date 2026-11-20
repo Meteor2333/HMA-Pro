@@ -43,6 +43,9 @@
     <string name="refresh_complete">Refreshed successfully</string>
 
     <!-- Misc -->
+    <string name="exit">Exit</string>
+    <string name="save">Save</string>
+    <string name="empty_content">Nothing here</string>
     <string name="reboot_tip"> (Try restarting your device)</string>
     <string name="log_copied">Copied to clipboard</string>
     <string name="log_cleared">Logs cleared!</string>
@@ -50,5 +53,6 @@
     <string name="download">Download</string>
     <string name="download_started">Download started</string>
     <string name="download_start_failed">Failed to start download</string>
+    <string name="unsaved_changes">Save current settings?</string>
     <string name="confirm_action">Are you sure you want to proceed with this action?</string>
 </resources>

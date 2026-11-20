@@ -44,14 +44,14 @@ import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
-import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.isDarkMode
-import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
-import cc.meteormc.hmapro.manager.ui.weight.CancelSearchButton
+import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
+import cc.meteormc.hmapro.manager.ui.weight.CancelButton
+import cc.meteormc.hmapro.manager.ui.weight.EmptyContent
 import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
 import cc.meteormc.hmapro.manager.ui.weight.PullToRefresh
 import cc.meteormc.hmapro.manager.util.LogParser
@@ -231,16 +231,9 @@ fun LogsPage(outerPadding: PaddingValues) {
         }
     ) { innerPadding ->
         if (moduleStatus == ModuleStatus.ServiceNotRunning) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResourceBy("home_xposed_service_off"),
-                    color = MiuixTheme.colorScheme.onSecondary,
-                    fontSize = 18.sp
-                )
-            }
+            EmptyContent(
+                text = stringResourceBy("home_xposed_service_off")
+            )
             return@Scaffold
         }
 
@@ -250,17 +243,18 @@ fun LogsPage(outerPadding: PaddingValues) {
                 isRefreshing = true
                 scope.launch { updateLogs() }
             },
-            modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+            contentPadding = innerPadding
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                     .verticalScrollEffect(
                         enableOverScroll = false,
                         scrollBehavior = scrollBehavior
                     ),
-                contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
+                contentPadding = outerPadding
+                    .withSafeHorizontal()
+                    .copy(top = innerPadding.calculateTopPadding())
             ) {
                 val items = logs.toMutableList()
                 if (query.isNotBlank()) {
@@ -308,7 +302,7 @@ private fun LogsSearchBar(onQuery: (String) -> Unit) {
         onExpandedChange = { expanded = it },
         expanded = expanded,
         outsideEndAction = {
-            CancelSearchButton {
+            CancelButton {
                 query = ""
                 expanded = false
                 onQuery("")

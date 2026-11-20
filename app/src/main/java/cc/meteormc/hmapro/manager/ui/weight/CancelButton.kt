@@ -10,7 +10,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun CancelSearchButton(
+fun CancelButton(
     onClick: () -> Unit
 ) {
     Text(

@@ -8,7 +8,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -17,6 +19,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.manager.ManagerMain
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -46,11 +49,15 @@ fun Modifier.then(block: Modifier.() -> Modifier): Modifier {
 }
 
 fun Modifier.verticalScrollEffect(
+    enableHaptic: Boolean = true,
     enableOverScroll: Boolean = true,
     scrollBehavior: ScrollBehavior? = null
 ): Modifier {
     return this
-        .scrollEndHaptic()
+        .then {
+            if (!enableHaptic) this
+            else scrollEndHaptic()
+        }
         .then {
             if (!enableOverScroll) this
             else overScrollVertical()
@@ -60,6 +67,8 @@ fun Modifier.verticalScrollEffect(
             else nestedScroll(scrollBehavior.nestedScrollConnection)
         }
 }
+
+fun <T> Collection<T>.toMutableStateSet() = mutableStateSetOf<T>().also { it.addAll(this) }
 
 enum class PaddingValuesSides {
     Start, End, Top, Bottom, Horizontal, Vertical
@@ -99,6 +108,11 @@ fun PaddingValues.copy(
 }
 
 @Composable
+fun PaddingValues.withSafeHorizontal(): PaddingValues {
+    return plus(PaddingValues(horizontal = 12.dp))
+}
+
+@Composable
 fun useBlur(): Boolean {
     val prefs = LocalPreferencesState.current
     val supported = remember { isRuntimeShaderSupported() }
@@ -112,4 +126,9 @@ fun isDarkMode(): Boolean {
         ColorSchemeMode.Dark, ColorSchemeMode.MonetDark -> true
         else -> isSystemInDarkTheme()
     }
+}
+
+@Composable
+fun rememberSnackbarHostState(): SnackbarHostState {
+    return remember { SnackbarHostState() }
 }

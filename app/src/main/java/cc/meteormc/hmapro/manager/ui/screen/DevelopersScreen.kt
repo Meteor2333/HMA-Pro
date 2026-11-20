@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import cc.meteormc.hmapro.manager.ui.util.painterResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
+import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
 import cc.meteormc.hmapro.manager.ui.weight.BackButton
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -94,9 +95,8 @@ fun DevelopersScreen() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 16.dp)
                 .verticalScrollEffect(),
-            contentPadding = paddingValues
+            contentPadding = paddingValues.withSafeHorizontal()
         ) {
             items(
                 items = developers,
@@ -114,10 +114,7 @@ private fun DeveloperCard(developer: Developer) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                horizontal = 12.dp,
-                vertical = 6.dp
-            ),
+            .padding(vertical = 6.dp),
         onClick = { uriHandler.openUri(developer.link) },
         showIndication = true
     ) {

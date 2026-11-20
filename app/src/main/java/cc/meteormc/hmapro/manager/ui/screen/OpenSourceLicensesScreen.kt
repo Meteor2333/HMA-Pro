@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
+import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
 import cc.meteormc.hmapro.manager.ui.weight.BackButton
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -108,9 +109,8 @@ fun OpenSourceLicensesScreen() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 16.dp)
                 .verticalScrollEffect(),
-            contentPadding = paddingValues
+            contentPadding = paddingValues.withSafeHorizontal()
         ) {
             items(
                 items = libraries,
@@ -128,10 +128,7 @@ private fun LibraryCard(library: Library) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                horizontal = 12.dp,
-                vertical = 6.dp
-            ),
+            .padding(vertical = 6.dp),
         onClick = { uriHandler.openUri(library.url) },
         showIndication = true
     ) {

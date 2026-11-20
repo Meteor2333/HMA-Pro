@@ -18,7 +18,7 @@ import java.io.File
 
 object ManagerMain {
     @SuppressLint("SdCardPath")
-    const val CACHE_DIR = "/data/data/${HmaProModule.HMA_PACKAGE}/cache"
+    const val CACHE_DIR = "/data/data/${HmaProModule.HMA_PACKAGE}/cache/hmapro"
     const val MAIN_ACTIVITY = "icu.nullptr.hidemyapplist.ui.activity.MainActivity"
 
     lateinit var preferences: PreferencesState
@@ -28,7 +28,7 @@ object ManagerMain {
         @SuppressLint("SdCardPath")
         DexMembers.init(
             appInfo.sourceDir,
-            File(CACHE_DIR, "hmapro_cache.dat")
+            File(CACHE_DIR, "dexkit_cache.dat")
         )
         val context = HookerContext(classLoader)
         ActivityHooker.installHook(context)

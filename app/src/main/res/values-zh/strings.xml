@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_description">增强你的隐藏应用列表模块</string>
-    <string name="download">下载</string>
-    <string name="download_started">已开始下载</string>
-    <string name="download_start_failed">准备开始下载时出错</string>
     <string name="color_spec_summary">Material3 色彩规范版本</string>
     <string name="color_spec_title">色彩规范</string>
     <string name="confirm_action">是否确定执行此操作？</string>
+    <string name="download">下载</string>
+    <string name="download_started">已开始下载</string>
+    <string name="download_start_failed">准备开始下载时出错</string>
+    <string name="empty_content">空空如也</string>
     <string name="enable_blur_title">启用模糊</string>
     <string name="enable_swipe_back_gesture_summary">从屏幕边缘滑动来返回上一页</string>
     <string name="enable_swipe_back_gesture_title">滑动返回手势</string>
+    <string name="exit">取消</string>
     <string name="fix_update_checker_summary">将版本检查通道改为 Github Releases 源</string>
     <string name="fix_update_checker_title">修复更新检查</string>
     <string name="force_mount">强制挂载</string>
@@ -32,12 +34,14 @@
     <string name="refresh_complete">刷新完成</string>
     <string name="refreshing">正在刷新...</string>
     <string name="threshold_reached">松开刷新</string>
+    <string name="save">保存</string>
     <string name="service_running">系统服务运行中</string>
     <string name="service_version">系统服务版本</string>
     <string name="sort_method">排序方式</string>
     <string name="theme_dark">深色</string>
     <string name="theme_light">浅色</string>
     <string name="title_description">简介</string>
+    <string name="unsaved_changes">是否保存当前配置</string>
     <string name="use_monet">使用 Monet 主题</string>
     <string name="view_source_code">查看源代码</string>
 </resources>

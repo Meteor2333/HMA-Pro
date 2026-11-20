@@ -20,22 +20,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,17 +41,15 @@ import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.nav.Route
-import cc.meteormc.hmapro.manager.ui.util.LocalContainerTransformState
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
-import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.isDarkMode
-import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
+import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
 import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -108,10 +102,10 @@ fun HomePage(outerPadding: PaddingValues) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = innerPadding.calculateTopPadding())
-                .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                 .verticalScrollEffect(scrollBehavior = scrollBehavior),
-            contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
+            contentPadding = outerPadding
+                .withSafeHorizontal()
+                .copy(top = innerPadding.calculateTopPadding())
         ) {
             item {
                 Spacer(modifier = Modifier.height(12.dp))
@@ -353,26 +347,15 @@ private fun InfoCard() {
 @Composable
 private fun ManageCard() {
     val navigator = LocalNavigator.current
-    val transformState = LocalContainerTransformState.current
-
     val colors = CardDefaults.defaultColors()
     val cornerRadius = CardDefaults.CornerRadius
-    val scopeManageBounds = remember { mutableStateOf<Rect?>(null) }
-    val templateManageBounds = remember { mutableStateOf<Rect?>(null) }
-    val presetOverviewBounds = remember { mutableStateOf<Rect?>(null) }
     Card(
         cornerRadius = cornerRadius,
         colors = colors
     ) {
         ArrowPreference(
             title = stringResourceBy("title_app_manage"),
-            modifier = Modifier.onGloballyPositioned {
-                scopeManageBounds.value = it.boundsInRoot()
-            },
             onClick = {
-                transformState.rect = scopeManageBounds
-                transformState.color = mutableStateOf(colors.color)
-                transformState.cornerRadius = mutableStateOf(cornerRadius)
                 navigator.push(Route.ScopeList)
             },
             startAction = {
@@ -384,13 +367,7 @@ private fun ManageCard() {
         )
         ArrowPreference(
             title = stringResourceBy("title_template_manage"),
-            modifier = Modifier.onGloballyPositioned {
-                templateManageBounds.value = it.boundsInRoot()
-            },
             onClick = {
-                transformState.rect = templateManageBounds
-                transformState.color = mutableStateOf(colors.color)
-                transformState.cornerRadius = mutableStateOf(cornerRadius)
                 navigator.push(Route.TemplateList)
             },
             startAction = {
@@ -402,13 +379,7 @@ private fun ManageCard() {
         )
         ArrowPreference(
             title = stringResourceFromModule(R.string.preset_overview),
-            modifier = Modifier.onGloballyPositioned {
-                presetOverviewBounds.value = it.boundsInRoot()
-            },
             onClick = {
-                transformState.rect = presetOverviewBounds
-                transformState.color = mutableStateOf(colors.color)
-                transformState.cornerRadius = mutableStateOf(cornerRadius)
                 navigator.push(Route.PresetOverview)
             },
             startAction = {

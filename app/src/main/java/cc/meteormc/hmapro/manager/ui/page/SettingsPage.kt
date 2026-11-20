@@ -10,12 +10,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,25 +32,25 @@ import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
-import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.copy
-import cc.meteormc.hmapro.manager.ui.util.only
+import cc.meteormc.hmapro.manager.ui.util.rememberSnackbarHostState
 import cc.meteormc.hmapro.manager.ui.util.restart
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
+import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
+import cc.meteormc.hmapro.manager.ui.weight.DialogButtonPair
 import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
 import cc.meteormc.hmapro.manager.util.ConfigBackuper
 import cc.meteormc.hmapro.manager.util.Shell
 import cc.meteormc.hmapro.manager.util.SystemProperties
 import cc.meteormc.xposedkit.get
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.SnackbarDuration
 import top.yukonga.miuix.kmp.material.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -74,18 +71,20 @@ fun SettingsPage(outerPadding: PaddingValues) {
     val prefs = LocalPreferencesState.current
     val uriHandler = LocalUriHandler.current
 
-    // todo: 添加remember
-    val languageOptions = DexFields.LangList_LOCALES.get<Array<String>>(null).map {
-        val name = if (it == "SYSTEM") {
-            stringResourceBy("follow_system")
-        } else {
-            val locale = Locale.forLanguageTag(it)
-            locale.getDisplayName(locale)
+    val followSystemMessage = stringResourceBy("follow_system")
+    val languageOptions = remember(followSystemMessage) {
+        DexFields.LangList_LOCALES.get<Array<String>>(null).map {
+            val name = if (it == "SYSTEM") {
+                followSystemMessage
+            } else {
+                val locale = Locale.forLanguageTag(it)
+                locale.getDisplayName(locale)
+            }
+            it to name
         }
-        it to name
     }
     val themeOptions = listOf(
-        ColorSchemeMode.System to stringResourceBy("follow_system"),
+        ColorSchemeMode.System to followSystemMessage,
         ColorSchemeMode.Light to stringResourceFromModule(R.string.theme_light),
         ColorSchemeMode.Dark to stringResourceFromModule(R.string.theme_dark)
     )
@@ -133,6 +132,8 @@ fun SettingsPage(outerPadding: PaddingValues) {
     }
 
     val scope = rememberCoroutineScope()
+    val snackbarState = rememberSnackbarHostState()
+    val rebootMessage = stringResourceBy("settings_need_reboot")
     val deniedMessage = stringResourceBy("settings_permission_denied")
     var showAppDataIsolationConfirmDialog by remember { mutableStateOf(false) }
     var showVoldAppDataIsolationConfirmDialog by remember { mutableStateOf(false) }
@@ -148,6 +149,11 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 if (isSuccess) {
                     appDataIsolation = newValue
                     showAppDataIsolationConfirmDialog = false
+                    snackbarState.showSnackbar(
+                        message = rebootMessage,
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Short,
+                    )
                 } else {
                     Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
                 }
@@ -164,6 +170,11 @@ fun SettingsPage(outerPadding: PaddingValues) {
                 if (isSuccess) {
                     voldAppDataIsolation = newValue
                     showVoldAppDataIsolationConfirmDialog = false
+                    snackbarState.showSnackbar(
+                        message = rebootMessage,
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Short,
+                    )
                 } else {
                     Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
                 }
@@ -241,10 +252,10 @@ fun SettingsPage(outerPadding: PaddingValues) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = innerPadding.calculateTopPadding())
-                .padding(outerPadding.only(PaddingValuesSides.Horizontal))
                 .verticalScrollEffect(scrollBehavior = scrollBehavior),
-            contentPadding = PaddingValues(horizontal = 12.dp).copy(bottom = outerPadding.calculateBottomPadding())
+            contentPadding = outerPadding
+                .withSafeHorizontal()
+                .copy(top = innerPadding.calculateTopPadding())
         ) {
             item {
                 SettingsCard(title = stringResourceBy("settings_language")) {
@@ -470,22 +481,12 @@ private fun ConfirmDialog(
         summary = summary,
         onDismissRequest = onCancel
     ) {
-        Row {
-            TextButton(
-                text = stringResource(android.R.string.cancel),
-                onClick = onCancel,
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.width(18.dp))
-
-            TextButton(
-                text = stringResource(android.R.string.ok),
-                onClick = onConfirm,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
-            )
-        }
+        DialogButtonPair(
+            leftText = stringResource(android.R.string.cancel),
+            rightText = stringResource(android.R.string.ok),
+            onLeftClick = onCancel,
+            onRightClick = onConfirm
+        )
     }
 }
 
@@ -523,28 +524,18 @@ private fun StopSystemServiceConfirmDialog(
         summary = stringResourceBy("settings_is_clean_env_summary"),
         onDismissRequest = { showCleanEnvDialog = false }
     ) {
-        Row {
-            TextButton(
-                text = stringResourceBy("no"),
-                onClick = {
-                    showCleanEnvDialog = false
-                    stopService(false)
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.width(18.dp))
-
-            TextButton(
-                text = stringResourceBy("yes"),
-                onClick = {
-                    showCleanEnvDialog = false
-                    stopService(true)
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.textButtonColorsPrimary()
-            )
-        }
+        DialogButtonPair(
+            leftText = stringResourceBy("no"),
+            rightText = stringResourceBy("yes"),
+            onLeftClick = {
+                showCleanEnvDialog = false
+                stopService(false)
+            },
+            onRightClick = {
+                showCleanEnvDialog = false
+                stopService(true)
+            }
+        )
     }
 }
 

@@ -22,7 +22,6 @@ import java.util.concurrent.Executors
 object AppMetaLoader {
     private const val TAG = "AppMetaLoader"
     private const val MAX_CACHE_SIZE = 128 * 1024 * 1024 // 128MiB
-    private const val COMPRESS_QUALITY = 80
     private const val CACHE_HEADER = 0x4D455441
     private const val CACHE_VERSION = 1
     private val CACHE_FILE = File(ManagerMain.CACHE_DIR, "app_meta.cache")
@@ -110,8 +109,8 @@ object AppMetaLoader {
                         output.writeBoolean(true)
                         val stream = ByteArrayOutputStream()
                         icon.compress(
-                            Bitmap.CompressFormat.WEBP_LOSSY,
-                            COMPRESS_QUALITY,
+                            Bitmap.CompressFormat.WEBP_LOSSLESS,
+                            100,
                             stream
                         )
 

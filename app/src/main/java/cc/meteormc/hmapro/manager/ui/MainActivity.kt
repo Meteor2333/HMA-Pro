@@ -11,6 +11,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -22,14 +32,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import cc.meteormc.hmapro.manager.ManagerMain
 import cc.meteormc.hmapro.manager.ManagerMain.preferences
 import cc.meteormc.hmapro.manager.data.HMAVersion
 import cc.meteormc.hmapro.manager.data.ModuleStatus
+import cc.meteormc.hmapro.manager.ui.nav.NavMetadata
+import cc.meteormc.hmapro.manager.ui.nav.NavMetadata.has
 import cc.meteormc.hmapro.manager.ui.nav.Route
+import cc.meteormc.hmapro.manager.ui.nav.rememberNavigator
 import cc.meteormc.hmapro.manager.ui.preference.PreferencesState
 import cc.meteormc.hmapro.manager.ui.screen.AboutScreen
 import cc.meteormc.hmapro.manager.ui.screen.DevelopersScreen
@@ -47,9 +60,6 @@ import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.xposedkit.XposedKit
 import org.json.JSONObject
-import top.yukonga.miuix.kmp.nav.core.NavDisplay
-import top.yukonga.miuix.kmp.nav.core.rememberNavController
-import top.yukonga.miuix.kmp.nav.transition.NavSwipeDirection
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
@@ -105,7 +115,6 @@ class MainActivity : ComponentActivity() {
 private fun App(preferences: PreferencesState) {
     val context = LocalContext.current
     val resources = LocalResources.current
-    val layoutDirection = LocalLayoutDirection.current
     val hmaVersion = HMAVersion.current(context)
     val moduleResource = remember(resources) {
         XposedKit.createModuleResources(
@@ -117,8 +126,6 @@ private fun App(preferences: PreferencesState) {
     var moduleStatus by remember {
         mutableStateOf<ModuleStatus>(ModuleStatus.Disabled)
     }
-
-    val navigator = rememberNavController<Route>(Route.Main)
 
     val themeController = remember(
         preferences.colorMode,
@@ -139,6 +146,7 @@ private fun App(preferences: PreferencesState) {
         }
     }
 
+    val navigator = rememberNavigator(Route.Main)
     MiuixTheme(controller = themeController) {
         CompositionLocalProvider(
             LocalHMAVersion provides hmaVersion,
@@ -147,69 +155,93 @@ private fun App(preferences: PreferencesState) {
             LocalNavigator provides navigator,
             LocalPreferencesState provides preferences
         ) {
-            val swipeDismiss = remember(preferences.enableSwipeDismiss) {
-                if (preferences.enableSwipeDismiss) {
-                    if (layoutDirection == LayoutDirection.Rtl) {
-                        NavSwipeDirection.RightToLeft
-                    } else {
-                        NavSwipeDirection.LeftToRight
+            SharedTransitionLayout {
+                // todo: 尝试支持swipeDismiss（使用predictivePopTransitionSpec）
+                NavDisplay(
+                    backStack = navigator.backStack,
+                    onBack = { navigator.back() },
+                    transitionSpec = {
+                        if (targetState.metadata.has(NavMetadata.DISABLE_TRANSITION)) {
+                            return@NavDisplay EnterTransition.None togetherWith ExitTransition.None
+                        }
+
+                        slideInHorizontally(
+                            animationSpec = tween(500),
+                            initialOffsetX = { width -> width }
+                        ) togetherWith slideOutHorizontally(
+                            animationSpec = tween(500),
+                            targetOffsetX = { width -> -width / 4 }
+                        ) + fadeOut(
+                            animationSpec = tween(500, easing = LinearEasing),
+                            targetAlpha = 0.5f
+                        )
+                    },
+                    popTransitionSpec = {
+                        if (initialState.metadata.has(NavMetadata.DISABLE_TRANSITION)) {
+                            return@NavDisplay EnterTransition.None togetherWith ExitTransition.None
+                        }
+
+                        slideInHorizontally(
+                            animationSpec = tween(500),
+                            initialOffsetX = { width -> -width / 4 }
+                        ) + fadeIn(
+                            animationSpec = tween(500, easing = LinearEasing),
+                            initialAlpha = 0.5f
+                        ) togetherWith slideOutHorizontally(
+                            animationSpec = tween(500),
+                            targetOffsetX = { width -> width }
+                        )
+                    },
+                    entryProvider = entryProvider {
+                        entry<Route.Main> {
+                            MainScreen()
+                        }
+
+                        entry<Route.About>(
+                            metadata = NavMetadata.ENABLE_SWIPE_DISMISS
+                        ) {
+                            AboutScreen()
+                        }
+
+                        entry<Route.Developers>(
+                            metadata = NavMetadata.ENABLE_SWIPE_DISMISS
+                        ) {
+                            DevelopersScreen()
+                        }
+
+                        entry<Route.OpenSourceLicenses>(
+                            metadata = NavMetadata.ENABLE_SWIPE_DISMISS
+                        ) {
+                            OpenSourceLicensesScreen()
+                        }
+
+                        entry<Route.ScopeList>(
+                            metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
+                        ) {
+                            ScopeListScreen()
+                        }
+
+                        entry<Route.ScopeSettings> {
+                            ScopeSettingsScreen(it.title, it.packageName)
+                        }
+
+                        entry<Route.TemplateList>(
+                            metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
+                        ) {
+                            TemplateListScreen()
+                        }
+
+                        entry<Route.TemplateSettings> {
+                            TemplateSettingsScreen()
+                        }
+
+                        entry<Route.PresetOverview>(
+                            metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
+                        ) {
+                            PresetOverviewScreen()
+                        }
                     }
-                } else {
-                    NavSwipeDirection.None
-                }
-            }
-
-            NavDisplay(
-                backStack = navigator.backStack,
-                onBack = { navigator.pop() }
-            ) {
-                entry<Route.Main> {
-                    MainScreen()
-                }
-
-                entry<Route.About>(
-                    swipeDismiss = swipeDismiss
-                ) {
-                    AboutScreen()
-                }
-
-                entry<Route.Developers>(
-                    swipeDismiss = swipeDismiss
-                ) {
-                    DevelopersScreen()
-                }
-
-                entry<Route.OpenSourceLicenses>(
-                    swipeDismiss = swipeDismiss
-                ) {
-                    OpenSourceLicensesScreen()
-                }
-
-                entry<Route.ScopeList>(
-                    swipeDismiss = swipeDismiss
-                ) {
-                    ScopeListScreen()
-                }
-
-                entry<Route.ScopeSettings> {
-                    ScopeSettingsScreen(it.title, it.packageName)
-                }
-
-                entry<Route.TemplateList>(
-                    swipeDismiss = swipeDismiss
-                ) {
-                    TemplateListScreen()
-                }
-
-                entry<Route.TemplateSettings> {
-                    TemplateSettingsScreen()
-                }
-
-                entry<Route.PresetOverview>(
-                    swipeDismiss = swipeDismiss
-                ) {
-                    PresetOverviewScreen()
-                }
+                )
             }
         }
     }

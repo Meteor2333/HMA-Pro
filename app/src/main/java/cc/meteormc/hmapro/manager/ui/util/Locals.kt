@@ -5,8 +5,8 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import cc.meteormc.hmapro.manager.data.HMAVersion
 import cc.meteormc.hmapro.manager.data.ModuleStatus
+import cc.meteormc.hmapro.manager.ui.nav.Navigator
 import cc.meteormc.hmapro.manager.ui.preference.PreferencesState
-import top.yukonga.miuix.kmp.nav.core.NavController
 
 val LocalHMAVersion = staticCompositionLocalOf {
     HMAVersion(
@@ -25,8 +25,8 @@ val LocalModuleStatus = compositionLocalOf<ModuleStatus> {
     ModuleStatus.Disabled
 }
 
-val LocalNavigator = staticCompositionLocalOf<NavController> {
-    error("NavController not provided")
+val LocalNavigator = staticCompositionLocalOf<Navigator> {
+    error("Navigator not provided")
 }
 
 val LocalPreferencesState = staticCompositionLocalOf<PreferencesState> {

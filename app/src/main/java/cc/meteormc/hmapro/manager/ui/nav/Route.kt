@@ -1,7 +1,7 @@
 package cc.meteormc.hmapro.manager.ui.nav
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
-import top.yukonga.miuix.kmp.nav.core.NavKey
 
 @Serializable
 sealed interface Route : NavKey {

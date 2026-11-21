@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
@@ -100,7 +101,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
-fun MainScreen() {
+fun SharedTransitionScope.MainScreen() {
     val useBlur = useBlur()
     val deviceType = currentDeviceType()
     val surfaceColor = MiuixTheme.colorScheme.surface

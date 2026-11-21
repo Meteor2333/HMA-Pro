@@ -296,11 +296,11 @@ private fun AboutContent(
                     )
                     ArrowPreference(
                         title = stringResourceBy("about_open_source"),
-                        onClick = { navigator.push(Route.OpenSourceLicenses) }
+                        onClick = { navigator.navigate(Route.OpenSourceLicenses) }
                     )
                     ArrowPreference(
                         title = stringResourceBy("about_developer"),
-                        onClick = { navigator.push(Route.Developers) }
+                        onClick = { navigator.navigate(Route.Developers) }
                     )
                 }
             }

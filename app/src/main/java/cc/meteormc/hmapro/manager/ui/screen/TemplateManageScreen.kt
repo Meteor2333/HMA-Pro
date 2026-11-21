@@ -1,5 +1,6 @@
 package cc.meteormc.hmapro.manager.ui.screen
 
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +18,7 @@ import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
+import cc.meteormc.hmapro.manager.ui.util.containerTransform
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.weight.BackButton
 import cc.meteormc.hmapro.manager.ui.weight.TipCard
@@ -30,10 +32,12 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.reflect.KProperty
 
 @Composable
-fun TemplateListScreen() {
+fun SharedTransitionScope.TemplateListScreen() {
     val navigator = LocalNavigator.current
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .containerTransform("template_manage"),
         topBar = {
             SmallTopAppBar(
                 title = stringResourceBy("title_template_manage"),
@@ -43,7 +47,7 @@ fun TemplateListScreen() {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navigator.push(Route.TemplateSettings(""))
+                    navigator.navigate(Route.TemplateSettings(""))
                 }
             ) {
                 Icon(

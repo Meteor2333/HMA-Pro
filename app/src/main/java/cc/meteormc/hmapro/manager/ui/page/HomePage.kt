@@ -1,5 +1,6 @@
 package cc.meteormc.hmapro.manager.ui.page
 
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -44,6 +45,7 @@ import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
+import cc.meteormc.hmapro.manager.ui.util.containerTransform
 import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.isDarkMode
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
@@ -76,7 +78,7 @@ import kotlin.math.sign
 import kotlin.math.tanh
 
 @Composable
-fun HomePage(outerPadding: PaddingValues) {
+fun SharedTransitionScope.HomePage(outerPadding: PaddingValues) {
     val navigator = LocalNavigator.current
     val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
@@ -88,7 +90,7 @@ fun HomePage(outerPadding: PaddingValues) {
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(
-                        onClick = { navigator.push(Route.About) }
+                        onClick = { navigator.navigate(Route.About) }
                     ) {
                         Icon(
                             imageVector = MiuixIcons.Help,
@@ -345,7 +347,7 @@ private fun InfoCard() {
 }
 
 @Composable
-private fun ManageCard() {
+private fun SharedTransitionScope.ManageCard() {
     val navigator = LocalNavigator.current
     val colors = CardDefaults.defaultColors()
     val cornerRadius = CardDefaults.CornerRadius
@@ -355,8 +357,9 @@ private fun ManageCard() {
     ) {
         ArrowPreference(
             title = stringResourceBy("title_app_manage"),
+            modifier = Modifier.containerTransform("scope_manage"),
             onClick = {
-                navigator.push(Route.ScopeList)
+                navigator.navigate(Route.ScopeList)
             },
             startAction = {
                 Icon(
@@ -367,8 +370,9 @@ private fun ManageCard() {
         )
         ArrowPreference(
             title = stringResourceBy("title_template_manage"),
+            modifier = Modifier.containerTransform("template_manage"),
             onClick = {
-                navigator.push(Route.TemplateList)
+                navigator.navigate(Route.TemplateList)
             },
             startAction = {
                 Icon(
@@ -379,8 +383,9 @@ private fun ManageCard() {
         )
         ArrowPreference(
             title = stringResourceFromModule(R.string.preset_overview),
+            modifier = Modifier.containerTransform("preset_overview"),
             onClick = {
-                navigator.push(Route.PresetOverview)
+                navigator.navigate(Route.PresetOverview)
             },
             startAction = {
                 Icon(

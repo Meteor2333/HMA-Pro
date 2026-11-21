@@ -1,6 +1,7 @@
 package cc.meteormc.hmapro.manager.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,6 +41,7 @@ import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
+import cc.meteormc.hmapro.manager.ui.util.containerTransform
 import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
@@ -79,7 +81,7 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import kotlin.reflect.KProperty
 
 @Composable
-fun ScopeListScreen() {
+fun SharedTransitionScope.ScopeListScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isInitial by rememberSaveable { mutableStateOf(true) }
@@ -160,7 +162,9 @@ fun ScopeListScreen() {
     val navigator = LocalNavigator.current
     val moduleStatus = LocalModuleStatus.current
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .containerTransform("scope_manage"),
         topBar = {
             SmallTopAppBar(
                 title = stringResourceBy("title_app_manage"),
@@ -262,7 +266,7 @@ fun ScopeListScreen() {
                     app = it,
                     onClick = {
                         val nav = Route.ScopeSettings(it.label, it.packageName)
-                        navigator.push(nav)
+                        navigator.navigate(nav)
                     },
                     enabled = ScopeConfigState.isScopeEnabled(it.packageName)
                 )
@@ -324,7 +328,7 @@ fun ScopeSettingsScreen(
                     IconButton(
                         onClick = {
                             save()
-                            navigator.pop()
+                            navigator.back()
                         }
                     ) {
                         Icon(
@@ -348,12 +352,12 @@ fun ScopeSettingsScreen(
                 rightText = stringResourceFromModule(R.string.save),
                 onLeftClick = {
                     showUnsavedDialog = false
-                    navigator.pop()
+                    navigator.back()
                 },
                 onRightClick = {
                     save()
                     showUnsavedDialog = false
-                    navigator.pop()
+                    navigator.back()
                 }
             )
         }

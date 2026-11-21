@@ -12,7 +12,7 @@ import top.yukonga.miuix.kmp.icon.extended.Back
 fun BackButton(icon: ImageVector = MiuixIcons.Back) {
     val navigator = LocalNavigator.current
     IconButton(
-        onClick = { navigator.pop() }
+        onClick = { navigator.back() }
     ) {
         Icon(
             imageVector = icon,

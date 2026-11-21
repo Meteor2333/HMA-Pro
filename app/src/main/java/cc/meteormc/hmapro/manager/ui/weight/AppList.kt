@@ -80,14 +80,23 @@ fun AppItem(
             Text(
                 text = app.label,
                 modifier = Modifier.basicMarquee(),
+                color = if (enabled) {
+                    MiuixTheme.colorScheme.onSurface
+                } else {
+                    MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                },
                 fontSize = MiuixTheme.textStyles.headline1.fontSize,
                 fontWeight = FontWeight.Medium,
                 minLines = 1
             )
             Text(
                 text = app.packageName,
-                fontSize = MiuixTheme.textStyles.body2.fontSize,
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                color = if (enabled) {
+                    MiuixTheme.colorScheme.onSurfaceVariantSummary
+                } else {
+                    MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                },
+                fontSize = MiuixTheme.textStyles.body2.fontSize
             )
         }
     }

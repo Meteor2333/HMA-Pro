@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.util.AppMetaLoader
+import cc.meteormc.xposedkit.util.AtomicDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -20,7 +21,7 @@ data class InstalledPackage(
     val lastUpdateTime: Long
 ) {
     companion object {
-        private val cache = mutableListOf<InstalledPackage>()
+        private var cache by AtomicDelegate(emptyList<InstalledPackage>())
 
         suspend fun getInstalledPackages(
             packageManager: PackageManager,
@@ -49,8 +50,7 @@ data class InstalledPackage(
                 AppMetaLoader.saveCache()
             }
 
-            cache.clear()
-            cache.addAll(packages)
+            cache = packages
             return packages
         }
     }

@@ -427,7 +427,7 @@ fun ScopeSettingsScreen(
                 }
             },
             onDismissRequest = { showExtraAppsBottomSheet = false },
-            insideMargin = DpSize(8.dp, 0.dp)
+            insideMargin = DpSize.Zero
         ) {
             val scope = rememberCoroutineScope()
             var query by remember { mutableStateOf("") }
@@ -474,6 +474,7 @@ fun ScopeSettingsScreen(
             ) {
                 val pkg = it.packageName
                 fun toggleExtraApp() {
+                    unsaved = true
                     if (extraAppList.contains(pkg)) {
                         extraAppList -= pkg
                     } else {

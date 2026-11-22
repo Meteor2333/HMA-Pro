@@ -83,11 +83,11 @@ class HMAConfig(internal val config: Any) {
 
         var isWhitelist: Boolean
             get() = delegate["isWhitelist"]
-            private set(value) { delegate["isWhitelist"] = value }
+            set(value) { delegate["isWhitelist"] = value }
 
         var appList: Set<String>
             get() = delegate["appList"]
-            private set(value) { delegate["appList"] = value }
+            set(value) { delegate["appList"] = value }
     }
 
     private class FieldAccessor(private val instance: Any) {

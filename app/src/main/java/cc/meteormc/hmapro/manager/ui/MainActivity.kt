@@ -231,8 +231,14 @@ private fun App(preferences: PreferencesState) {
                             TemplateListScreen()
                         }
 
+                        entry<Route.NewTemplate>(
+                            metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
+                        ) {
+                            TemplateSettingsScreen(null)
+                        }
+
                         entry<Route.TemplateSettings> {
-                            TemplateSettingsScreen()
+                            TemplateSettingsScreen(it.name)
                         }
 
                         entry<Route.PresetOverview>(

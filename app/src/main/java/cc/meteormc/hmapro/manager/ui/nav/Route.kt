@@ -27,7 +27,10 @@ sealed interface Route : NavKey {
     data object TemplateList : Route
 
     @Serializable
-    data class TemplateSettings(val template: String) : Route
+    data object NewTemplate : Route
+
+    @Serializable
+    data class TemplateSettings(val name: String) : Route
 
     @Serializable
     data object PresetOverview : Route

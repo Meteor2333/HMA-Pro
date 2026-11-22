@@ -23,6 +23,13 @@ data class InstalledPackage(
     companion object {
         private var cache by AtomicDelegate(emptyList<InstalledPackage>())
 
+        suspend fun getInstalledPackage(
+            packageManager: PackageManager,
+            packageName: String
+        ): InstalledPackage? {
+            return getInstalledPackages(packageManager).firstOrNull { it.packageName == packageName }
+        }
+
         suspend fun getInstalledPackages(
             packageManager: PackageManager,
             scope: CoroutineScope = MainScope(),

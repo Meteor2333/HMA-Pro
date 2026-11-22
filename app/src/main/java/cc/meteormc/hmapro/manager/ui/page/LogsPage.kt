@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,7 +61,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
 import top.yukonga.miuix.kmp.basic.Icon
@@ -69,6 +69,7 @@ import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SearchBar
+import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Clear
@@ -339,20 +340,18 @@ private fun LogItemComponent(item: LogItem) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Card(
+                Surface(
                     modifier = Modifier.size(16.dp),
-                    cornerRadius = 4.dp,
-                    colors = CardDefaults.defaultColors(
-                        color = when (item.level) {
-                            Log.VERBOSE -> if (isDarkMode()) Color(0xFFAAAAAA) else Color(0xFFD6D6D6)
-                            Log.DEBUG -> if (isDarkMode()) Color(0xFF305D78) else Color(0xFFCFE7FF)
-                            Log.INFO -> if (isDarkMode()) Color(0xFF6A8759) else Color(0xFFD7F6CF)
-                            Log.WARN -> if (isDarkMode()) Color(0xFFBBB529) else Color(0xFFF6E8B1)
-                            Log.ERROR -> if (isDarkMode()) Color(0xFFCF5B56) else Color(0xFFCF5B56)
-                            Log.ASSERT -> if (isDarkMode()) Color(0xFF8B3C3C) else Color(0xFF7F0000)
-                            else -> MiuixTheme.colorScheme.surfaceContainer
-                        }
-                    )
+                    shape = RoundedCornerShape(4.dp),
+                    color = when (item.level) {
+                        Log.VERBOSE -> if (isDarkMode()) Color(0xFFAAAAAA) else Color(0xFFD6D6D6)
+                        Log.DEBUG -> if (isDarkMode()) Color(0xFF305D78) else Color(0xFFCFE7FF)
+                        Log.INFO -> if (isDarkMode()) Color(0xFF6A8759) else Color(0xFFD7F6CF)
+                        Log.WARN -> if (isDarkMode()) Color(0xFFBBB529) else Color(0xFFF6E8B1)
+                        Log.ERROR -> if (isDarkMode()) Color(0xFFCF5B56) else Color(0xFFCF5B56)
+                        Log.ASSERT -> if (isDarkMode()) Color(0xFF8B3C3C) else Color(0xFF7F0000)
+                        else -> MiuixTheme.colorScheme.surfaceContainer
+                    }
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),

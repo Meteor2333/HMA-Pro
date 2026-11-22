@@ -55,6 +55,7 @@ import cc.meteormc.hmapro.manager.ui.weight.CancelButton
 import cc.meteormc.hmapro.manager.ui.weight.DialogButtonPair
 import cc.meteormc.hmapro.manager.ui.weight.EmptyContent
 import cc.meteormc.hmapro.manager.ui.weight.PullToRefresh
+import cc.meteormc.hmapro.manager.ui.weight.UnsavedChangesDialog
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Checkbox
@@ -260,6 +261,7 @@ fun SharedTransitionScope.ScopeListScreen() {
         ) {
             AppList(
                 apps = apps,
+                modifier = Modifier.verticalScrollEffect(enableOverScroll = false),
                 contentPadding = paddingValues.withSafeHorizontal()
             ) {
                 AppItem(
@@ -282,13 +284,13 @@ fun ScopeSettingsScreen(
 ) {
     val context = LocalContext.current
     val navigator = LocalNavigator.current
-    val scope = remember { ScopeConfigState.value[packageName] }
-    var enabled by remember { mutableStateOf(scope != null) }
-    var useWhitelist by remember { mutableStateOf(scope?.useWhitelist ?: false) }
-    var excludeSystemApps by remember { mutableStateOf(scope?.excludeSystemApps ?: false) }
-    var aggressiveFilter by remember { mutableStateOf(scope?.aggressiveFilter ?: false) }
-    val applyTemplates = remember { scope?.applyTemplates.orEmpty().toMutableStateSet() }
-    val extraAppList = remember { scope?.extraAppList.orEmpty().toMutableStateSet() }
+    val scope = remember(packageName) { ScopeConfigState.value[packageName] }
+    var enabled by remember(scope) { mutableStateOf(scope != null) }
+    var useWhitelist by remember(scope) { mutableStateOf(scope?.useWhitelist ?: false) }
+    var excludeSystemApps by remember(scope) { mutableStateOf(scope?.excludeSystemApps ?: false) }
+    var aggressiveFilter by remember(scope) { mutableStateOf(scope?.aggressiveFilter ?: false) }
+    val applyTemplates = remember(scope) { scope?.applyTemplates.orEmpty().toMutableStateSet() }
+    val extraAppList = remember(scope) { scope?.extraAppList.orEmpty().toMutableStateSet() }
 
     var unsaved by remember { mutableStateOf(false) }
     fun save() {
@@ -340,27 +342,14 @@ fun ScopeSettingsScreen(
             )
         }
     ) { paddingValues ->
-        OverlayDialog(
+        UnsavedChangesDialog(
             show = showUnsavedDialog,
-            title = stringResourceFromModule(R.string.unsaved_changes),
-            onDismissRequest = { showUnsavedDialog = false }
-        ) {
-            Spacer(modifier = Modifier.height(12.dp))
-
-            DialogButtonPair(
-                leftText = stringResourceFromModule(R.string.exit),
-                rightText = stringResourceFromModule(R.string.save),
-                onLeftClick = {
-                    showUnsavedDialog = false
-                    navigator.back()
-                },
-                onRightClick = {
-                    save()
-                    showUnsavedDialog = false
-                    navigator.back()
-                }
-            )
-        }
+            onDismiss = {
+                showUnsavedDialog = false
+                navigator.back()
+            },
+            onSave = { save() }
+        )
 
         OverlayDialog(
             show = showTemplateDialog,
@@ -438,7 +427,7 @@ fun ScopeSettingsScreen(
             var expanded by remember { mutableStateOf(false) }
             var apps by remember { mutableStateOf(emptyList<InstalledPackage>()) }
 
-            LaunchedEffect(Unit) {
+            LaunchedEffect(query, extraAppList) {
                 apps = InstalledPackage.getInstalledPackages(
                     packageManager = context.packageManager,
                     scope = scope
@@ -472,6 +461,7 @@ fun ScopeSettingsScreen(
 
             AppList(
                 apps = apps,
+                modifier = Modifier.verticalScrollEffect(),
                 contentPadding = paddingValues
                     .only(PaddingValuesSides.Bottom)
                     .withSafeHorizontal()
@@ -504,10 +494,6 @@ fun ScopeSettingsScreen(
                 .verticalScrollEffect(),
             contentPadding = paddingValues.withSafeHorizontal()
         ) {
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
             item {
                 Card {
                     SwitchPreference(
@@ -583,10 +569,6 @@ fun ScopeSettingsScreen(
                         onClick = { showExtraAppsBottomSheet = true }
                     )
                 }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }

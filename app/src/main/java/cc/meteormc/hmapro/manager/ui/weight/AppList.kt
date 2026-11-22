@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.manager.data.InstalledPackage
-import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
@@ -36,7 +35,6 @@ fun AppList(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScrollEffect(enableOverScroll = false)
             .then(modifier),
         contentPadding = contentPadding
     ) {

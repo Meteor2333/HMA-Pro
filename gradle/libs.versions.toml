@@ -7,7 +7,7 @@ coreKtx = "1.19.1"
 dexkit = "2.3.0"
 kotlin = "2.4.21"
 libsu = "6.0.0"
-miuix = "0.9.5-beta02"
+miuix = "0.9.5-beta03"
 navigation3 = "1.2.2"
 xposedkit = "1.0.0"
 

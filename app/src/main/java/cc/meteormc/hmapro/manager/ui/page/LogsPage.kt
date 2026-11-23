@@ -387,7 +387,7 @@ private fun LogItemComponent(item: LogItem) {
 
             Text(
                 text = item.date,
-                color = MiuixTheme.colorScheme.onSecondary,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 fontSize = 12.sp,
                 maxLines = 1
             )

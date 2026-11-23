@@ -167,9 +167,13 @@ private fun ModuleStatusCard() {
             summary = stringResourceFromModule(R.string.service_running)
             icon = MiuixIcons.Medium.Ok
 
-            val containerColor = MiuixTheme.colorScheme.secondaryContainer
+            val containerColor = if (MiuixTheme.isDynamicColor) {
+                MiuixTheme.colorScheme.secondaryContainer
+            } else {
+                MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+            }
             background = Brush.linearGradient(
-                colors = listOf(containerColor, containerColor.copy(alpha = 0.8f)),
+                colors = listOf(containerColor, containerColor.copy(alpha = containerColor.alpha - 0.2f)),
                 start = Offset.Zero,
                 end = Offset.Infinite
             )

@@ -152,7 +152,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                     snackbarState.showSnackbar(
                         message = rebootMessage,
                         withDismissAction = true,
-                        duration = SnackbarDuration.Short,
+                        duration = SnackbarDuration.Short
                     )
                 } else {
                     Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()
@@ -173,7 +173,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                     snackbarState.showSnackbar(
                         message = rebootMessage,
                         withDismissAction = true,
-                        duration = SnackbarDuration.Short,
+                        duration = SnackbarDuration.Short
                     )
                 } else {
                     Toast.makeText(context, deniedMessage, Toast.LENGTH_SHORT).show()

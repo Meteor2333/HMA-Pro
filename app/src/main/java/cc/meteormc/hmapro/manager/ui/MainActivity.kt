@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.runtime.result.rememberResultEventBusNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import cc.meteormc.hmapro.manager.ManagerMain
 import cc.meteormc.hmapro.manager.ManagerMain.preferences
@@ -45,6 +47,7 @@ import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.nav.rememberNavigator
 import cc.meteormc.hmapro.manager.ui.preference.PreferencesState
 import cc.meteormc.hmapro.manager.ui.screen.AboutScreen
+import cc.meteormc.hmapro.manager.ui.screen.AppSelectorScreen
 import cc.meteormc.hmapro.manager.ui.screen.DevelopersScreen
 import cc.meteormc.hmapro.manager.ui.screen.MainScreen
 import cc.meteormc.hmapro.manager.ui.screen.OpenSourceLicensesScreen
@@ -160,6 +163,10 @@ private fun App(preferences: PreferencesState) {
                 NavDisplay(
                     backStack = navigator.backStack,
                     onBack = { navigator.back() },
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberResultEventBusNavEntryDecorator()
+                    ),
                     transitionSpec = {
                         if (targetState.metadata.has(NavMetadata.DISABLE_TRANSITION)) {
                             return@NavDisplay EnterTransition.None togetherWith ExitTransition.None
@@ -245,6 +252,10 @@ private fun App(preferences: PreferencesState) {
                             metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
                         ) {
                             PresetOverviewScreen()
+                        }
+
+                        entry<Route.AppSelector> {
+                            AppSelectorScreen(it.resultKey, it.selected)
                         }
                     }
                 )

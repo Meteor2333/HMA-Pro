@@ -18,6 +18,11 @@
     <string name="view_source_code">View source code</string>
     <string name="join_telegram">Join Telegram channel</string>
 
+    <!-- Template -->
+    <string name="template_type">Template type</string>
+    <string name="template_name_blank">Template name is blank</string>
+    <string name="view_apps">View apps</string>
+
     <!-- Settings -->
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>

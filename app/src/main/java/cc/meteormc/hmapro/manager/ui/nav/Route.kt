@@ -34,4 +34,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object PresetOverview : Route
+
+    @Serializable
+    data class AppSelector(val resultKey: String, val selected: Set<String>) : Route
 }

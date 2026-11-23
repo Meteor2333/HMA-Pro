@@ -4,6 +4,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import cc.meteormc.hmapro.manager.service.ServiceClient
+import cc.meteormc.hmapro.manager.ui.preference.AppSortMethod
 import cc.meteormc.hmapro.manager.util.AppMetaLoader
 import cc.meteormc.xposedkit.util.AtomicDelegate
 import kotlinx.coroutines.CoroutineScope
@@ -22,13 +23,6 @@ data class InstalledPackage(
 ) {
     companion object {
         private var cache by AtomicDelegate(emptyList<InstalledPackage>())
-
-        suspend fun getInstalledPackage(
-            packageManager: PackageManager,
-            packageName: String
-        ): InstalledPackage? {
-            return getInstalledPackages(packageManager).firstOrNull { it.packageName == packageName }
-        }
 
         suspend fun getInstalledPackages(
             packageManager: PackageManager,
@@ -51,7 +45,9 @@ data class InstalledPackage(
                     firstInstallTime = it.firstInstallTime,
                     lastUpdateTime = it.lastUpdateTime
                 )
-            }
+            }.sortedWith(
+                AppSortMethod.BY_LABEL.comparator
+            )
 
             scope.launch {
                 AppMetaLoader.saveCache()

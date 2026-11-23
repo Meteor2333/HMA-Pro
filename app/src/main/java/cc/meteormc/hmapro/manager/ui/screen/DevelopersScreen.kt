@@ -144,7 +144,7 @@ private fun DeveloperCard(developer: Developer) {
 
                 Text(
                     text = developer.description,
-                    color = MiuixTheme.colorScheme.onSecondary,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                     maxLines = 1
                 )
             }

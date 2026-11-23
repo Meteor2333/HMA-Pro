@@ -239,6 +239,7 @@ private fun AboutContent(
             contentPadding = padding.copy(top = 0.dp)
         ) {
             item {
+                // todo: 进入页面时无法第一时间获取到headerHeight 导致初始滚动状态不在顶部
                 Spacer(modifier = Modifier.height(with(density) { headerHeight.toDp() }))
             }
 

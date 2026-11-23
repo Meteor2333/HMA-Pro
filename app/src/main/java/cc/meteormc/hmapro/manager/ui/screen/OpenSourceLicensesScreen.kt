@@ -144,7 +144,7 @@ private fun LibraryCard(library: Library) {
 
             Text(
                 text = library.author,
-                color = MiuixTheme.colorScheme.onSecondary,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 maxLines = 1
             )
 

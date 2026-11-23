@@ -2,6 +2,10 @@ package cc.meteormc.hmapro.manager.ui.screen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionScope.ResizeMode
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,26 +29,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation3.runtime.result.ResultEffect
+import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.manager.data.InstalledPackage
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.ui.nav.Route
-import cc.meteormc.hmapro.manager.ui.preference.AppSortMethod
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
 import cc.meteormc.hmapro.manager.ui.util.containerTransform
+import cc.meteormc.hmapro.manager.ui.util.isDarkMode
 import cc.meteormc.hmapro.manager.ui.util.only
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
+import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
+import cc.meteormc.hmapro.manager.ui.util.toMutableStateSet
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
 import cc.meteormc.hmapro.manager.ui.weight.AppItem
@@ -72,7 +84,7 @@ import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.overlay.OverlayBottomSheet
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.reflect.KProperty
 
@@ -95,7 +107,12 @@ fun SharedTransitionScope.TemplateListScreen() {
                 onClick = {
                     navigator.navigate(Route.NewTemplate)
                 },
-                modifier = Modifier.containerTransform("new_template")
+                modifier = Modifier.containerTransform(
+                    containerKey = "new_template",
+                    enter = fadeIn(tween(300)),
+                    exit = fadeOut(tween(150)),
+                    resizeMode = ResizeMode.scaleToBounds(ContentScale.Fit)
+                )
             ) {
                 Icon(
                     imageVector = MiuixIcons.Add,
@@ -182,25 +199,52 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
     }
 
     if (isInvalid) return
-    var deleted by remember { mutableStateOf(false) }
-    var nameInput by remember { mutableStateOf(name ?: "") }
-    var isWhitelist by remember(template) { mutableStateOf(template?.isWhitelist ?: false) }
-    var targetApps by remember(template) { mutableStateOf(template?.appList ?: emptySet()) }
-    val appliedApps = remember(ConfigManager.scopes, template) {
-        ConfigManager.scopes.filterValues { name in it.applyTemplates }.keys
+    var deleted by rememberSaveable { mutableStateOf(false) }
+    var nameInput by rememberSaveable { mutableStateOf(name ?: "") }
+    var isWhitelist by rememberSaveable(template) { mutableStateOf(template?.isWhitelist ?: false) }
+    val targetApps = rememberSaveable(template) { template?.appList.orEmpty().toMutableStateSet() }
+    val appliedApps = rememberSaveable(ConfigManager.scopes, template) {
+        ConfigManager.scopes
+            .filterValues { name in it.applyTemplates }
+            .keys
+            .toMutableStateSet()
     }
 
-    var unsaved by remember { mutableStateOf(false) }
-    fun save() {
-        if (!unsaved) return
-        // todo: 添加nameInput的合法性检查
+    var exists by rememberSaveable { mutableStateOf(false) }
+    var isNameBlank by rememberSaveable { mutableStateOf(false) }
+    fun check(): Boolean {
+        if (nameInput.isBlank()) {
+            isNameBlank = true
+            return false
+        }
+
+        if ((name == null || name != nameInput) && nameInput in TemplateConfigState.value) {
+            exists = true
+            return false
+        }
+
+        return true
+    }
+
+    var unsaved by rememberSaveable { mutableStateOf(false) }
+    fun save(): Boolean {
+        if (!unsaved) return true
+        if (!check()) return false
 
         val newTemplates = TemplateConfigState.value.toMutableMap()
         if (name != null) {
             newTemplates.remove(name)
         }
 
-        if (!deleted) {
+        if (deleted) {
+            for (scope in ConfigManager.scopes.values) {
+                if (name == null) continue
+                if (name !in scope.applyTemplates) continue
+                val applyTemplates = scope.applyTemplates.toMutableSet()
+                applyTemplates.remove(name)
+                scope.applyTemplates = applyTemplates
+            }
+        } else {
             newTemplates[nameInput] = HMAConfig.TemplateConfig.new().apply {
                 this.isWhitelist = isWhitelist
                 this.appList = targetApps
@@ -209,20 +253,34 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
 
         TemplateConfigState.value = newTemplates
         unsaved = false
+        return true
     }
 
     var showUnsavedDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var showAppliedAppsBottomSheet by remember { mutableStateOf(false) }
     BackHandler(enabled = unsaved) {
-        showUnsavedDialog = true
+        if (check()) {
+            showUnsavedDialog = true
+        }
+    }
+
+    ResultEffect<Set<String>>("target_apps") {
+        if (targetApps != it) {
+            unsaved = true
+            targetApps.clear()
+            targetApps.addAll(it)
+        }
     }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .then(
-                if (isNew) Modifier.containerTransform("new_template")
+                if (isNew) Modifier.containerTransform(
+                    containerKey = "new_template",
+                    exit = fadeOut(tween(150))
+                )
                 else Modifier
             ),
         topBar = {
@@ -232,7 +290,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                 actions = {
                     IconButton(
                         onClick = {
-                            save()
+                            if (!save()) return@IconButton
                             navigator.back()
                         }
                     ) {
@@ -245,12 +303,42 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
             )
         }
     ) { paddingValues ->
+        OverlayDialog(
+            show = exists,
+            title = stringResourceBy("template_name_invalid"),
+            summary = stringResourceBy("template_name_already_exist"),
+            onDismissRequest = { exists = false }
+        ) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            DialogButtonPair(
+                leftText = stringResourceFromModule(R.string.exit),
+                rightText = stringResource(android.R.string.cancel),
+                onLeftClick = { navigator.back() },
+                onRightClick = { exists = false }
+            )
+        }
+
+        OverlayDialog(
+            show = isNameBlank,
+            title = stringResourceBy("template_name_invalid"),
+            summary = stringResourceFromModule(R.string.template_name_blank),
+            onDismissRequest = { isNameBlank = false }
+        ) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            DialogButtonPair(
+                leftText = stringResourceFromModule(R.string.exit),
+                rightText = stringResource(android.R.string.cancel),
+                onLeftClick = { navigator.back() },
+                onRightClick = { isNameBlank = false }
+            )
+        }
+
         UnsavedChangesDialog(
             show = showUnsavedDialog,
-            onDismiss = {
-                showUnsavedDialog = false
-                navigator.back()
-            },
+            onDismiss = { showUnsavedDialog = false },
+            onExit = { navigator.back() },
             onSave = { save() }
         )
 
@@ -279,30 +367,30 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
 
         OverlayBottomSheet(
             show = showAppliedAppsBottomSheet,
-            title = stringResourceBy("title_app_select"), //todo: 改名
-            onDismissRequest = { showAppliedAppsBottomSheet = false }
+            title = stringResourceFromModule(R.string.view_apps),
+            onDismissRequest = { showAppliedAppsBottomSheet = false },
+            insideMargin = DpSize.Zero
         ) {
             if (appliedApps.isEmpty()) {
                 EmptyContent(maxHeight = 300.dp)
+                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
                 return@OverlayBottomSheet
             }
 
             val scope = rememberCoroutineScope()
             var apps by remember { mutableStateOf(emptyList<InstalledPackage>()) }
-            LaunchedEffect(appliedApps) {
+            LaunchedEffect(Unit) {
                 apps = InstalledPackage.getInstalledPackages(
                     packageManager = context.packageManager,
                     scope = scope
-                ).filter {
-                    it.packageName in appliedApps
-                }.sortedWith(
-                    AppSortMethod.BY_LABEL.comparator
                 )
             }
 
             AppList(
-                apps = apps,
-                modifier = Modifier.verticalScrollEffect(),
+                apps = apps.filter { it.packageName in appliedApps },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScrollEffect(),
                 contentPadding = paddingValues
                     .only(PaddingValuesSides.Bottom)
                     .withSafeHorizontal()
@@ -335,7 +423,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                     )
                 ) {
                     Text(
@@ -380,13 +468,27 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
 
             item {
                 Card {
-                    // todo: 换一种表现方式
-                    SwitchPreference(
-                        title = stringResourceBy("whitelist"),
-                        checked = isWhitelist,
-                        onCheckedChange = {
+                    OverlayDropdownPreference(
+                        title = stringResourceFromModule(R.string.template_type),
+                        items = listOf(
+                            stringResourceBy("blacklist"),
+                            stringResourceBy("whitelist")
+                        ),
+                        selectedIndex = if (isWhitelist) 1 else 0,
+                        onSelectedIndexChange = {
                             unsaved = true
-                            isWhitelist = it
+                            isWhitelist = it == 1
+                        }
+                    )
+
+                    ArrowPreference(
+                        title = stringResourceBy(
+                            if (isWhitelist) "template_apps_visible_count"
+                            else "template_apps_invisible_count",
+                            targetApps.size
+                        ),
+                        onClick = {
+                            navigator.navigate(Route.AppSelector("target_apps", targetApps))
                         }
                     )
 
@@ -406,7 +508,11 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.defaultColors(
-                            color = MiuixTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+                            color = when {
+                                MiuixTheme.isDynamicColor -> MiuixTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+                                isDarkMode() -> Color(0xFF2E0603)
+                                else -> Color(0xFFFAE8E3)
+                            }
                         ),
                         onClick = { showDeleteConfirmDialog = true },
                         showIndication = true
@@ -444,7 +550,7 @@ private object TemplateConfigState {
     private operator fun <T : Map<String, HMAConfig.TemplateConfig>> MutableState<T>.setValue(
         thisObj: Any?,
         property: KProperty<*>,
-        value: T,
+        value: T
     ) {
         this.value = value
         ConfigManager.templates = value

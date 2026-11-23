@@ -13,6 +13,7 @@ import top.yukonga.miuix.kmp.overlay.OverlayDialog
 fun UnsavedChangesDialog(
     show: Boolean,
     onDismiss: () -> Unit = {},
+    onExit: () -> Unit = {},
     onSave: () -> Unit = {}
 ) {
     OverlayDialog(
@@ -25,9 +26,13 @@ fun UnsavedChangesDialog(
         DialogButtonPair(
             leftText = stringResourceFromModule(R.string.exit),
             rightText = stringResourceFromModule(R.string.save),
-            onLeftClick = onDismiss,
+            onLeftClick = {
+                onExit()
+                onDismiss()
+            },
             onRightClick = {
                 onSave()
+                onExit()
                 onDismiss()
             }
         )

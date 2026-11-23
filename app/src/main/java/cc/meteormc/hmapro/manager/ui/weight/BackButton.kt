@@ -9,10 +9,16 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 
 @Composable
-fun BackButton(icon: ImageVector = MiuixIcons.Back) {
+fun BackButton(
+    icon: ImageVector = MiuixIcons.Back,
+    onBack: (() -> Unit)? = null
+) {
     val navigator = LocalNavigator.current
     IconButton(
-        onClick = { navigator.back() }
+        onClick = {
+            onBack?.invoke()
+            navigator.back()
+        }
     ) {
         Icon(
             imageVector = icon,

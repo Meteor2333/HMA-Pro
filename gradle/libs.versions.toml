@@ -1,6 +1,6 @@
 [versions]
 accompanist = "0.37.3"
-agp = "9.5.1"
+agp = "9.5.2"
 composeActivity = "1.13.0"
 composeBom = "2026.11.01"
 coreKtx = "1.19.1"

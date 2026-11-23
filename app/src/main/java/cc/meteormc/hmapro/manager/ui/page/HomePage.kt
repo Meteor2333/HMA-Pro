@@ -90,7 +90,7 @@ fun SharedTransitionScope.HomePage(outerPadding: PaddingValues) {
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(
-                        onClick = { navigator.navigate(Route.About) }
+                        onClick = navigator.navigate(Route.About)
                     ) {
                         Icon(
                             imageVector = MiuixIcons.Help,
@@ -362,9 +362,7 @@ private fun SharedTransitionScope.ManageCard() {
         ArrowPreference(
             title = stringResourceBy("title_app_manage"),
             modifier = Modifier.containerTransform("scope_manage"),
-            onClick = {
-                navigator.navigate(Route.ScopeList)
-            },
+            onClick = navigator.navigate(Route.ScopeList),
             startAction = {
                 Icon(
                     imageVector = MiuixIcons.GridView,
@@ -375,9 +373,7 @@ private fun SharedTransitionScope.ManageCard() {
         ArrowPreference(
             title = stringResourceBy("title_template_manage"),
             modifier = Modifier.containerTransform("template_manage"),
-            onClick = {
-                navigator.navigate(Route.TemplateList)
-            },
+            onClick = navigator.navigate(Route.TemplateList),
             startAction = {
                 Icon(
                     imageVector = MiuixIcons.Backup,
@@ -388,9 +384,7 @@ private fun SharedTransitionScope.ManageCard() {
         ArrowPreference(
             title = stringResourceFromModule(R.string.preset_overview),
             modifier = Modifier.containerTransform("preset_overview"),
-            onClick = {
-                navigator.navigate(Route.PresetOverview)
-            },
+            onClick = navigator.navigate(Route.PresetOverview),
             startAction = {
                 Icon(
                     imageVector = MiuixIcons.Background,

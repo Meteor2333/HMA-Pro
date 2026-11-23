@@ -104,9 +104,7 @@ fun SharedTransitionScope.TemplateListScreen() {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    navigator.navigate(Route.NewTemplate)
-                },
+                onClick = navigator.navigate(Route.NewTemplate),
                 modifier = Modifier.containerTransform(
                     containerKey = "new_template",
                     enter = fadeIn(tween(300)),
@@ -142,9 +140,7 @@ fun SharedTransitionScope.TemplateListScreen() {
                         .padding(vertical = 6.dp),
                     insideMargin = PaddingValues(16.dp),
                     showIndication = true,
-                    onClick = {
-                        navigator.navigate(Route.TemplateSettings(name))
-                    }
+                    onClick = navigator.navigate(Route.TemplateSettings(name))
                 ) {
                     Row {
                         Text(
@@ -397,9 +393,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
             ) {
                 AppItem(
                     app = it,
-                    onClick = {
-                        navigator.navigate(Route.ScopeSettings(it.label, it.packageName))
-                    }
+                    onClick = navigator.navigate(Route.ScopeSettings(it.label, it.packageName))
                 ) {
                     Icon(
                         imageVector = MiuixIcons.Basic.ArrowRight,
@@ -487,9 +481,9 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                             else "template_apps_invisible_count",
                             targetApps.size
                         ),
-                        onClick = {
-                            navigator.navigate(Route.AppSelector("target_apps", targetApps))
-                        }
+                        onClick = navigator.navigate(
+                            Route.AppSelector("target_apps", targetApps)
+                        )
                     )
 
                     ArrowPreference(

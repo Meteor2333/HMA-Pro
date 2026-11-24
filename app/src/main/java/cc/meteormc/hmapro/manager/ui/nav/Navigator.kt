@@ -2,14 +2,14 @@ package cc.meteormc.hmapro.manager.ui.nav
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 
 class Navigator(val backStack: NavBackStack<NavKey>) {
-    @Composable
-    fun navigate(key: NavKey) = dropUnlessResumed { backStack.add(key) }
+    fun navigate(key: NavKey) {
+        backStack.add(key)
+    }
 
     fun back(): Boolean {
         return if (backStack.size > 1) {

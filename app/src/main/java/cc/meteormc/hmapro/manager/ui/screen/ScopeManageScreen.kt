@@ -62,7 +62,10 @@ fun SharedTransitionScope.ScopeListScreen() {
     ) {
         AppItem(
             app = it,
-            onClick = navigator.navigate(Route.ScopeSettings(it.label, it.packageName)),
+            onClick = {
+                val nav = Route.ScopeSettings(it.label, it.packageName)
+                navigator.navigate(nav)
+            },
             enabled = ScopeConfigState.isScopeEnabled(it.packageName)
         )
     }
@@ -280,9 +283,9 @@ fun ScopeSettingsScreen(
                         } else {
                             stringResourceBy("app_extra_apps_invisible_count", extraApps.size)
                         },
-                        onClick = navigator.navigate(
-                            Route.AppSelector("extra_apps", extraApps)
-                        )
+                        onClick = {
+                            navigator.navigate(Route.AppSelector("extra_apps", extraApps))
+                        }
                     )
                 }
             }

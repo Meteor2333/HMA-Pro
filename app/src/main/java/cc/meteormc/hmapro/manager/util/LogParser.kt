@@ -5,7 +5,7 @@ import cc.meteormc.hmapro.manager.data.LogItem
 import java.util.regex.Pattern
 
 object LogParser {
-    private val pattern = Pattern.compile("\\[ ?(.*)] (.*) \\((.*)\\) (.*)", Pattern.DOTALL)
+    private val pattern = Pattern.compile("\\[ ?(.*?)] (.*?) \\((.*?)\\) (.*)", Pattern.DOTALL)
 
     fun parse(str: String) = buildList {
         val builder = StringBuilder()

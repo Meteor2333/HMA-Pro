@@ -10,8 +10,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import cc.meteormc.hmapro.DexClasses
 import cc.meteormc.hmapro.DexMethods
-import cc.meteormc.hmapro.HmaProModule
 import cc.meteormc.hmapro.R
+import cc.meteormc.hmapro.common.Constants
 import cc.meteormc.hmapro.manager.ManagerMain.preferences
 import cc.meteormc.hmapro.manager.ui.util.findResource
 import cc.meteormc.hmapro.manager.ui.util.restart
@@ -80,7 +80,7 @@ object UiHooker : BaseHooker<HookerContext>() {
     )
 
     override fun HookerContext.hook() {
-        XposedKit.registerAppAttachListener(HmaProModule.HMA_PACKAGE) {
+        XposedKit.registerAppAttachListener(Constants.HMA_PACKAGE) {
             val settingsId = it.findResource("settings", "xml") { _, id -> id }
             Resources::class.reflect {
                 method("getXml", Int::class.javaPrimitiveType!!)?.hookAfter { info ->

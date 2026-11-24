@@ -27,10 +27,12 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.DexFields
-import cc.meteormc.hmapro.HmaProModule
 import cc.meteormc.hmapro.R
+import cc.meteormc.hmapro.common.Constants
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.service.ServiceClient
+import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
+import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.rememberSnackbarHostState
@@ -39,8 +41,6 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
-import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
 import cc.meteormc.hmapro.manager.util.ConfigBackuper
 import cc.meteormc.hmapro.manager.util.Shell
 import cc.meteormc.hmapro.manager.util.SystemProperties
@@ -373,7 +373,7 @@ fun SettingsPage(outerPadding: PaddingValues) {
                             context.packageManager.setComponentEnabledSetting(
                                 ComponentName(
                                     context,
-                                    HmaProModule.HMA_PACKAGE + ".MainActivityLauncher"
+                                    Constants.HMA_PACKAGE + ".MainActivityLauncher"
                                 ),
                                 if (it) {
                                     PackageManager.COMPONENT_ENABLED_STATE_DISABLED

@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.AppComponentFactory
 import android.app.Instrumentation
 import android.content.Intent
-import cc.meteormc.hmapro.HmaProModule
+import cc.meteormc.hmapro.common.Constants
 import cc.meteormc.hmapro.manager.ManagerMain
 import cc.meteormc.hmapro.manager.ui.MainActivity
 import cc.meteormc.xposedkit.hook.BaseHooker
@@ -17,7 +17,7 @@ object ActivityHooker : BaseHooker<HookerContext>() {
         Instrumentation::class.reflect {
             method("getFactory")?.hookAfter {
                 val pkg = it.findArg<String>()
-                if (pkg != HmaProModule.HMA_PACKAGE) {
+                if (pkg != Constants.HMA_PACKAGE) {
                     return@hookAfter
                 }
 

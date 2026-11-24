@@ -2,7 +2,7 @@ package cc.meteormc.hmapro.manager.ui.weight
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.compose.dropUnlessStarted
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -16,7 +16,7 @@ fun BackButton(
 ) {
     val navigator = LocalNavigator.current
     IconButton(
-        onClick = dropUnlessResumed {
+        onClick = dropUnlessStarted {
             onBack?.invoke()
             navigator.back()
         }

@@ -20,7 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.compose.dropUnlessStarted
 import androidx.navigation3.runtime.result.ResultEffect
 import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.manager.service.ConfigManager
@@ -63,7 +63,7 @@ fun SharedTransitionScope.ScopeListScreen() {
     ) {
         AppItem(
             app = it,
-            onClick = dropUnlessResumed {
+            onClick = dropUnlessStarted {
                 val nav = Route.ScopeSettings(it.label, it.packageName)
                 navigator.navigate(nav)
             },
@@ -129,7 +129,7 @@ fun ScopeSettingsScreen(
                 navigationIcon = { BackButton(MiuixIcons.Close) },
                 actions = {
                     IconButton(
-                        onClick = dropUnlessResumed {
+                        onClick = dropUnlessStarted {
                             save()
                             navigator.back()
                         }
@@ -146,7 +146,7 @@ fun ScopeSettingsScreen(
         UnsavedChangesDialog(
             show = showUnsavedDialog,
             onDismiss = { showUnsavedDialog = false },
-            onExit = dropUnlessResumed { navigator.back() },
+            onExit = dropUnlessStarted { navigator.back() },
             onSave = { save() }
         )
 
@@ -284,7 +284,7 @@ fun ScopeSettingsScreen(
                         } else {
                             stringResourceBy("app_extra_apps_invisible_count", extraApps.size)
                         },
-                        onClick = dropUnlessResumed {
+                        onClick = dropUnlessStarted {
                             navigator.navigate(Route.AppSelector("extra_apps", extraApps))
                         }
                     )

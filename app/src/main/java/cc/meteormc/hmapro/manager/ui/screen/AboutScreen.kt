@@ -43,7 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.compose.dropUnlessStarted
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
@@ -298,11 +298,11 @@ private fun AboutContent(
                     )
                     ArrowPreference(
                         title = stringResourceBy("about_open_source"),
-                        onClick = dropUnlessResumed { navigator.navigate(Route.OpenSourceLicenses) }
+                        onClick = dropUnlessStarted { navigator.navigate(Route.OpenSourceLicenses) }
                     )
                     ArrowPreference(
                         title = stringResourceBy("about_developer"),
-                        onClick = dropUnlessResumed { navigator.navigate(Route.Developers) }
+                        onClick = dropUnlessStarted { navigator.navigate(Route.Developers) }
                     )
                 }
             }

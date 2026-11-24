@@ -43,7 +43,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.compose.dropUnlessStarted
 import androidx.navigation3.runtime.result.ResultEffect
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.common.HMAConfig
@@ -105,7 +105,7 @@ fun SharedTransitionScope.TemplateListScreen() {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = dropUnlessResumed {
+                onClick = dropUnlessStarted {
                     navigator.navigate(Route.NewTemplate)
                 },
                 modifier = Modifier.containerTransform(
@@ -143,7 +143,7 @@ fun SharedTransitionScope.TemplateListScreen() {
                         .padding(vertical = 6.dp),
                     insideMargin = PaddingValues(16.dp),
                     showIndication = true,
-                    onClick = dropUnlessResumed {
+                    onClick = dropUnlessStarted {
                         navigator.navigate(Route.TemplateSettings(name))
                     }
                 ) {
@@ -290,8 +290,8 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                 navigationIcon = { BackButton(MiuixIcons.Close) },
                 actions = {
                     IconButton(
-                        onClick = dropUnlessResumed {
-                            if (!save()) return@dropUnlessResumed
+                        onClick = dropUnlessStarted {
+                            if (!save()) return@dropUnlessStarted
                             navigator.back()
                         }
                     ) {
@@ -315,7 +315,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
             DialogButtonPair(
                 leftText = stringResourceFromModule(R.string.exit),
                 rightText = stringResource(android.R.string.cancel),
-                onLeftClick = dropUnlessResumed { navigator.back() },
+                onLeftClick = dropUnlessStarted { navigator.back() },
                 onRightClick = { exists = false }
             )
         }
@@ -331,7 +331,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
             DialogButtonPair(
                 leftText = stringResourceFromModule(R.string.exit),
                 rightText = stringResource(android.R.string.cancel),
-                onLeftClick = dropUnlessResumed { navigator.back() },
+                onLeftClick = dropUnlessStarted { navigator.back() },
                 onRightClick = { isNameBlank = false }
             )
         }
@@ -339,7 +339,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
         UnsavedChangesDialog(
             show = showUnsavedDialog,
             onDismiss = { showUnsavedDialog = false },
-            onExit = dropUnlessResumed { navigator.back() },
+            onExit = dropUnlessStarted { navigator.back() },
             onSave = { save() }
         )
 
@@ -356,7 +356,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                 onLeftClick = {
                     showDeleteConfirmDialog = false
                 },
-                onRightClick = dropUnlessResumed {
+                onRightClick = dropUnlessStarted {
                     unsaved = true
                     deleted = true
                     save()
@@ -398,7 +398,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
             ) {
                 AppItem(
                     app = it,
-                    onClick = dropUnlessResumed {
+                    onClick = dropUnlessStarted {
                         navigator.navigate(Route.ScopeSettings(it.label, it.packageName))
                     }
                 ) {
@@ -488,7 +488,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                             else "template_apps_invisible_count",
                             targetApps.size
                         ),
-                        onClick = dropUnlessResumed {
+                        onClick = dropUnlessStarted {
                             navigator.navigate(Route.AppSelector("target_apps", targetApps))
                         }
                     )

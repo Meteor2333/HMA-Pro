@@ -36,7 +36,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.compose.dropUnlessStarted
 import cc.meteormc.hmapro.BuildConfig
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.data.ModuleStatus
@@ -91,7 +91,7 @@ fun SharedTransitionScope.HomePage(outerPadding: PaddingValues) {
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(
-                        onClick = dropUnlessResumed { navigator.navigate(Route.About) }
+                        onClick = dropUnlessStarted { navigator.navigate(Route.About) }
                     ) {
                         Icon(
                             imageVector = MiuixIcons.Help,
@@ -363,7 +363,7 @@ private fun SharedTransitionScope.ManageCard() {
         ArrowPreference(
             title = stringResourceBy("title_app_manage"),
             modifier = Modifier.containerTransform("scope_manage"),
-            onClick = dropUnlessResumed {
+            onClick = dropUnlessStarted {
                 navigator.navigate(Route.ScopeList)
             },
             startAction = {
@@ -376,7 +376,7 @@ private fun SharedTransitionScope.ManageCard() {
         ArrowPreference(
             title = stringResourceBy("title_template_manage"),
             modifier = Modifier.containerTransform("template_manage"),
-            onClick = dropUnlessResumed {
+            onClick = dropUnlessStarted {
                 navigator.navigate(Route.TemplateList)
             },
             startAction = {
@@ -389,7 +389,7 @@ private fun SharedTransitionScope.ManageCard() {
         ArrowPreference(
             title = stringResourceFromModule(R.string.preset_overview),
             modifier = Modifier.containerTransform("preset_overview"),
-            onClick = dropUnlessResumed {
+            onClick = dropUnlessStarted {
                 navigator.navigate(Route.PresetOverview)
             },
             startAction = {

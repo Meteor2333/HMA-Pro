@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.get
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.runtime.result.rememberResultEventBusNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -42,7 +44,6 @@ import cc.meteormc.hmapro.manager.ManagerMain.preferences
 import cc.meteormc.hmapro.manager.data.HMAVersion
 import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.ui.nav.NavMetadata
-import cc.meteormc.hmapro.manager.ui.nav.NavMetadata.has
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.nav.rememberNavigator
 import cc.meteormc.hmapro.manager.ui.preference.PreferencesState
@@ -168,7 +169,7 @@ private fun App(preferences: PreferencesState) {
                         rememberResultEventBusNavEntryDecorator()
                     ),
                     transitionSpec = {
-                        if (targetState.metadata.has(NavMetadata.DISABLE_TRANSITION)) {
+                        if (targetState.metadata[NavMetadata.DisableTransitionKey] ?: false) {
                             return@NavDisplay EnterTransition.None togetherWith ExitTransition.None
                         }
 
@@ -184,7 +185,7 @@ private fun App(preferences: PreferencesState) {
                         )
                     },
                     popTransitionSpec = {
-                        if (initialState.metadata.has(NavMetadata.DISABLE_TRANSITION)) {
+                        if (initialState.metadata[NavMetadata.DisableTransitionKey] ?: false) {
                             return@NavDisplay EnterTransition.None togetherWith ExitTransition.None
                         }
 
@@ -205,25 +206,34 @@ private fun App(preferences: PreferencesState) {
                         }
 
                         entry<Route.About>(
-                            metadata = NavMetadata.ENABLE_SWIPE_DISMISS
+                            metadata = metadata {
+                                put(NavMetadata.EnableSwipeDismissKey, true)
+                            }
                         ) {
                             AboutScreen()
                         }
 
                         entry<Route.Developers>(
-                            metadata = NavMetadata.ENABLE_SWIPE_DISMISS
+                            metadata = metadata {
+                                put(NavMetadata.EnableSwipeDismissKey, true)
+                            }
                         ) {
                             DevelopersScreen()
                         }
 
                         entry<Route.OpenSourceLicenses>(
-                            metadata = NavMetadata.ENABLE_SWIPE_DISMISS
+                            metadata = metadata {
+                                put(NavMetadata.EnableSwipeDismissKey, true)
+                            }
                         ) {
                             OpenSourceLicensesScreen()
                         }
 
                         entry<Route.ScopeList>(
-                            metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
+                            metadata = metadata {
+                                put(NavMetadata.DisableTransitionKey, true)
+                                put(NavMetadata.EnableSwipeDismissKey, true)
+                            }
                         ) {
                             ScopeListScreen()
                         }
@@ -233,13 +243,18 @@ private fun App(preferences: PreferencesState) {
                         }
 
                         entry<Route.TemplateList>(
-                            metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
+                            metadata = metadata {
+                                put(NavMetadata.DisableTransitionKey, true)
+                                put(NavMetadata.EnableSwipeDismissKey, true)
+                            }
                         ) {
                             TemplateListScreen()
                         }
 
                         entry<Route.NewTemplate>(
-                            metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
+                            metadata = metadata {
+                                put(NavMetadata.DisableTransitionKey, true)
+                            }
                         ) {
                             TemplateSettingsScreen(null)
                         }
@@ -249,7 +264,10 @@ private fun App(preferences: PreferencesState) {
                         }
 
                         entry<Route.PresetOverview>(
-                            metadata = NavMetadata.DISABLE_TRANSITION + NavMetadata.ENABLE_SWIPE_DISMISS
+                            metadata = metadata {
+                                put(NavMetadata.DisableTransitionKey, true)
+                                put(NavMetadata.EnableSwipeDismissKey, true)
+                            }
                         ) {
                             PresetOverviewScreen()
                         }

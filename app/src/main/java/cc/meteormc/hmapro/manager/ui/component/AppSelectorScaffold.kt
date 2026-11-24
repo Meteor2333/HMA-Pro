@@ -1,4 +1,4 @@
-package cc.meteormc.hmapro.manager.ui.weight
+package cc.meteormc.hmapro.manager.ui.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.data.InstalledPackage
 import cc.meteormc.hmapro.manager.data.ModuleStatus
+import cc.meteormc.hmapro.manager.ui.component.button.BackButton
+import cc.meteormc.hmapro.manager.ui.component.button.CancelButton
 import cc.meteormc.hmapro.manager.ui.preference.AppSortMethod
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState

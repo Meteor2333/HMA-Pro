@@ -77,7 +77,7 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.then
 import cc.meteormc.hmapro.manager.ui.util.useBlur
-import cc.meteormc.hmapro.manager.ui.weight.DialogButtonPair
+import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
 import cc.meteormc.hmapro.manager.util.UpdateChecker
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode

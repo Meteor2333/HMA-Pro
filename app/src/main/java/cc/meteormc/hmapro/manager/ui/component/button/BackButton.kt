@@ -1,4 +1,4 @@
-package cc.meteormc.hmapro.manager.ui.weight
+package cc.meteormc.hmapro.manager.ui.component.button
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector

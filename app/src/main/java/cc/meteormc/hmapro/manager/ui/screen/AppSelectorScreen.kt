@@ -3,13 +3,13 @@ package cc.meteormc.hmapro.manager.ui.screen
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.state.ToggleableState
 import androidx.navigation3.runtime.result.LocalResultEventBus
+import cc.meteormc.hmapro.manager.ui.component.AppIcon
+import cc.meteormc.hmapro.manager.ui.component.AppSelectorScaffold
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.toMutableStateSet
-import cc.meteormc.hmapro.manager.ui.weight.AppItem
-import cc.meteormc.hmapro.manager.ui.weight.AppSelectorScaffold
-import top.yukonga.miuix.kmp.basic.Checkbox
+import top.yukonga.miuix.kmp.preference.CheckboxLocation
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
 @Composable
 fun AppSelectorScreen(
@@ -45,14 +45,21 @@ fun AppSelectorScreen(
         onRefresh = { selected.retainAll(it.map { app -> app.packageName }) },
         enabled = { selected.contains(it.packageName) }
     ) {
-        AppItem(
-            app = it,
-            onClick = { toggle(it.packageName) }
-        ) {
-            Checkbox(
-                state = ToggleableState(selected.contains(it.packageName)),
-                onClick = { toggle(it.packageName) }
-            )
-        }
+        CheckboxPreference(
+            title = it.label,
+            summary = it.packageName,
+            checked = selected.contains(it.packageName),
+            onCheckedChange = { checked ->
+                if (checked) {
+                    selected += it.packageName
+                } else {
+                    selected -= it.packageName
+                }
+            },
+            startAction = {
+                AppIcon(app = it)
+            },
+            checkboxLocation = CheckboxLocation.End
+        )
     }
 }

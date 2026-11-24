@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.ui.util.containerTransform
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
-import cc.meteormc.hmapro.manager.ui.weight.BackButton
+import cc.meteormc.hmapro.manager.ui.component.button.BackButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 

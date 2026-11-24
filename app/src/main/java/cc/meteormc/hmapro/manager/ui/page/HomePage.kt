@@ -53,7 +53,7 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
+import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card

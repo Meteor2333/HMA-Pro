@@ -1,5 +1,6 @@
-package cc.meteormc.hmapro.manager.ui.weight
+package cc.meteormc.hmapro.manager.ui.component.button
 
+import android.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -14,7 +15,7 @@ fun CancelButton(
     onClick: () -> Unit
 ) {
     Text(
-        text = stringResource(android.R.string.cancel),
+        text = stringResource(R.string.cancel),
         modifier = Modifier
             .clickable(onClick = onClick)
             .padding(

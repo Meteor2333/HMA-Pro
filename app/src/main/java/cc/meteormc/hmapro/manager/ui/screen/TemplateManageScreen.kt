@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -49,6 +50,12 @@ import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.manager.data.InstalledPackage
 import cc.meteormc.hmapro.manager.service.ConfigManager
+import cc.meteormc.hmapro.manager.ui.component.AppIcon
+import cc.meteormc.hmapro.manager.ui.component.AppList
+import cc.meteormc.hmapro.manager.ui.component.EmptyContent
+import cc.meteormc.hmapro.manager.ui.component.button.BackButton
+import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
+import cc.meteormc.hmapro.manager.ui.component.dialog.UnsavedChangesDialog
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.PaddingValuesSides
@@ -60,12 +67,6 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.toMutableStateSet
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.weight.AppItem
-import cc.meteormc.hmapro.manager.ui.weight.AppList
-import cc.meteormc.hmapro.manager.ui.weight.BackButton
-import cc.meteormc.hmapro.manager.ui.weight.DialogButtonPair
-import cc.meteormc.hmapro.manager.ui.weight.EmptyContent
-import cc.meteormc.hmapro.manager.ui.weight.UnsavedChangesDialog
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
@@ -78,7 +79,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Ok
@@ -396,21 +396,20 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                     .only(PaddingValuesSides.Bottom)
                     .withSafeHorizontal()
             ) {
-                AppItem(
-                    app = it,
+                ArrowPreference(
+                    title = it.label,
+                    summary = it.packageName,
+                    startAction = {
+                        Row {
+                            AppIcon(app = it)
+
+                            Spacer(modifier = Modifier.width(5.dp))
+                        }
+                    },
                     onClick = dropUnlessStarted {
                         navigator.navigate(Route.ScopeSettings(it.label, it.packageName))
                     }
-                ) {
-                    Icon(
-                        imageVector = MiuixIcons.Basic.ArrowRight,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .size(width = 10.dp, height = 16.dp),
-                        tint = MiuixTheme.colorScheme.onSurfaceVariantActions
-                    )
-                }
+                )
             }
         }
 

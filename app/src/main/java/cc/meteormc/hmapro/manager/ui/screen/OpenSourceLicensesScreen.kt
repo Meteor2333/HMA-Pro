@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.weight.BackButton
+import cc.meteormc.hmapro.manager.ui.component.button.BackButton
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Scaffold

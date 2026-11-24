@@ -1,7 +1,7 @@
 // Copyright 2025, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package cc.meteormc.hmapro.manager.ui.weight
+package cc.meteormc.hmapro.manager.ui.component
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing

@@ -1,4 +1,4 @@
-package cc.meteormc.hmapro.manager.ui.weight
+package cc.meteormc.hmapro.manager.ui.component.button
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer

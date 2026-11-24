@@ -39,8 +39,8 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.weight.DialogButtonPair
-import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
+import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
+import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
 import cc.meteormc.hmapro.manager.util.ConfigBackuper
 import cc.meteormc.hmapro.manager.util.Shell
 import cc.meteormc.hmapro.manager.util.SystemProperties

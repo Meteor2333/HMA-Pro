@@ -51,10 +51,10 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.weight.CancelButton
-import cc.meteormc.hmapro.manager.ui.weight.EmptyContent
-import cc.meteormc.hmapro.manager.ui.weight.PageTopAppBar
-import cc.meteormc.hmapro.manager.ui.weight.PullToRefresh
+import cc.meteormc.hmapro.manager.ui.component.button.CancelButton
+import cc.meteormc.hmapro.manager.ui.component.EmptyContent
+import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
+import cc.meteormc.hmapro.manager.ui.component.PullToRefresh
 import cc.meteormc.hmapro.manager.util.LogParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

@@ -1,4 +1,4 @@
-package cc.meteormc.hmapro.manager.ui.weight
+package cc.meteormc.hmapro.manager.ui.component.dialog
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.R
+import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 

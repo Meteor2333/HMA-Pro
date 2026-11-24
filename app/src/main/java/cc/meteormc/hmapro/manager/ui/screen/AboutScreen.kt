@@ -58,8 +58,8 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.then
 import cc.meteormc.hmapro.manager.ui.util.useBlur
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
-import cc.meteormc.hmapro.manager.ui.weight.BackButton
-import cc.meteormc.hmapro.manager.ui.weight.aurora.AuroraBackground
+import cc.meteormc.hmapro.manager.ui.component.button.BackButton
+import cc.meteormc.hmapro.manager.ui.component.aurora.AuroraBackground
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.Card

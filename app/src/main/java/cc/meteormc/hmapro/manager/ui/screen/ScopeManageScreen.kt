@@ -2,10 +2,13 @@ package cc.meteormc.hmapro.manager.ui.screen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -19,11 +22,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessStarted
 import androidx.navigation3.runtime.result.ResultEffect
 import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.manager.service.ConfigManager
+import cc.meteormc.hmapro.manager.ui.component.AppIcon
+import cc.meteormc.hmapro.manager.ui.component.AppSelectorScaffold
+import cc.meteormc.hmapro.manager.ui.component.EmptyContent
+import cc.meteormc.hmapro.manager.ui.component.button.BackButton
+import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
+import cc.meteormc.hmapro.manager.ui.component.dialog.UnsavedChangesDialog
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.containerTransform
@@ -31,17 +41,13 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.toMutableStateSet
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.weight.AppItem
-import cc.meteormc.hmapro.manager.ui.weight.AppSelectorScaffold
-import cc.meteormc.hmapro.manager.ui.weight.BackButton
-import cc.meteormc.hmapro.manager.ui.weight.DialogButtonPair
-import cc.meteormc.hmapro.manager.ui.weight.EmptyContent
-import cc.meteormc.hmapro.manager.ui.weight.UnsavedChangesDialog
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Ok
@@ -51,6 +57,7 @@ import top.yukonga.miuix.kmp.preference.CheckboxPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.squircle.squircleClip
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.reflect.KProperty
 
 @Composable
@@ -61,14 +68,46 @@ fun SharedTransitionScope.ScopeListScreen() {
         title = stringResourceBy("title_app_manage"),
         enabled = { ScopeConfigState.isScopeEnabled(it.packageName) }
     ) {
-        AppItem(
-            app = it,
+        val enabled = ScopeConfigState.isScopeEnabled(it.packageName)
+        BasicComponent(
+            startAction = {
+                Row {
+                    AppIcon(
+                        app = it,
+                        enabled = enabled
+                    )
+
+                    Spacer(modifier = Modifier.width(5.dp))
+                }
+            },
             onClick = dropUnlessStarted {
                 val nav = Route.ScopeSettings(it.label, it.packageName)
                 navigator.navigate(nav)
             },
-            enabled = ScopeConfigState.isScopeEnabled(it.packageName)
-        )
+            enabled = enabled
+        ) {
+            Text(
+                text = it.label,
+                modifier = Modifier.basicMarquee(),
+                color = if (enabled) {
+                    MiuixTheme.colorScheme.onSurface
+                } else {
+                    MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                },
+                fontSize = MiuixTheme.textStyles.headline1.fontSize,
+                fontWeight = FontWeight.Medium,
+                minLines = 1
+            )
+            Text(
+                text = it.packageName,
+                color = if (enabled) {
+                    MiuixTheme.colorScheme.onSurfaceVariantSummary
+                } else {
+                    MiuixTheme.colorScheme.disabledOnSecondaryVariant
+                },
+                fontSize = MiuixTheme.textStyles.body2.fontSize
+            )
+        }
     }
 }
 

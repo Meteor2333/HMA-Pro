@@ -1,7 +1,7 @@
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
 
-package cc.meteormc.hmapro.manager.ui.weight.aurora
+package cc.meteormc.hmapro.manager.ui.component.aurora
 
 import cc.meteormc.hmapro.manager.ui.util.DeviceType
 

@@ -83,8 +83,7 @@ fun SharedTransitionScope.ScopeListScreen() {
             onClick = dropUnlessStarted {
                 val nav = Route.ScopeSettings(it.label, it.packageName)
                 navigator.navigate(nav)
-            },
-            enabled = enabled
+            }
         ) {
             Text(
                 text = it.label,

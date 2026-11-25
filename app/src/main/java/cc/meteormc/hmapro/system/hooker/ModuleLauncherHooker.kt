@@ -2,18 +2,27 @@ package cc.meteormc.hmapro.system.hooker
 
 import android.os.Binder
 import android.os.IInterface
+import android.os.ServiceManager
 import cc.meteormc.hmapro.common.Constants
 import cc.meteormc.hmapro.system.SystemServerMain
 import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.hook.BaseHooker
 import cc.meteormc.xposedkit.hook.HookerContext
 import cc.meteormc.xposedkit.reflect
-import java.util.concurrent.CountDownLatch
 
 object ModuleLauncherHooker : BaseHooker<HookerContext>() {
-    private val latch = CountDownLatch(1)
+    private val tasks = ArrayDeque<() -> Unit>()
 
     override fun HookerContext.hook() {
+        ServiceManager::class.reflect {
+            method("addService")?.hookBefore {
+                val name = it.argumentAt<String>(0)
+                if (name == "package") {
+                    SystemServerMain.pms = it.argumentAt(1)
+                }
+            }
+        }
+
         Binder::class.reflect {
             method("attachInterface")?.hookBefore {
                 val owner = it.argumentAt<IInterface>(0)
@@ -25,11 +34,16 @@ object ModuleLauncherHooker : BaseHooker<HookerContext>() {
                 XLog.d(tag, "Detected IHMAService: $owner")
                 SystemServerMain.service = owner
                 SystemServerMain.hmaLoader = owner.javaClass.classLoader!!
-                latch.countDown()
+                while (tasks.isNotEmpty()) {
+                    tasks.removeFirst().invoke()
+                }
+
                 unhookAll()
             }
         }
     }
 
-    fun await() = latch.await()
+    fun submitTask(task: () -> Unit) {
+        tasks.add(task)
+    }
 }

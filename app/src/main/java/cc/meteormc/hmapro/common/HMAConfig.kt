@@ -1,12 +1,25 @@
 package cc.meteormc.hmapro.common
 
+import android.provider.Settings
+import androidx.annotation.StringRes
+import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.ManagerMain
 import cc.meteormc.xposedkit.allocate
 import cc.meteormc.xposedkit.get
 import cc.meteormc.xposedkit.put
 import cc.meteormc.xposedkit.reflect
+import cc.meteormc.xposedkit.util.extrasOf
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.EnumSet
+
 
 class HMAConfig(internal val config: Any) {
+    companion object {
+        const val EXTRA_HIDDEN_SETTINGS = "hiddenSettings"
+    }
+
+    private val extras = extrasOf(config)
     private val delegate = FieldAccessor(config)
 
     var detailLog: Boolean
@@ -29,7 +42,40 @@ class HMAConfig(internal val config: Any) {
         get() = delegate.get<Map<String, TemplateConfig>>("templates").mapValues { TemplateConfig(it.value) }
         set(value) { delegate["templates"] = value.mapValues { it.value.config } }
 
+    fun readExtras(json: JSONObject) {
+        json.optJSONObject("scope")?.apply {
+            for ((packageName, scope) in scopes) {
+                val obj = optJSONObject(packageName) ?: continue
+                scope.readExtras(obj)
+            }
+        }
+
+        json.optJSONObject("templates")?.apply {
+            for ((name, template) in templates) {
+                val obj = optJSONObject(name) ?: continue
+                template.readExtras(obj)
+            }
+        }
+    }
+
+    fun writeExtras(json: JSONObject) {
+        json.optJSONObject("scope")?.apply {
+            for ((packageName, scope) in scopes) {
+                val obj = optJSONObject(packageName) ?: continue
+                scope.writeExtras(obj)
+            }
+        }
+
+        json.optJSONObject("templates")?.apply {
+            for ((name, template) in templates) {
+                val obj = optJSONObject(name) ?: continue
+                template.writeExtras(obj)
+            }
+        }
+    }
+
     class ScopeConfig(internal val config: Any) {
+        private val extras = extrasOf(config)
         private val delegate = FieldAccessor(config)
 
         companion object {
@@ -66,10 +112,37 @@ class HMAConfig(internal val config: Any) {
             get() = delegate["extraAppList"]
             set(value) { delegate["extraAppList"] = value }
 
-        var hiddenSettings = mutableMapOf<String, String>() // xx settings hidden
+        var hiddenSettings: Set<HiddenSettings>
+            get() = extras[EXTRA_HIDDEN_SETTINGS] ?: emptySet()
+            set(value) { extras[EXTRA_HIDDEN_SETTINGS] = value }
+
+        fun readExtras(json: JSONObject) {
+            json.optJSONArray(EXTRA_HIDDEN_SETTINGS)?.apply {
+                val settings = EnumSet.noneOf(HiddenSettings::class.java)
+                for (i in 0 until length()) {
+                    val item = try {
+                        val str = getString(i) ?: continue
+                        HiddenSettings.valueOf(str)
+                    } catch (_: Throwable) {
+                        continue
+                    }
+
+                    settings.add(item)
+                }
+                hiddenSettings = settings
+            }
+        }
+
+        fun writeExtras(json: JSONObject) {
+            JSONArray().apply {
+                for (setting in hiddenSettings) { put(setting.name) }
+                json.put(EXTRA_HIDDEN_SETTINGS, this)
+            }
+        }
     }
 
     class TemplateConfig(internal val config: Any) {
+        private val extras = extrasOf(config)
         private val delegate = FieldAccessor(config)
 
         companion object {
@@ -90,12 +163,33 @@ class HMAConfig(internal val config: Any) {
         var appList: Set<String>
             get() = delegate["appList"]
             set(value) { delegate["appList"] = value }
+
+        fun readExtras(json: JSONObject) {
+
+        }
+
+        fun writeExtras(json: JSONObject) {
+
+        }
     }
 
-    data class SettingEntry(
-        val name: String,
-        val value: String
-    )
+    enum class HiddenSettings(
+        @StringRes
+        val message: Int,
+        vararg kv: Pair<String, String>
+    ) {
+        DEVELOPER_OPTIONS(
+            R.string.developer_options,
+            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED to "0"
+        ),
+        ADB_DEBUGGING(
+            R.string.adb_debugging,
+            Settings.Global.ADB_ENABLED to "0",
+            "adb_wifi_enabled" to "0"
+        );
+
+        val items = kv.toMap()
+    }
 
     private class FieldAccessor(private val instance: Any) {
         private val reflect = instance.javaClass.reflect

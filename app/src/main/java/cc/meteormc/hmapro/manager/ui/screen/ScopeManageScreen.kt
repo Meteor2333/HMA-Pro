@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessStarted
 import androidx.navigation3.runtime.result.ResultEffect
+import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.ui.component.AppIcon
@@ -38,6 +39,7 @@ import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
 import cc.meteormc.hmapro.manager.ui.util.containerTransform
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
+import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.toMutableStateSet
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
@@ -58,6 +60,7 @@ import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import java.util.EnumSet
 import kotlin.reflect.KProperty
 
 @Composable
@@ -123,6 +126,7 @@ fun ScopeSettingsScreen(
     var aggressiveFilter by rememberSaveable(scope) { mutableStateOf(scope?.aggressiveFilter ?: false) }
     val applyTemplates = rememberSaveable(scope) { scope?.applyTemplates.orEmpty().toMutableStateSet() }
     val extraApps = rememberSaveable(scope) { scope?.extraAppList.orEmpty().toMutableStateSet() }
+    val hiddenSettings = rememberSaveable(scope) { scope?.hiddenSettings.orEmpty().toMutableStateSet() }
 
     var unsaved by rememberSaveable { mutableStateOf(false) }
     fun save() {
@@ -136,6 +140,11 @@ fun ScopeSettingsScreen(
                 this.excludeSystemApps = excludeSystemApps
                 this.applyTemplates = applyTemplates
                 this.extraAppList = extraApps
+                this.hiddenSettings = if (hiddenSettings.isNotEmpty()) {
+                    EnumSet.copyOf(hiddenSettings)
+                } else {
+                    EnumSet.noneOf(HMAConfig.HiddenSettings::class.java)
+                }
             }
         } else {
             newScopes.remove(packageName)
@@ -147,6 +156,7 @@ fun ScopeSettingsScreen(
 
     var showUnsavedDialog by remember { mutableStateOf(false) }
     var showTemplateDialog by remember { mutableStateOf(false) }
+    var showHiddenSettingsDialog by remember { mutableStateOf(false) }
     BackHandler(enabled = unsaved) {
         showUnsavedDialog = true
     }
@@ -243,6 +253,54 @@ fun ScopeSettingsScreen(
             )
         }
 
+        OverlayDialog(
+            show = showHiddenSettingsDialog,
+            title = stringResourceFromModule(R.string.choose_settings),
+            largeScreen = true
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScrollEffect(
+                        enableHaptic = false,
+                        enableOverScroll = false
+                    )
+            ) {
+                items(items = HMAConfig.HiddenSettings.entries) {
+                    CheckboxPreference(
+                        title = stringResourceFromModule(it.message),
+                        checked = hiddenSettings.contains(it),
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                hiddenSettings += it
+                            } else {
+                                hiddenSettings -= it
+                            }
+                        },
+                        modifier = Modifier.squircleClip(16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            DialogButtonPair(
+                leftText = stringResource(android.R.string.cancel),
+                rightText = stringResource(android.R.string.ok),
+                onLeftClick = {
+                    showHiddenSettingsDialog = false
+                    hiddenSettings.clear()
+                    scope?.hiddenSettings?.also {
+                        hiddenSettings.addAll(it)
+                    }
+                },
+                onRightClick = {
+                    unsaved = true
+                    showHiddenSettingsDialog = false
+                }
+            )
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -325,6 +383,11 @@ fun ScopeSettingsScreen(
                         onClick = dropUnlessStarted {
                             navigator.navigate(Route.AppSelector("extra_apps", extraApps))
                         }
+                    )
+
+                    ArrowPreference(
+                        title = stringResourceFromModule(R.string.settings_hidden_count, hiddenSettings.size),
+                        onClick = { showHiddenSettingsDialog = true }
                     )
                 }
             }

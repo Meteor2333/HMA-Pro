@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Basic -->
     <string name="app_name" translatable="false">HMA-Pro</string>
     <string name="app_description">An Xposed module to enhance Hide My AppList</string>
 
-    <!-- Home -->
+    <!-- Home Page -->
     <string name="module_activated">Module Activated</string>
     <string name="service_running">System service running</string>
     <string name="module_version">Module version</string>
@@ -12,18 +13,13 @@
     <string name="force_mount">Force mount</string>
     <string name="preset_overview">Preset overview</string>
     <string name="open_release_page">Open release page</string>
+    <string name="reboot_tip"> (Try restarting your device)</string>
 
-    <!-- About -->
-    <string name="title_description">Description</string>
-    <string name="view_source_code">View source code</string>
-    <string name="join_telegram">Join Telegram channel</string>
+    <!-- Logs Page -->
+    <string name="log_copied">Copied to clipboard</string>
+    <string name="log_cleared">Logs cleared!</string>
 
-    <!-- Template -->
-    <string name="template_type">Template type</string>
-    <string name="template_name_blank">Template name is blank</string>
-    <string name="view_apps">View apps</string>
-
-    <!-- Settings -->
+    <!-- Settings Page -->
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="use_monet">Use monet theme</string>
@@ -41,23 +37,36 @@
     <string name="full_backup_title">Full backup</string>
     <string name="full_backup_summary">Allow backup and restore of all module settings</string>
 
-    <!-- Pull To Refresh -->
+    <!-- About -->
+    <string name="title_description">Description</string>
+    <string name="view_source_code">View source code</string>
+    <string name="join_telegram">Join Telegram channel</string>
+
+    <!-- Scope -->
+    <string name="settings_hidden_count">%d settings hidden</string>
+    <string name="choose_settings">Choose settings</string>
+    <string name="developer_options">Developer options</string>
+    <string name="adb_debugging">ADB debugging</string>
+
+    <!-- Template -->
+    <string name="template_type">Template type</string>
+    <string name="template_name_blank">Template name is blank</string>
+    <string name="view_apps">View apps</string>
+
+    <!-- Component -->
+    <string name="empty_content">Nothing here</string>
+    <string name="sort_method">Sort method</string>
     <string name="pulling">Pull down to refresh</string>
     <string name="threshold_reached">Release to refresh</string>
     <string name="refreshing">Refreshing...</string>
     <string name="refresh_complete">Refreshed successfully</string>
+    <string name="unsaved_changes">Save current settings?</string>
+    <string name="confirm_action">Are you sure you want to proceed with this action?</string>
 
     <!-- Misc -->
     <string name="exit">Exit</string>
     <string name="save">Save</string>
-    <string name="empty_content">Nothing here</string>
-    <string name="reboot_tip"> (Try restarting your device)</string>
-    <string name="log_copied">Copied to clipboard</string>
-    <string name="log_cleared">Logs cleared!</string>
-    <string name="sort_method">Sort method</string>
     <string name="download">Download</string>
     <string name="download_started">Download started</string>
     <string name="download_start_failed">Failed to start download</string>
-    <string name="unsaved_changes">Save current settings?</string>
-    <string name="confirm_action">Are you sure you want to proceed with this action?</string>
 </resources>

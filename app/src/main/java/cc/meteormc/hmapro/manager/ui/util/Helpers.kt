@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.plus
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -69,6 +70,8 @@ fun Modifier.verticalScrollEffect(
 }
 
 fun <T> Collection<T>.toMutableStateSet() = mutableStateSetOf<T>().also { it.addAll(this) }
+
+fun <K, V> Map<K, V>.toMutableStateMap() = mutableStateMapOf<K, V>().also { it.putAll(this) }
 
 enum class PaddingValuesSides {
     Start, End, Top, Bottom, Horizontal, Vertical

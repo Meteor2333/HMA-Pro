@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adb_debugging">ADB调试</string>
     <string name="app_description">增强你的隐藏应用列表模块</string>
     <string name="color_spec_summary">Material3 色彩规范版本</string>
+    <string name="choose_settings">选择设置项</string>
     <string name="color_spec_title">色彩规范</string>
     <string name="confirm_action">是否确定执行此操作？</string>
+    <string name="developer_options">开发者选项</string>
     <string name="download">下载</string>
     <string name="download_started">已开始下载</string>
     <string name="download_start_failed">准备开始下载时出错</string>
@@ -37,6 +40,7 @@
     <string name="save">保存</string>
     <string name="service_running">系统服务运行中</string>
     <string name="service_version">系统服务版本</string>
+    <string name="settings_hidden_count">%d 个设置已隐藏</string>
     <string name="sort_method">排序方式</string>
     <string name="template_name_blank">模板名称为空</string>
     <string name="template_type">模板类型</string>

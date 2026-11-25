@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.ktx)
     implementation(libs.dexkit)
     implementation(libs.libsu)
+    compileOnly(libs.hidden.stub)
 
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

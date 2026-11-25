@@ -3,7 +3,7 @@ package cc.meteormc.hmapro.manager.data
 import android.content.Context
 import cc.meteormc.hmapro.DexClasses
 import cc.meteormc.hmapro.DexMethods
-import cc.meteormc.hmapro.HmaProModule
+import cc.meteormc.hmapro.manager.ManagerMain
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.xposedkit.allocate
 import cc.meteormc.xposedkit.call
@@ -18,7 +18,7 @@ sealed class ModuleStatus {
         }
 
         fun current(context: Context): ModuleStatus {
-            val isHooked = HmaProModule.classLoader.reflect("icu.nullptr.hidemyapplist.MyApp") {
+            val isHooked = ManagerMain.classLoader.reflect("icu.nullptr.hidemyapplist.MyApp") {
                 field {
                     type = Boolean::class.javaPrimitiveType
                 }

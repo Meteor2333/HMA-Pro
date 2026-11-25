@@ -1,6 +1,6 @@
 package cc.meteormc.hmapro.common
 
-import cc.meteormc.hmapro.HmaProModule
+import cc.meteormc.hmapro.manager.ManagerMain
 import cc.meteormc.xposedkit.allocate
 import cc.meteormc.xposedkit.get
 import cc.meteormc.xposedkit.put
@@ -34,7 +34,7 @@ class HMAConfig(internal val config: Any) {
 
         companion object {
             fun new(): ScopeConfig {
-                return HmaProModule.classLoader.reflect($$"icu.nullptr.hidemyapplist.common.JsonConfig$AppConfig") {
+                return ManagerMain.classLoader.reflect($$"icu.nullptr.hidemyapplist.common.JsonConfig$AppConfig") {
                     ScopeConfig(type.allocate())
                 }!!.apply {
                     aggressiveFilter = false
@@ -65,6 +65,8 @@ class HMAConfig(internal val config: Any) {
         var extraAppList: Set<String>
             get() = delegate["extraAppList"]
             set(value) { delegate["extraAppList"] = value }
+
+        var hiddenSettings = mutableMapOf<String, String>() // xx settings hidden
     }
 
     class TemplateConfig(internal val config: Any) {
@@ -72,7 +74,7 @@ class HMAConfig(internal val config: Any) {
 
         companion object {
             fun new(): TemplateConfig {
-                return HmaProModule.classLoader.reflect($$"icu.nullptr.hidemyapplist.common.JsonConfig$Template") {
+                return ManagerMain.classLoader.reflect($$"icu.nullptr.hidemyapplist.common.JsonConfig$Template") {
                     TemplateConfig(type.allocate())
                 }!!.apply {
                     isWhitelist = false
@@ -89,6 +91,11 @@ class HMAConfig(internal val config: Any) {
             get() = delegate["appList"]
             set(value) { delegate["appList"] = value }
     }
+
+    data class SettingEntry(
+        val name: String,
+        val value: String
+    )
 
     private class FieldAccessor(private val instance: Any) {
         private val reflect = instance.javaClass.reflect

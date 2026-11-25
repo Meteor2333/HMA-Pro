@@ -4,6 +4,7 @@ package cc.meteormc.hmapro
 
 import android.app.Activity
 import android.content.Context
+import cc.meteormc.hmapro.common.Constants
 import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.util.AtomicBooleanDelegate
 import org.luckypray.dexkit.DexKitCacheBridge
@@ -25,28 +26,34 @@ import kotlin.concurrent.thread
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-private lateinit var dexkit: DexKitCacheBridge.RecyclableBridge
-
 object DexMembers {
     const val TAG = "DexMembers"
+
+    lateinit var classLoader: ClassLoader
+    lateinit var dexkit: DexKitCacheBridge.RecyclableBridge
 
     init {
         System.loadLibrary("dexkit")
     }
 
-    fun init(sourceDir: String, cacheFile: File?) {
+    fun init(
+        sourceDir: String,
+        classLoader: ClassLoader,
+        cacheFile: File?
+    ) {
         val startTime = System.currentTimeMillis()
         if (cacheFile != null) {
             DexKitCache.load(cacheFile)
-            DexKitCacheBridge.init(DexKitCache)
-            DexKitCacheBridge.addListener(
-                object : CacheBridgeListener() {
-                    override fun onBridgeReleased(appTag: String) {
-                        DexKitCache.trySave()
-                    }
-                }
-            )
         }
+
+        DexKitCacheBridge.init(DexKitCache)
+        DexKitCacheBridge.addListener(
+            object : CacheBridgeListener() {
+                override fun onBridgeReleased(appTag: String) {
+                    DexKitCache.trySave()
+                }
+            }
+        )
 
         val appHash = MessageDigest.getInstance("SHA-256").run {
             val buffer = ByteArray(8192)
@@ -61,7 +68,9 @@ object DexMembers {
                 "%02x".format(it.toInt() and 0xFF)
             }
         }
-        dexkit = DexKitCacheBridge.create(appHash, sourceDir)
+
+        this.classLoader = classLoader
+        this.dexkit = DexKitCacheBridge.create(appHash, sourceDir)
         XLog.d(TAG, "DexKit initialized in ${System.currentTimeMillis() - startTime}ms")
     }
 }
@@ -86,7 +95,7 @@ object DexClasses {
     val HMAService by classFinder {
         addMethod {
             name = "<init>"
-            usingEqStrings("icu.nullptr.hidemyapplist.common.IHMAService")
+            usingEqStrings(Constants.HMA_SERVICE_CLASS)
             addInvoke {
                 name = "attachInterface"
             }
@@ -121,7 +130,10 @@ object DexClasses {
     }
 
     private fun classFinder(block: ClassMatcher.() -> Unit) = FinderDelegate {
-        dexkit.getClass(it) { matcher(ClassMatcher().apply(block)) }.getInstance(HmaProModule.classLoader)
+        val clazz = DexMembers.dexkit.getClass(it) {
+            matcher(ClassMatcher().apply(block))
+        }
+        return@FinderDelegate clazz.getInstance(DexMembers.classLoader)
     }
 }
 
@@ -261,11 +273,17 @@ object DexMethods {
     }
 
     private fun constructorFinder(block: MethodMatcher.() -> Unit) = FinderDelegate {
-        dexkit.getMethod(it) { matcher(MethodMatcher().apply(block)) }.getConstructorInstance(HmaProModule.classLoader)
+        val ctor = DexMembers.dexkit.getMethod(it) {
+            matcher(MethodMatcher().apply(block))
+        }
+        return@FinderDelegate ctor.getConstructorInstance(DexMembers.classLoader)
     }
 
     private fun methodFinder(block: MethodMatcher.() -> Unit) = FinderDelegate {
-        dexkit.getMethod(it) { matcher(MethodMatcher().apply(block)) }.getMethodInstance(HmaProModule.classLoader)
+        val method = DexMembers.dexkit.getMethod(it) {
+            matcher(MethodMatcher().apply(block))
+        }
+        return@FinderDelegate method.getMethodInstance(DexMembers.classLoader)
     }
 }
 
@@ -280,6 +298,11 @@ object DexFields {
         declaredClass = DexClasses.ConfigManager.name
         type = DexClasses.ConfigManager.name
         modifiers = Modifier.STATIC or Modifier.FINAL
+    }
+
+    val HMAService_config by fieldFinder {
+        declaredClass = DexClasses.HMAService.name
+        type = "icu.nullptr.hidemyapplist.common.JsonConfig"
     }
 
     val JsonConfig_Companion by fieldFinder {
@@ -303,7 +326,10 @@ object DexFields {
     }
 
     private fun fieldFinder(block: FieldMatcher.() -> Unit) = FinderDelegate {
-        dexkit.getField(it) { matcher(FieldMatcher().apply(block)) }.getFieldInstance(HmaProModule.classLoader)
+        val field = DexMembers.dexkit.getField(it) {
+            matcher(FieldMatcher().apply(block))
+        }
+        return@FinderDelegate field.getFieldInstance(DexMembers.classLoader)
     }
 }
 
@@ -369,6 +395,7 @@ private object DexKitCache : DexKitCacheBridge.Cache {
 
     fun trySave() {
         if (!dirty) return
+        if (!::file.isInitialized) return
         thread { save(file) }
     }
 

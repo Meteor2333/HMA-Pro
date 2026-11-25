@@ -15,8 +15,6 @@ import cc.meteormc.xposedkit.param.SystemServerStartingParam
     staticScope = true
 )
 object HmaProModule : XposedModule {
-    lateinit var classLoader: ClassLoader
-
     init {
         if (BuildConfig.DEBUG){
             XLog.updateLevel(Log.VERBOSE)
@@ -24,9 +22,9 @@ object HmaProModule : XposedModule {
     }
 
     override fun onPackageLoaded(param: PackageLoadedParam) {
-        classLoader = param.classLoader
         val packageName = param.packageName
-        if (param.processName == "android") {
+        val classLoader = param.classLoader
+        if (param.processName == "system") {
             SystemServerMain.init(packageName, classLoader)
         }
 
@@ -36,7 +34,9 @@ object HmaProModule : XposedModule {
     }
 
     override fun onSystemServerStarting(param: SystemServerStartingParam) {
-        classLoader = param.classLoader
-        SystemServerMain.init(Constants.SYSTEM_PACKAGE, classLoader)
+        SystemServerMain.init(
+            Constants.SYSTEM_PACKAGE,
+            param.classLoader
+        )
     }
 }

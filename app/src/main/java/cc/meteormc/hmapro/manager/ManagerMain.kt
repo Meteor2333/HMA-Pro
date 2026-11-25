@@ -21,13 +21,18 @@ object ManagerMain {
     const val CACHE_DIR = "/data/data/${Constants.HMA_PACKAGE}/cache/hmapro"
     const val MAIN_ACTIVITY = "icu.nullptr.hidemyapplist.ui.activity.MainActivity"
 
+    lateinit var classLoader: ClassLoader
+        private set
     lateinit var preferences: PreferencesState
+        private set
     val serviceBindEvent = MutableSharedFlow<Unit>(replay = 1)
 
     fun init(classLoader: ClassLoader, appInfo: ApplicationInfo) {
+        this.classLoader = classLoader
         @SuppressLint("SdCardPath")
         DexMembers.init(
             appInfo.sourceDir,
+            classLoader,
             File(CACHE_DIR, "dexkit_cache.dat")
         )
         val context = HookerContext(classLoader)

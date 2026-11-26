@@ -401,7 +401,7 @@ fun SharedTransitionScope.TemplateSettingsScreen(name: String?) {
                     summary = it.packageName,
                     startAction = {
                         Row {
-                            AppIcon(app = it)
+                            AppIcon(icon = it.icon)
 
                             Spacer(modifier = Modifier.width(5.dp))
                         }

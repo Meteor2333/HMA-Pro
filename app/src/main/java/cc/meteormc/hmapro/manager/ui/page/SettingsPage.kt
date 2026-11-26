@@ -29,10 +29,12 @@ import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.DexFields
 import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.common.Constants
+import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.service.ServiceClient
 import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
 import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
+import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.copy
 import cc.meteormc.hmapro.manager.ui.util.rememberSnackbarHostState
@@ -506,10 +508,11 @@ private fun StopSystemServiceConfirmDialog(
     )
 
     val context = LocalContext.current
+    val moduleStatus = LocalModuleStatus.current
     val toastMessage = stringResourceBy("settings_stop_system_service")
     val offMessage = stringResourceBy("home_xposed_service_off")
     fun stopService(cleanEnv: Boolean) {
-        if (ServiceClient.getServiceVersion() == 0) {
+        if (moduleStatus == ModuleStatus.ServiceNotRunning) {
             Toast.makeText(context,  offMessage, Toast.LENGTH_SHORT).show()
             return
         }

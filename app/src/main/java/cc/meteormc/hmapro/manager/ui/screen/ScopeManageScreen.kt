@@ -1,16 +1,15 @@
 package cc.meteormc.hmapro.manager.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
@@ -21,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessStarted
@@ -31,9 +29,8 @@ import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.ui.component.AppIcon
 import cc.meteormc.hmapro.manager.ui.component.AppSelectorScaffold
-import cc.meteormc.hmapro.manager.ui.component.EmptyContent
 import cc.meteormc.hmapro.manager.ui.component.button.BackButton
-import cc.meteormc.hmapro.manager.ui.component.button.DialogButtonPair
+import cc.meteormc.hmapro.manager.ui.component.dialog.ItemsDialog
 import cc.meteormc.hmapro.manager.ui.component.dialog.UnsavedChangesDialog
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
@@ -53,12 +50,9 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.Ok
-import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.preference.CheckboxPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
-import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.util.EnumSet
 import kotlin.reflect.KProperty
@@ -76,7 +70,7 @@ fun SharedTransitionScope.ScopeListScreen() {
             startAction = {
                 Row {
                     AppIcon(
-                        app = it,
+                        icon = it.icon,
                         enabled = enabled
                     )
 
@@ -125,6 +119,7 @@ fun ScopeSettingsScreen(
     var excludeSystemApps by rememberSaveable(scope) { mutableStateOf(scope?.excludeSystemApps ?: false) }
     var aggressiveFilter by rememberSaveable(scope) { mutableStateOf(scope?.aggressiveFilter ?: false) }
     val applyTemplates = rememberSaveable(scope) { scope?.applyTemplates.orEmpty().toMutableStateSet() }
+    val applyPresets = rememberSaveable(scope) { scope?.applyPresets.orEmpty().toMutableStateSet() }
     val extraApps = rememberSaveable(scope) { scope?.extraAppList.orEmpty().toMutableStateSet() }
     val hiddenSettings = rememberSaveable(scope) { scope?.hiddenSettings.orEmpty().toMutableStateSet() }
 
@@ -139,11 +134,12 @@ fun ScopeSettingsScreen(
                 this.useWhitelist = useWhitelist
                 this.excludeSystemApps = excludeSystemApps
                 this.applyTemplates = applyTemplates
+                this.applyPresets = applyPresets
                 this.extraAppList = extraApps
                 this.hiddenSettings = if (hiddenSettings.isNotEmpty()) {
                     EnumSet.copyOf(hiddenSettings)
                 } else {
-                    EnumSet.noneOf(HMAConfig.HiddenSettings::class.java)
+                    EnumSet.noneOf(HMAConfig.HiddenSetting::class.java)
                 }
             }
         } else {
@@ -156,6 +152,7 @@ fun ScopeSettingsScreen(
 
     var showUnsavedDialog by remember { mutableStateOf(false) }
     var showTemplateDialog by remember { mutableStateOf(false) }
+    var showPresetDialog by remember { mutableStateOf(false) }
     var showHiddenSettingsDialog by remember { mutableStateOf(false) }
     BackHandler(enabled = unsaved) {
         showUnsavedDialog = true
@@ -198,108 +195,64 @@ fun ScopeSettingsScreen(
             onSave = { save() }
         )
 
-        OverlayDialog(
+        ItemsDialog(
             show = showTemplateDialog,
             title = stringResourceBy("app_choose_template"),
-            largeScreen = true
-        ) {
-            val templates = ConfigManager.templates.filterValues { it.isWhitelist == useWhitelist }
-            if (templates.isEmpty()) {
-                EmptyContent(
-                    maxHeight = 150.dp
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScrollEffect(
-                            enableHaptic = false,
-                            enableOverScroll = false
-                        )
-                ) {
-                    items(items = templates.keys.toList()) {
-                        CheckboxPreference(
-                            title = it,
-                            checked = applyTemplates.contains(it),
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    applyTemplates += it
-                                } else {
-                                    applyTemplates -= it
-                                }
-                            },
-                            modifier = Modifier.squircleClip(16.dp)
-                        )
-                    }
+            items = ConfigManager.templates
+                .filterValues { it.isWhitelist == useWhitelist }
+                .keys
+                .toList(),
+            selected = applyTemplates,
+            onCancel = {
+                showTemplateDialog = false
+                applyTemplates.clear()
+                scope?.applyTemplates?.also {
+                    applyTemplates.addAll(it)
                 }
+            },
+            onConfirm = {
+                unsaved = true
+                showTemplateDialog = false
             }
+        )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            DialogButtonPair(
-                leftText = stringResource(android.R.string.cancel),
-                rightText = stringResource(android.R.string.ok),
-                onLeftClick = {
-                    showTemplateDialog = false
-                    applyTemplates.clear()
-                    scope?.applyTemplates?.also {
-                        applyTemplates.addAll(it)
-                    }
-                },
-                onRightClick = {
-                    unsaved = true
-                    showTemplateDialog = false
+        ItemsDialog(
+            show = showPresetDialog,
+            title = stringResourceFromModule(R.string.choose_presets),
+            items = HMAConfig.AppPreset.entries,
+            selected = applyPresets,
+            transform = { stringResourceFromModule(it.message) },
+            onCancel = {
+                showPresetDialog = false
+                applyPresets.clear()
+                scope?.applyPresets?.also {
+                    applyPresets.addAll(it)
                 }
-            )
-        }
+            },
+            onConfirm = {
+                unsaved = true
+                showPresetDialog = false
+            }
+        )
 
-        OverlayDialog(
+        ItemsDialog(
             show = showHiddenSettingsDialog,
             title = stringResourceFromModule(R.string.choose_settings),
-            largeScreen = true
-        ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScrollEffect(
-                        enableHaptic = false,
-                        enableOverScroll = false
-                    )
-            ) {
-                items(items = HMAConfig.HiddenSettings.entries) {
-                    CheckboxPreference(
-                        title = stringResourceFromModule(it.message),
-                        checked = hiddenSettings.contains(it),
-                        onCheckedChange = { checked ->
-                            if (checked) {
-                                hiddenSettings += it
-                            } else {
-                                hiddenSettings -= it
-                            }
-                        },
-                        modifier = Modifier.squircleClip(16.dp)
-                    )
+            items = HMAConfig.HiddenSetting.entries,
+            selected = hiddenSettings,
+            transform = { stringResourceFromModule(it.message) },
+            onCancel = {
+                showHiddenSettingsDialog = false
+                hiddenSettings.clear()
+                scope?.hiddenSettings?.also {
+                    hiddenSettings.addAll(it)
                 }
+            },
+            onConfirm = {
+                unsaved = true
+                showHiddenSettingsDialog = false
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            DialogButtonPair(
-                leftText = stringResource(android.R.string.cancel),
-                rightText = stringResource(android.R.string.ok),
-                onLeftClick = {
-                    showHiddenSettingsDialog = false
-                    hiddenSettings.clear()
-                    scope?.hiddenSettings?.also {
-                        hiddenSettings.addAll(it)
-                    }
-                },
-                onRightClick = {
-                    unsaved = true
-                    showHiddenSettingsDialog = false
-                }
-            )
-        }
+        )
 
         LazyColumn(
             modifier = Modifier
@@ -336,6 +289,7 @@ fun ScopeSettingsScreen(
                         onSelectedIndexChange = {
                             unsaved = true
                             applyTemplates.clear()
+                            applyPresets.clear()
                             useWhitelist = it == 1
                         }
                     )
@@ -373,6 +327,15 @@ fun ScopeSettingsScreen(
                         title = stringResourceBy("app_template_using", applyTemplates.size),
                         onClick = { showTemplateDialog = true }
                     )
+
+                    AnimatedVisibility(
+                        visible = !useWhitelist
+                    ) {
+                        ArrowPreference(
+                            title = stringResourceFromModule(R.string.preset_using, applyPresets.size),
+                            onClick = { showPresetDialog = true }
+                        )
+                    }
 
                     ArrowPreference(
                         title = if (useWhitelist) {

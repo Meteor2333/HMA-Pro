@@ -1,6 +1,7 @@
 package cc.meteormc.hmapro.manager.data
 
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import cc.meteormc.hmapro.manager.service.ServiceClient
@@ -24,6 +25,18 @@ data class InstalledPackage(
     companion object {
         private var cache by AtomicDelegate(emptyList<InstalledPackage>())
 
+        suspend fun PackageInfo.toInstallPackage(packageManager: PackageManager): InstalledPackage? {
+            val appInfo = applicationInfo ?: return null
+            return InstalledPackage(
+                label = AppMetaLoader.loadLabel(packageManager, appInfo, lastUpdateTime),
+                icon = AppMetaLoader.loadUnbadgedIcon(packageManager, appInfo, lastUpdateTime),
+                packageName = packageName,
+                isSystemApp = appInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0,
+                firstInstallTime = firstInstallTime,
+                lastUpdateTime = lastUpdateTime
+            )
+        }
+
         suspend fun getInstalledPackages(
             packageManager: PackageManager,
             scope: CoroutineScope = MainScope(),
@@ -36,15 +49,7 @@ data class InstalledPackage(
             val packages = withContext(Dispatchers.IO) {
                 ServiceClient.getInstalledPackages().orEmpty()
             }.mapNotNull {
-                val appInfo = it.applicationInfo ?: return@mapNotNull null
-                InstalledPackage(
-                    label = AppMetaLoader.loadLabel(packageManager, appInfo, it.lastUpdateTime),
-                    icon = AppMetaLoader.loadUnbadgedIcon(packageManager, appInfo, it.lastUpdateTime),
-                    packageName = it.packageName,
-                    isSystemApp = appInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0,
-                    firstInstallTime = it.firstInstallTime,
-                    lastUpdateTime = it.lastUpdateTime
-                )
+                it.toInstallPackage(packageManager)
             }.sortedWith(
                 AppSortMethod.BY_LABEL.comparator
             )

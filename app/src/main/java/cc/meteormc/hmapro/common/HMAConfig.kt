@@ -16,6 +16,7 @@ import java.util.EnumSet
 class HMAConfig(internal val config: Any) {
     companion object {
         const val EXTRA_RAW_JSON = "rawJson"
+        const val EXTRA_APP_PRESETS = "app"
         const val EXTRA_HIDDEN_SETTINGS = "hiddenSettings"
     }
 
@@ -93,14 +94,11 @@ class HMAConfig(internal val config: Any) {
                     useWhitelist = false
                     excludeSystemApps = true
                     applyTemplates = mutableSetOf()
+                    applyPresets = mutableSetOf()
                     extraAppList = mutableSetOf()
                 }
             }
         }
-
-        var aggressiveFilter: Boolean
-            get() = delegate["aggressiveFilter"]
-            set(value) { delegate["aggressiveFilter"] = value }
 
         var useWhitelist: Boolean
             get() = delegate["useWhitelist"]
@@ -110,25 +108,47 @@ class HMAConfig(internal val config: Any) {
             get() = delegate["excludeSystemApps"]
             set(value) { delegate["excludeSystemApps"] = value }
 
+        var aggressiveFilter: Boolean
+            get() = delegate["aggressiveFilter"]
+            set(value) { delegate["aggressiveFilter"] = value }
+
         var applyTemplates: Set<String>
             get() = delegate["applyTemplates"]
             set(value) { delegate["applyTemplates"] = value }
+
+        var applyPresets: Set<AppPreset>
+            get() = extras[EXTRA_APP_PRESETS] ?: emptySet()
+            set(value) { extras[EXTRA_APP_PRESETS] = value }
 
         var extraAppList: Set<String>
             get() = delegate["extraAppList"]
             set(value) { delegate["extraAppList"] = value }
 
-        var hiddenSettings: Set<HiddenSettings>
+        var hiddenSettings: Set<HiddenSetting>
             get() = extras[EXTRA_HIDDEN_SETTINGS] ?: emptySet()
             set(value) { extras[EXTRA_HIDDEN_SETTINGS] = value }
 
         fun readExtras(json: JSONObject) {
-            json.optJSONArray(EXTRA_HIDDEN_SETTINGS)?.apply {
-                val settings = EnumSet.noneOf(HiddenSettings::class.java)
+            json.optJSONArray(EXTRA_APP_PRESETS)?.apply {
+                val presets = EnumSet.noneOf(AppPreset::class.java)
                 for (i in 0 until length()) {
                     val item = try {
                         val str = getString(i) ?: continue
-                        HiddenSettings.valueOf(str)
+                        AppPreset.valueOf(str)
+                    } catch (_: Throwable) {
+                        continue
+                    }
+
+                    presets.add(item)
+                }
+                applyPresets = presets
+            }
+            json.optJSONArray(EXTRA_HIDDEN_SETTINGS)?.apply {
+                val settings = EnumSet.noneOf(HiddenSetting::class.java)
+                for (i in 0 until length()) {
+                    val item = try {
+                        val str = getString(i) ?: continue
+                        HiddenSetting.valueOf(str)
                     } catch (_: Throwable) {
                         continue
                     }
@@ -140,6 +160,10 @@ class HMAConfig(internal val config: Any) {
         }
 
         fun writeExtras(json: JSONObject) {
+            JSONArray().apply {
+                for (preset in applyPresets) { put(preset.name) }
+                json.put(EXTRA_APP_PRESETS, this)
+            }
             JSONArray().apply {
                 for (setting in hiddenSettings) { put(setting.name) }
                 json.put(EXTRA_HIDDEN_SETTINGS, this)
@@ -179,7 +203,22 @@ class HMAConfig(internal val config: Any) {
         }
     }
 
-    enum class HiddenSettings(
+    enum class AppPreset(
+        @StringRes
+        val message: Int
+    ) {
+        DETECTORS(
+            R.string.preset_detectors
+        ),
+        SHIZUKU_APPS(
+            R.string.preset_shizuku_apps
+        ),
+        XPOSED_MODULES(
+            R.string.preset_xposed_modules
+        )
+    }
+
+    enum class HiddenSetting(
         @StringRes
         val message: Int,
         vararg kv: Pair<String, String>

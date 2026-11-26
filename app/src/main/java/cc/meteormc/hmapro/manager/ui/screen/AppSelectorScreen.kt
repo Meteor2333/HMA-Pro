@@ -57,7 +57,7 @@ fun AppSelectorScreen(
                 }
             },
             startAction = {
-                AppIcon(app = it)
+                AppIcon(icon = it.icon)
             },
             checkboxLocation = CheckboxLocation.End
         )

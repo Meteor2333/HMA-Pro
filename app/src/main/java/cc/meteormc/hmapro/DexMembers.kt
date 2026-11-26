@@ -26,6 +26,7 @@ import kotlin.concurrent.thread
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+// todo: 整理
 object DexMembers {
     const val TAG = "DexMembers"
 
@@ -76,6 +77,16 @@ object DexMembers {
 }
 
 object DexClasses {
+    val CompiledAppConfig by classFinder {
+        addFieldForType(LinkedHashSet::class.java)
+        addMethod {
+            name = "<init>"
+            addCaller(
+                MethodMatcher.create(DexMethods.HMAService_compileConfig)
+            )
+        }
+    }
+
     val ConfigManager by classFinder {
         usingEqStrings("ConfigManager")
         addFieldForType("icu.nullptr.hidemyapplist.common.JsonConfig")
@@ -182,11 +193,28 @@ object DexMethods {
         usingEqStrings(" not attached to a context.")
     }
 
+    val HMAService_getInstalledPackages by methodFinder {
+        declaredClass = DexClasses.HMAService.name
+        name = ServiceClient_getInstalledPackages.name
+        paramCount = 1
+    }
+
     val HMAService_getServiceVersion by methodFinder {
         declaredClass = DexClasses.HMAService.name
         name = ServiceClient_getServiceVersion.name
         returnType = "int"
         paramCount = 0
+    }
+
+    val HMAService_compileConfig by methodFinder {
+        modifiers = Modifier.STATIC
+        paramTypes("icu.nullptr.hidemyapplist.common.JsonConfig")
+        returnType(Map::class.java)
+    }
+
+    val HMAService_shouldHide by methodFinder {
+        returnType = "boolean"
+        paramCount(min = 2)
     }
 
     val JsonConfig_parse by methodFinder {
@@ -288,6 +316,11 @@ object DexMethods {
 }
 
 object DexFields {
+    val CompiledAppConfig_querySet by fieldFinder {
+        declaredClass = DexClasses.CompiledAppConfig.name
+        type(LinkedHashSet::class.java)
+    }
+
     val ConfigManager_config by fieldFinder {
         declaredClass = DexClasses.ConfigManager.name
         type = "icu.nullptr.hidemyapplist.common.JsonConfig"

@@ -4,6 +4,7 @@
     <string name="accessibility">无障碍服务</string>
     <string name="app_description">增强你的隐藏应用列表模块</string>
     <string name="color_spec_summary">Material3 色彩规范版本</string>
+    <string name="choose_presets">选择预设</string>
     <string name="choose_settings">选择设置项</string>
     <string name="color_spec_title">色彩规范</string>
     <string name="confirm_action">是否确定执行此操作？</string>
@@ -32,7 +33,11 @@
     <string name="open_release_page">打开发布页</string>
     <string name="palette_style_summary">用于推导 Material3 调色板的色调算法</string>
     <string name="palette_style_title">调色板风格</string>
+    <string name="preset_detectors">检测器</string>
     <string name="preset_overview">查看预设</string>
+    <string name="preset_shizuku_apps">Shizuku应用</string>
+    <string name="preset_using">已使用 %d 个预设</string>
+    <string name="preset_xposed_modules">Xposed模块</string>
     <string name="pulling">下拉刷新</string>
     <string name="reboot_tip">（请尝试重启设备）</string>
     <string name="refresh_complete">刷新完成</string>

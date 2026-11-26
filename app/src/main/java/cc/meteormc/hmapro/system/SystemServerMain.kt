@@ -9,6 +9,7 @@ import cc.meteormc.hmapro.DexMembers
 import cc.meteormc.hmapro.common.Constants
 import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.common.hooker.ConfigHooker
+import cc.meteormc.hmapro.system.hooker.HMAHooker
 import cc.meteormc.hmapro.system.hooker.ModuleLauncherHooker
 import cc.meteormc.hmapro.system.hooker.SettingsProviderHooker
 import cc.meteormc.xposedkit.XLog
@@ -54,7 +55,8 @@ object SystemServerMain {
         
         val hookers = when (packageName) {
             Constants.SYSTEM_PACKAGE -> listOf(
-                ConfigHooker
+                ConfigHooker,
+                HMAHooker
             )
             Constants.SETTINGS_PROVIDER_PACKAGE -> listOf(
                 ConfigHooker,
@@ -126,7 +128,12 @@ object SystemServerMain {
 
         val hmaLoader = service.javaClass.classLoader!!
         DexMembers.classLoader = hmaLoader
-        if (!DexClasses.HMAService.isInstance(service)) {
+        try {
+            if (!DexClasses.HMAService.isInstance(service)) {
+                XLog.w(TAG, "Service $service is not an instance of HMAService")
+                return false
+            }
+        } catch (_: Throwable) {
             return false
         }
 

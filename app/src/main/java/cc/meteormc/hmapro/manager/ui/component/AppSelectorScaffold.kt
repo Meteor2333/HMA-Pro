@@ -53,6 +53,7 @@ fun AppSelectorScaffold(
     item: @Composable (InstalledPackage) -> Unit
 ) {
     val context = LocalContext.current
+    val moduleStatus = LocalModuleStatus.current
     val scope = rememberCoroutineScope()
     var reversion by rememberSaveable { mutableIntStateOf(0) }
     var isInitial by rememberSaveable { mutableStateOf(true) }
@@ -137,8 +138,6 @@ fun AppSelectorScaffold(
 
     var query by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
-
-    val moduleStatus = LocalModuleStatus.current
     Scaffold(
         modifier = Modifier
             .fillMaxSize()

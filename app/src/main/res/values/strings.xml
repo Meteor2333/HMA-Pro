@@ -43,8 +43,13 @@
     <string name="join_telegram">Join Telegram channel</string>
 
     <!-- Scope -->
+    <string name="preset_using">Using %d presets</string>
     <string name="settings_hidden_count">%d settings hidden</string>
+    <string name="choose_presets">Choose presets</string>
     <string name="choose_settings">Choose settings</string>
+    <string name="preset_detectors">Detectors</string>
+    <string name="preset_shizuku_apps">Shizuku apps</string>
+    <string name="preset_xposed_modules">Xposed modules</string>
     <string name="developer_options">Developer options</string>
     <string name="adb_debugging">ADB debugging</string>
     <string name="accessibility">Accessibility</string>

@@ -1,5 +1,6 @@
 package cc.meteormc.hmapro.manager.ui.component
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -7,16 +8,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import cc.meteormc.hmapro.manager.data.InstalledPackage
 
 @Composable
 fun AppIcon(
-    app: InstalledPackage,
+    icon: Bitmap,
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
     Image(
-        bitmap = app.icon.asImageBitmap(),
+        bitmap = icon.asImageBitmap(),
         contentDescription = "App Icon",
         modifier = Modifier
             .size(42.dp)

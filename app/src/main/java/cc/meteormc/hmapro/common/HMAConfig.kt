@@ -13,14 +13,18 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.EnumSet
 
-
 class HMAConfig(internal val config: Any) {
     companion object {
+        const val EXTRA_RAW_JSON = "rawJson"
         const val EXTRA_HIDDEN_SETTINGS = "hiddenSettings"
     }
 
     private val extras = extrasOf(config)
     private val delegate = FieldAccessor(config)
+
+    var rawJson: JSONObject
+        get() = extras[EXTRA_RAW_JSON] ?: JSONObject()
+        private set(value) { extras[EXTRA_RAW_JSON] = value }
 
     var detailLog: Boolean
         get() = delegate["detailLog"]
@@ -43,6 +47,8 @@ class HMAConfig(internal val config: Any) {
         set(value) { delegate["templates"] = value.mapValues { it.value.config } }
 
     fun readExtras(json: JSONObject) {
+        rawJson = json
+
         json.optJSONObject("scope")?.apply {
             for ((packageName, scope) in scopes) {
                 val obj = optJSONObject(packageName) ?: continue

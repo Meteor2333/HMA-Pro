@@ -13,6 +13,7 @@ import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.get
 import cc.meteormc.xposedkit.hook.BaseHooker
 import cc.meteormc.xposedkit.hook.HookerContext
+import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicBoolean
 
 object SystemServerMain {
@@ -44,7 +45,11 @@ object SystemServerMain {
         ModuleLauncherHooker.installHook(context)
     }
 
-    fun init(packageName: String, classLoader: ClassLoader) {
+    fun init(
+        packageName: String,
+        classLoader: ClassLoader,
+        reloadData: Map<String, Any>?
+    ) {
         val hookers = when (packageName) {
             Constants.SYSTEM_PACKAGE -> listOf(
                 ConfigHooker
@@ -56,12 +61,45 @@ object SystemServerMain {
             else -> return
         }
 
+        if (isInitialized.get()) {
+            launch(classLoader, hookers)
+            return
+        }
+
+        if (reloadData != null) {
+            service = reloadData["service"] as Any
+            hmaLoader = reloadData["hmaLoader"] as ClassLoader
+            pms = reloadData["pms"] as IPackageManager
+            launch(classLoader, hookers)
+
+            val rawConfig = reloadData["config"]
+            if (rawConfig != null) {
+                config?.readExtras(rawConfig as JSONObject)
+            }
+            return
+        }
+
         ModuleLauncherHooker.submitTask {
             launch(classLoader, hookers)
         }
     }
 
-    fun launch(
+    fun reload(): Map<String, Any>? {
+        if (!isInitialized.get()) {
+            return null
+        }
+
+        return buildMap {
+            this["service"] = service
+            this["hmaLoader"] = hmaLoader
+            this["pms"] = pms
+            if (config != null) {
+                this["config"] = config!!.rawJson
+            }
+        }
+    }
+
+    private fun launch(
         classLoader: ClassLoader,
         hookers: List<BaseHooker<HookerContext>>
     ) {

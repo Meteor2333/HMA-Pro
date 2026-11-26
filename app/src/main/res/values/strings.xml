@@ -47,6 +47,7 @@
     <string name="choose_settings">Choose settings</string>
     <string name="developer_options">Developer options</string>
     <string name="adb_debugging">ADB debugging</string>
+    <string name="accessibility">Accessibility</string>
 
     <!-- Template -->
     <string name="template_type">Template type</string>

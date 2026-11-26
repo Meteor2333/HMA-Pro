@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="adb_debugging">ADB调试</string>
+    <string name="accessibility">无障碍服务</string>
     <string name="app_description">增强你的隐藏应用列表模块</string>
     <string name="color_spec_summary">Material3 色彩规范版本</string>
     <string name="choose_settings">选择设置项</string>

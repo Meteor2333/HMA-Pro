@@ -192,6 +192,11 @@ class HMAConfig(internal val config: Any) {
             R.string.adb_debugging,
             Settings.Global.ADB_ENABLED to "0",
             "adb_wifi_enabled" to "0"
+        ),
+        ACCESSIBILITY(
+            R.string.accessibility,
+            Settings.Secure.ACCESSIBILITY_ENABLED to "0",
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES to ""
         );
 
         val items = kv.toMap()

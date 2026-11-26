@@ -69,9 +69,8 @@ object SystemServerMain {
         }
 
         if (reloadData != null) {
-            service = reloadData["service"] as Any
-            hmaLoader = reloadData["hmaLoader"] as ClassLoader
-            pms = reloadData["pms"] as IPackageManager
+            onPmsAttach(reloadData["pms"] as IPackageManager)
+            onServiceAttach(reloadData["service"] as IInterface)
             launch(classLoader, hookers)
 
             val rawConfig = reloadData["config"]
@@ -93,7 +92,6 @@ object SystemServerMain {
 
         return buildMap {
             this["service"] = service
-            this["hmaLoader"] = hmaLoader
             this["pms"] = pms
             if (config != null) {
                 this["config"] = config!!.rawJson

@@ -5,7 +5,6 @@ import android.os.IInterface
 import android.os.ServiceManager
 import cc.meteormc.hmapro.common.Constants
 import cc.meteormc.hmapro.system.SystemServerMain
-import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.hook.BaseHooker
 import cc.meteormc.xposedkit.hook.HookerContext
 import cc.meteormc.xposedkit.reflect
@@ -18,7 +17,7 @@ object ModuleLauncherHooker : BaseHooker<HookerContext>() {
             method("addService")?.hookBefore {
                 val name = it.argumentAt<String>(0)
                 if (name == "package") {
-                    SystemServerMain.pms = it.argumentAt(1)
+                    SystemServerMain.onPmsAttach(it.argumentAt(1))
                 }
             }
         }
@@ -31,14 +30,10 @@ object ModuleLauncherHooker : BaseHooker<HookerContext>() {
                     return@hookBefore
                 }
 
-                XLog.d(tag, "Detected IHMAService: $owner")
-                SystemServerMain.service = owner
-                SystemServerMain.hmaLoader = owner.javaClass.classLoader!!
-                while (tasks.isNotEmpty()) {
-                    tasks.removeFirst().invoke()
+                val unhook = SystemServerMain.onServiceAttach(owner)
+                if (unhook) {
+                    unhookAll()
                 }
-
-                unhookAll()
             }
         }
     }

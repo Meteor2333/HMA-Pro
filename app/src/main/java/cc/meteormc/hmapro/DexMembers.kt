@@ -34,6 +34,15 @@ object DexMembers {
 
     init {
         System.loadLibrary("dexkit")
+
+        DexKitCacheBridge.init(DexKitCache)
+        DexKitCacheBridge.addListener(
+            object : CacheBridgeListener() {
+                override fun onBridgeReleased(appTag: String) {
+                    DexKitCache.trySave()
+                }
+            }
+        )
     }
 
     fun init(
@@ -45,15 +54,6 @@ object DexMembers {
         if (cacheFile != null) {
             DexKitCache.load(cacheFile)
         }
-
-        DexKitCacheBridge.init(DexKitCache)
-        DexKitCacheBridge.addListener(
-            object : CacheBridgeListener() {
-                override fun onBridgeReleased(appTag: String) {
-                    DexKitCache.trySave()
-                }
-            }
-        )
 
         val appHash = MessageDigest.getInstance("SHA-256").run {
             val buffer = ByteArray(8192)

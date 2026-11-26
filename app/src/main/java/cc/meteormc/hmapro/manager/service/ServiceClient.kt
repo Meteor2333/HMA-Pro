@@ -24,7 +24,7 @@ object ServiceClient {
 
     fun getInstalledPackages(): List<PackageInfo>? {
         val method = DexMethods.ServiceClient_getInstalledPackages
-        val result = method.call<Any>(INSTANCE, 0)
+        val result = method.call<Any?>(INSTANCE, 0) ?: return null
         return method.returnType.reflect {
             field(List::class.java)!!.get<List<PackageInfo>?>(result)
         }

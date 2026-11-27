@@ -207,12 +207,14 @@ object DexMethods {
     }
 
     val HMAService_compileConfig by methodFinder {
+        declaredClass = DexClasses.HMAService.name
         modifiers = Modifier.STATIC
         paramTypes("icu.nullptr.hidemyapplist.common.JsonConfig")
         returnType(Map::class.java)
     }
 
     val HMAService_shouldHide by methodFinder {
+        declaredClass = DexClasses.HMAService.name
         returnType = "boolean"
         paramCount(min = 2)
     }

@@ -19,7 +19,7 @@ object HMAHooker : BaseHooker<HookerContext>() {
     override fun HookerContext.hook() {
         // todo: 计划将钩子改为在compileConfig时触发 起一个异步任务来解析预设
         //       然后在shouldHide方法里来修改逻辑 这样就尽可能不动已有的HMA预编译配置设计
-        //       同时需要加的缓存（可带超时） 并且在有应用安装或卸载也重新在后台解析一次
+        //       同时需要加缓存（可带超时） 并且在有应用安装或卸载也重新在后台解析一次
         DexMethods.HMAService_compileConfig.hookAfter { info ->
             val config = HMAConfig(info.argumentAt(0))
             val result = info.result<Map<String, Any>>()

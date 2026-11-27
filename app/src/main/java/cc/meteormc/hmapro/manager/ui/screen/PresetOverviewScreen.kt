@@ -1,20 +1,22 @@
 package cc.meteormc.hmapro.manager.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -22,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import cc.meteormc.hmapro.R
@@ -46,10 +49,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.basic.ArrowRight
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+private data class PresetInfo(
+    val type: HMAConfig.AppPreset,
+    val apps: List<InstalledPackage>
+)
 
 @Composable
 fun SharedTransitionScope.PresetOverviewScreen() {
@@ -58,18 +69,21 @@ fun SharedTransitionScope.PresetOverviewScreen() {
     val scope = rememberCoroutineScope()
     var isInitial by rememberSaveable { mutableStateOf(true) }
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
-    val presets = remember { mutableStateMapOf<HMAConfig.AppPreset, List<InstalledPackage>>() }
+    val presets = remember { mutableStateListOf<PresetInfo>() }
     suspend fun refreshPresets() {
         val source = withContext(Dispatchers.IO) {
             ServiceClient.getInstalledPackages().orEmpty()
         }
-        HMAConfig.AppPreset.entries.associateWith {
-            it.resolveApps(source).mapNotNull { app ->
+        HMAConfig.AppPreset.entries.map {
+            val apps = it.resolveApps(source).mapNotNull { app ->
                 app.toInstallPackage(context.packageManager)
             }
+            PresetInfo(it, apps)
+        }.sortedByDescending {
+            it.apps.size
         }.apply {
             presets.clear()
-            presets.putAll(this)
+            presets.addAll(this)
         }
     }
 
@@ -123,8 +137,8 @@ fun SharedTransitionScope.PresetOverviewScreen() {
                     .verticalScrollEffect(enableOverScroll = false),
                 contentPadding = paddingValues.withSafeHorizontal()
             ) {
-                items(items = presets.entries.toList()) {
-                    PresetItem(it.key, it.value)
+                items(items = presets) {
+                    PresetItem(it)
                 }
             }
         }
@@ -132,27 +146,45 @@ fun SharedTransitionScope.PresetOverviewScreen() {
 }
 
 @Composable
-private fun PresetItem(preset: HMAConfig.AppPreset, apps: List<InstalledPackage>) {
-    if (apps.isEmpty()) return
-
-    SmallTitle(
-        text = stringResourceFromModule(preset.message),
-        insideMargin = PaddingValues(16.dp, 8.dp)
+private fun PresetItem(preset: PresetInfo) {
+    val type = preset.type
+    var expanded by remember { mutableStateOf(true) }
+    val rotation by animateFloatAsState(
+        targetValue = if (expanded) 90f else 0f
     )
-
     Card {
-        Column {
-            for ((label, icon) in apps) {
-                BasicComponent(
-                    title = label,
-                    startAction = {
-                        Row {
-                            AppIcon(icon = icon)
-
-                            Spacer(modifier = Modifier.width(5.dp))
-                        }
-                    }
+        BasicComponent(
+            title = stringResourceFromModule(type.message),
+            endActions = {
+                Icon(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .align(Alignment.CenterVertically)
+                        .rotate(rotation),
+                    imageVector = MiuixIcons.Basic.ArrowRight,
+                    contentDescription = null,
+                    tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
                 )
+            },
+            onClick = { expanded = !expanded }
+        )
+
+        AnimatedVisibility(
+            visible = expanded
+        ) {
+            Column {
+                for ((label, icon) in preset.apps) {
+                    BasicComponent(
+                        title = label,
+                        startAction = {
+                            Row {
+                                AppIcon(icon = icon)
+
+                                Spacer(modifier = Modifier.width(5.dp))
+                            }
+                        }
+                    )
+                }
             }
         }
     }

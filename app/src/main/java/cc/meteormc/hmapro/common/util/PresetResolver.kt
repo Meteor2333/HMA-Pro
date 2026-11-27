@@ -3,7 +3,6 @@ package cc.meteormc.hmapro.common.util
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import cc.meteormc.hmapro.common.HMAConfig.AppPreset
-import cc.meteormc.xposedkit.XLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.zip.ZipFile
@@ -20,7 +19,7 @@ object PresetResolver {
         }
     }
 
-    suspend fun Collection<AppPreset>.resolveApps(source: List<PackageInfo>): List<String> {
+    suspend fun Collection<AppPreset>.resolveApps(source: List<PackageInfo>): Set<String> {
         val filters = map {
             when (it) {
                 AppPreset.DETECTORS -> DetectorFilter
@@ -29,17 +28,15 @@ object PresetResolver {
             }
         }
         return withContext(Dispatchers.IO) {
-            val result = mutableListOf<String>()
+            val result = HashSet<String>()
             for (app in source) {
                 val appInfo = app.applicationInfo
                 if (appInfo != null && appInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0) {
                     continue
                 }
 
-                XLog.d("PresetResolver", app.packageName)
                 for (filter in filters) {
                     if (!filter.shouldFilter(app)) continue
-                    XLog.d("PresetResolver", "shouldHide")
                     result.add(app.packageName)
                     break
                 }

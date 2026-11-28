@@ -93,6 +93,7 @@ object HMAHooker : BaseHooker<HookerContext>() {
 
         init {
             SystemServerMain.registerCleaner {
+                future?.cancel(true)
                 handler.removeCallbacksAndMessages(null)
                 scheduler.shutdownNow()
             }

@@ -10,8 +10,6 @@ import cc.meteormc.xposedkit.hook.HookerContext
 import cc.meteormc.xposedkit.reflect
 
 object ModuleLauncherHooker : BaseHooker<HookerContext>() {
-    private val tasks = ArrayDeque<() -> Unit>()
-
     override fun HookerContext.hook() {
         ServiceManager::class.reflect {
             method("addService")?.hookBefore {
@@ -36,9 +34,5 @@ object ModuleLauncherHooker : BaseHooker<HookerContext>() {
                 }
             }
         }
-    }
-
-    fun submitTask(task: () -> Unit) {
-        tasks.add(task)
     }
 }

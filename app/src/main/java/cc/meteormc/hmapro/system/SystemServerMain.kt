@@ -44,6 +44,13 @@ object SystemServerMain {
         }
         private set
 
+    init {
+        registerCleaner {
+            cleanerRegistry.clear()
+            config = null
+        }
+    }
+
     fun init(
         packageName: String,
         classLoader: ClassLoader,

@@ -14,7 +14,7 @@ sealed class ModuleStatus {
     companion object {
         private val expectedServiceVersion by lazy {
             val fake = DexClasses.HMAService.allocate()
-            DexMethods.HMAService_getServiceVersion.call<Int>(fake)
+            DexMethods.IHMAService_getServiceVersion.call<Int>(fake)
         }
 
         fun current(context: Context): ModuleStatus {

@@ -19,11 +19,11 @@ object ServiceClient {
     }
 
     fun clearLogs() {
-        DexMethods.ServiceClient_clearLogs.call<Unit>(INSTANCE)
+        DexMethods.IHMAService_clearLogs.call<Unit>(INSTANCE)
     }
 
     fun getInstalledPackages(): List<PackageInfo>? {
-        val method = DexMethods.ServiceClient_getInstalledPackages
+        val method = DexMethods.IHMAService_getInstalledPackages
         val result = method.call<Any?>(INSTANCE, 0) ?: return null
         return method.returnType.reflect {
             field(List::class.java)!!.get<List<PackageInfo>?>(result)
@@ -31,22 +31,22 @@ object ServiceClient {
     }
 
     fun getLogs(): String? {
-        return DexMethods.ServiceClient_getLogs.call(INSTANCE)
+        return DexMethods.IHMAService_getLogs.call(INSTANCE)
     }
 
     fun getServiceVersion(): Int {
-        return DexMethods.ServiceClient_getServiceVersion.call(INSTANCE)
+        return DexMethods.IHMAService_getServiceVersion.call(INSTANCE)
     }
 
     fun isNativeHookSupported(): Boolean {
-        return DexMethods.ServiceClient_isNativeHookSupported.call(INSTANCE)
+        return DexMethods.IHMAService_isNativeHookSupported.call(INSTANCE)
     }
 
     fun stopService(cleanEnv: Boolean) {
-        DexMethods.ServiceClient_stopService.call<Unit>(INSTANCE, cleanEnv)
+        DexMethods.IHMAService_stopService.call<Unit>(INSTANCE, cleanEnv)
     }
 
     fun syncConfig(json: String) {
-        DexMethods.ServiceClient_syncConfig.call<Unit>(INSTANCE, json)
+        DexMethods.IHMAService_syncConfig.call<Unit>(INSTANCE, json)
     }
 }

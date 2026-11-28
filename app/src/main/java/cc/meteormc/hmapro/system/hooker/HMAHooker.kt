@@ -79,7 +79,7 @@ object HMAHooker : BaseHooker<HookerContext>() {
 
     private fun getInstalledPackages(): List<PackageInfo> {
         val service = SystemServerMain.service
-        val method = DexMethods.HMAService_getInstalledPackages
+        val method = DexMethods.IHMAService_getInstalledPackages
         val result = method.call<Any>(service, 0)
         return method.returnType.reflect {
             field(List::class.java)!!.get<List<PackageInfo>?>(result).orEmpty()
@@ -126,7 +126,7 @@ object HMAHooker : BaseHooker<HookerContext>() {
         private fun updateConfig() = handler.post {
             val service = SystemServerMain.service
             val config = SystemServerMain.config?.config ?: return@post
-            DexMethods.HMAService_syncConfig.call(service, config.toString())
+            DexMethods.IHMAService_syncConfig.call(service, config.toString())
         }
     }
 }

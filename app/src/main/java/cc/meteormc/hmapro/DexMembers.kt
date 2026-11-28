@@ -4,9 +4,11 @@ package cc.meteormc.hmapro
 
 import android.app.Activity
 import android.content.Context
+import android.os.IInterface
 import cc.meteormc.hmapro.common.Constants
 import cc.meteormc.xposedkit.XLog
 import cc.meteormc.xposedkit.util.AtomicBooleanDelegate
+import org.luckypray.dexkit.DexKitBridge
 import org.luckypray.dexkit.DexKitCacheBridge
 import org.luckypray.dexkit.DexKitCacheBridge.CacheBridgeListener
 import org.luckypray.dexkit.annotations.DexKitExperimentalApi
@@ -14,6 +16,9 @@ import org.luckypray.dexkit.query.enums.UsingType
 import org.luckypray.dexkit.query.matchers.ClassMatcher
 import org.luckypray.dexkit.query.matchers.FieldMatcher
 import org.luckypray.dexkit.query.matchers.MethodMatcher
+import org.luckypray.dexkit.result.ClassDataList
+import org.luckypray.dexkit.result.FieldDataList
+import org.luckypray.dexkit.result.MethodDataList
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
@@ -26,7 +31,6 @@ import kotlin.concurrent.thread
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-// todo: 整理
 object DexMembers {
     const val TAG = "DexMembers"
 
@@ -113,6 +117,16 @@ object DexClasses {
         }
     }
 
+    val IHMAService by classDirectFinder {
+        val clientClass = getClassData(ServiceClient)!!
+        findClass {
+            searchIn(clientClass.interfaces)
+            matcher {
+                addInterface(IInterface::class.java.name)
+            }
+        }
+    }
+
     val OnPreferenceChangeListener by classFinder {
         modifiers = Modifier.INTERFACE
         methodCount(1)
@@ -146,15 +160,22 @@ object DexClasses {
         }
         return@FinderDelegate clazz.getInstance(DexMembers.classLoader)
     }
+
+    private fun classDirectFinder(block: DexKitBridge.() -> ClassDataList) = FinderDelegate {
+        val clazz = DexMembers.dexkit.getClassDirect(it) {
+            block(this).single()
+        }
+        return@FinderDelegate clazz.getInstance(DexMembers.classLoader)
+    }
 }
 
 object DexMethods {
     val ConfigManager_saveConfig by methodFinder {
-        declaredClass = DexClasses.ConfigManager.name
+        declaredClass(DexClasses.ConfigManager)
         returnType = "void"
         modifiers = Modifier.STATIC
         addInvoke {
-            declaredClass = Executor::class.java.name
+            declaredClass(Executor::class.java)
             name = "execute"
         }
     }
@@ -194,30 +215,115 @@ object DexMethods {
     }
 
     val HMAService_compileConfig by methodFinder {
-        declaredClass = DexClasses.HMAService.name
+        declaredClass(DexClasses.HMAService)
         modifiers = Modifier.STATIC
         paramTypes("icu.nullptr.hidemyapplist.common.JsonConfig")
         returnType(Map::class.java)
     }
 
-    val HMAService_getInstalledPackages by methodFinder {
-        declaredClass = DexClasses.HMAService.name
-        name = ServiceClient_getInstalledPackages.name
-        paramCount = 1
+    val IHMAService_clearLogs by methodDirectFinder {
+        val childMethod = findMethod {
+            matcher {
+                declaredClass(DexClasses.ServiceClient)
+                usingStrings("clearLogs")
+            }
+        }.single()
+        findMethod {
+            matcher {
+                descriptor = childMethod.descriptor
+                declaredClass(DexClasses.IHMAService)
+            }
+        }
     }
 
-    val HMAService_getServiceVersion by methodFinder {
-        declaredClass = DexClasses.HMAService.name
-        name = ServiceClient_getServiceVersion.name
-        returnType = "int"
-        paramCount = 0
+    val IHMAService_getInstalledPackages by methodDirectFinder {
+        val childMethod = findMethod {
+            matcher {
+                declaredClass(DexClasses.ServiceClient)
+                usingStrings("getInstalledPackages")
+            }
+        }.single()
+        findMethod {
+            matcher {
+                descriptor = childMethod.descriptor
+                declaredClass(DexClasses.IHMAService)
+            }
+        }
     }
 
-    val HMAService_syncConfig by methodFinder {
-        declaredClass = DexClasses.HMAService.name
-        name = ServiceClient_syncConfig.name
-        returnType = "void"
-        paramTypes(String::class.java)
+    val IHMAService_getLogs by methodDirectFinder {
+        val childMethod = findMethod {
+            matcher {
+                declaredClass(DexClasses.ServiceClient)
+                usingEqStrings("getLogs")
+            }
+        }.single()
+        findMethod {
+            matcher {
+                descriptor = childMethod.descriptor
+                declaredClass(DexClasses.IHMAService)
+            }
+        }
+    }
+
+    val IHMAService_getServiceVersion by methodDirectFinder {
+        val childMethod = findMethod {
+            matcher {
+                declaredClass(DexClasses.ServiceClient)
+                usingEqStrings("getServiceVersion")
+            }
+        }.single()
+        findMethod {
+            matcher {
+                descriptor = childMethod.descriptor
+                declaredClass(DexClasses.IHMAService)
+            }
+        }
+    }
+
+    val IHMAService_isNativeHookSupported by methodDirectFinder {
+        val childMethod = findMethod {
+            matcher {
+                declaredClass(DexClasses.ServiceClient)
+                usingEqStrings("isNativeHookSupported")
+            }
+        }.single()
+        findMethod {
+            matcher {
+                descriptor = childMethod.descriptor
+                declaredClass(DexClasses.IHMAService)
+            }
+        }
+    }
+
+    val IHMAService_stopService by methodDirectFinder {
+        val childMethod = findMethod {
+            matcher {
+                declaredClass(DexClasses.ServiceClient)
+                usingStrings("stopService")
+            }
+        }.single()
+        findMethod {
+            matcher {
+                descriptor = childMethod.descriptor
+                declaredClass(DexClasses.IHMAService)
+            }
+        }
+    }
+
+    val IHMAService_syncConfig by methodDirectFinder {
+        val childMethod = findMethod {
+            matcher {
+                declaredClass(DexClasses.ServiceClient)
+                usingStrings("syncConfig")
+            }
+        }.single()
+        findMethod {
+            matcher {
+                descriptor = childMethod.descriptor
+                declaredClass(DexClasses.IHMAService)
+            }
+        }
     }
 
     val JsonConfig_parse by methodFinder {
@@ -239,41 +345,6 @@ object DexMethods {
 
         paramTypes(String::class.java)
         returnType = "androidx.preference.Preference"
-    }
-
-    val ServiceClient_clearLogs by methodFinder {
-        declaredClass = DexClasses.ServiceClient.name
-        usingStrings("clearLogs")
-    }
-
-    val ServiceClient_getInstalledPackages by methodFinder {
-        declaredClass = DexClasses.ServiceClient.name
-        usingStrings("getInstalledPackages")
-    }
-
-    val ServiceClient_getLogs by methodFinder {
-        declaredClass = DexClasses.ServiceClient.name
-        usingEqStrings("getLogs")
-    }
-
-    val ServiceClient_getServiceVersion by methodFinder {
-        declaredClass = DexClasses.ServiceClient.name
-        usingEqStrings("getServiceVersion")
-    }
-
-    val ServiceClient_isNativeHookSupported by methodFinder {
-        declaredClass = DexClasses.ServiceClient.name
-        usingEqStrings("isNativeHookSupported")
-    }
-
-    val ServiceClient_stopService by methodFinder {
-        declaredClass = DexClasses.ServiceClient.name
-        usingStrings("stopService")
-    }
-
-    val ServiceClient_syncConfig by methodFinder {
-        declaredClass = DexClasses.ServiceClient.name
-        usingStrings("syncConfig")
     }
 
     val SettingsPreferenceFragment_onCreatePreferences by methodFinder {
@@ -310,9 +381,23 @@ object DexMethods {
         return@FinderDelegate ctor.getConstructorInstance(DexMembers.classLoader)
     }
 
+    private fun constructorDirectFinder(block: DexKitBridge.() -> MethodDataList) = FinderDelegate {
+        val ctor = DexMembers.dexkit.getMethodDirect(it) {
+            block(this).single()
+        }
+        return@FinderDelegate ctor.getConstructorInstance(DexMembers.classLoader)
+    }
+
     private fun methodFinder(block: MethodMatcher.() -> Unit) = FinderDelegate {
         val method = DexMembers.dexkit.getMethod(it) {
             matcher(MethodMatcher().apply(block))
+        }
+        return@FinderDelegate method.getMethodInstance(DexMembers.classLoader)
+    }
+
+    private fun methodDirectFinder(block: DexKitBridge.() -> MethodDataList) = FinderDelegate {
+        val method = DexMembers.dexkit.getMethodDirect(it) {
+            block(this).single()
         }
         return@FinderDelegate method.getMethodInstance(DexMembers.classLoader)
     }
@@ -320,24 +405,24 @@ object DexMethods {
 
 object DexFields {
     val CompiledAppConfig_querySet by fieldFinder {
-        declaredClass = DexClasses.CompiledAppConfig.name
+        declaredClass(DexClasses.CompiledAppConfig)
         type(LinkedHashSet::class.java)
     }
 
     val ConfigManager_config by fieldFinder {
-        declaredClass = DexClasses.ConfigManager.name
+        declaredClass(DexClasses.ConfigManager)
         type = "icu.nullptr.hidemyapplist.common.JsonConfig"
         modifiers = Modifier.STATIC
     }
 
     val ConfigManager_INSTANCE by fieldFinder {
-        declaredClass = DexClasses.ConfigManager.name
+        declaredClass(DexClasses.ConfigManager)
         type = DexClasses.ConfigManager.name
         modifiers = Modifier.STATIC or Modifier.FINAL
     }
 
     val HMAService_config by fieldFinder {
-        declaredClass = DexClasses.HMAService.name
+        declaredClass(DexClasses.HMAService)
         type = "icu.nullptr.hidemyapplist.common.JsonConfig"
     }
 
@@ -348,7 +433,7 @@ object DexFields {
     }
 
     val LangList_LOCALES by fieldFinder {
-        type { descriptor = "[Ljava/lang/String;" }
+        type(Array<String>::class.java)
         modifiers = Modifier.STATIC or Modifier.FINAL
         addWriteMethod {
             name = "<clinit>"
@@ -364,6 +449,13 @@ object DexFields {
     private fun fieldFinder(block: FieldMatcher.() -> Unit) = FinderDelegate {
         val field = DexMembers.dexkit.getField(it) {
             matcher(FieldMatcher().apply(block))
+        }
+        return@FinderDelegate field.getFieldInstance(DexMembers.classLoader)
+    }
+
+    private fun fieldDirectFinder(block: DexKitBridge.() -> FieldDataList) = FinderDelegate {
+        val field = DexMembers.dexkit.getFieldDirect(it) {
+            block(this).single()
         }
         return@FinderDelegate field.getFieldInstance(DexMembers.classLoader)
     }

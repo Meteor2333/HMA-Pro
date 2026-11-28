@@ -291,7 +291,8 @@ fun ScopeSettingsScreen(
                             applyTemplates.clear()
                             applyPresets.clear()
                             useWhitelist = it == 1
-                        }
+                        },
+                        enabled = enabled
                     )
 
                     SwitchPreference(
@@ -302,7 +303,7 @@ fun ScopeSettingsScreen(
                             unsaved = true
                             excludeSystemApps = it
                         },
-                        enabled = useWhitelist
+                        enabled = enabled && useWhitelist
                     )
 
                     SwitchPreference(
@@ -312,7 +313,8 @@ fun ScopeSettingsScreen(
                         onCheckedChange = {
                             unsaved = true
                             aggressiveFilter = it
-                        }
+                        },
+                        enabled = enabled
                     )
                 }
             }
@@ -325,7 +327,8 @@ fun ScopeSettingsScreen(
                 Card {
                     ArrowPreference(
                         title = stringResourceBy("app_template_using", applyTemplates.size),
-                        onClick = { showTemplateDialog = true }
+                        onClick = { showTemplateDialog = true },
+                        enabled = enabled
                     )
 
                     AnimatedVisibility(
@@ -333,7 +336,8 @@ fun ScopeSettingsScreen(
                     ) {
                         ArrowPreference(
                             title = stringResourceFromModule(R.string.preset_using, applyPresets.size),
-                            onClick = { showPresetDialog = true }
+                            onClick = { showPresetDialog = true },
+                            enabled = enabled
                         )
                     }
 
@@ -345,12 +349,14 @@ fun ScopeSettingsScreen(
                         },
                         onClick = dropUnlessStarted {
                             navigator.navigate(Route.AppSelector("extra_apps", extraApps))
-                        }
+                        },
+                        enabled = enabled
                     )
 
                     ArrowPreference(
                         title = stringResourceFromModule(R.string.settings_hidden_count, hiddenSettings.size),
-                        onClick = { showHiddenSettingsDialog = true }
+                        onClick = { showHiddenSettingsDialog = true },
+                        enabled = enabled
                     )
                 }
             }

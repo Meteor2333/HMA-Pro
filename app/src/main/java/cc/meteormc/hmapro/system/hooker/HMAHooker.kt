@@ -6,7 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInfo
-import android.os.SystemClock
+import android.os.Handler
+import android.os.Looper
+import cc.meteormc.hmapro.DexClasses
+import cc.meteormc.hmapro.DexFields
 import cc.meteormc.hmapro.DexMethods
 import cc.meteormc.hmapro.common.HMAConfig
 import cc.meteormc.hmapro.common.util.PresetResolver.resolveApps
@@ -18,38 +21,23 @@ import cc.meteormc.xposedkit.hook.BaseHooker
 import cc.meteormc.xposedkit.hook.HookHandle
 import cc.meteormc.xposedkit.hook.HookerContext
 import cc.meteormc.xposedkit.reflect
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 object HMAHooker : BaseHooker<HookerContext>() {
-    private const val TABLE_TIMEOUT = 24 * 60 * 60 * 1000L
-
-    private var lastResolveTime = 0L
-    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private val presetTable = HashMap<String, Set<String>>()
-
     override fun HookerContext.hook() {
-        // todo: 换方案
         DexMethods.HMAService_compileConfig.hookAfter { info ->
             val config = HMAConfig(info.argumentAt(0))
-            updateTable(config)
-        }
+            val result = info.result<Map<String, Any>>()
+            val resolved = runBlocking { resolvePresets(config) }
 
-        DexMethods.HMAService_shouldHide.hookAfter {
-            if (it.result()) return@hookAfter
-            val caller = it.argumentAt<String?>(0) ?: return@hookAfter
-            val query = it.argumentAt<String?>(1) ?: return@hookAfter
-            val shouldHide = query in (presetTable[caller] ?: return@hookAfter)
-            if (shouldHide) {
-                it.result = true
-            }
-
-            if (SystemClock.elapsedRealtime() - lastResolveTime >= TABLE_TIMEOUT) {
-                val config = SystemServerMain.config
-                if (config != null) updateTable(config)
+            for ((packageName, apps) in resolved) {
+                val compiledConfig = result[packageName] ?: continue
+                if (!DexClasses.CompiledAppConfig.isInstance(compiledConfig)) continue
+                val querySet = DexFields.CompiledAppConfig_querySet.get<MutableSet<String>>(compiledConfig)
+                querySet.addAll(apps)
             }
         }
 
@@ -63,7 +51,7 @@ object HMAHooker : BaseHooker<HookerContext>() {
                         return@hookAfter
                     }
 
-                    XLog.w(tag, "Failed to register package change receiver, HMA preset table may not be updated on package changes.")
+                    XLog.w(tag, "Failed to register package change receiver, preset apps may not be updated on package changes.")
                 }?.apply {
                     handle = this
                 }
@@ -71,26 +59,22 @@ object HMAHooker : BaseHooker<HookerContext>() {
         }
     }
 
-    private fun updateTable(config: HMAConfig) {
+    private suspend fun resolvePresets(config: HMAConfig): Map<String, Set<String>> {
         val scopes = config.scopes
+        val startTime = System.currentTimeMillis()
         val installedPackages = getInstalledPackages()
-        ioScope.launch {
-            val newTable = HashMap<String, Set<String>>()
-            for (app in installedPackages) {
-                val packageName = app.packageName
-                val scope = scopes[packageName] ?: continue
-                if (scope.useWhitelist) continue
+        val result = HashMap<String, Set<String>>()
+        for (app in installedPackages) {
+            val packageName = app.packageName
+            val scope = scopes[packageName] ?: continue
+            if (scope.useWhitelist) continue
 
-                val presets = scope.applyPresets.ifEmpty { continue }
-                newTable[packageName] = presets.resolveApps(installedPackages)
-            }
-
-            withContext(Dispatchers.IO) {
-                lastResolveTime = SystemClock.elapsedRealtime()
-                presetTable.clear()
-                presetTable.putAll(newTable)
-            }
+            val presets = scope.applyPresets.ifEmpty { continue }
+            result[packageName] = presets.resolveApps(installedPackages)
         }
+
+        XLog.d(tag, "Resolved presets in ${System.currentTimeMillis() - startTime}ms")
+        return result
     }
 
     private fun getInstalledPackages(): List<PackageInfo> {
@@ -103,7 +87,16 @@ object HMAHooker : BaseHooker<HookerContext>() {
     }
 
     private object PackageChangeReceiver : BroadcastReceiver() {
-        private var lastChange: String = ""
+        private var future: ScheduledFuture<*>? = null
+        private val handler = Handler(Looper.getMainLooper())
+        private val scheduler = Executors.newSingleThreadScheduledExecutor()
+
+        init {
+            SystemServerMain.registerCleaner {
+                handler.removeCallbacksAndMessages(null)
+                scheduler.shutdownNow()
+            }
+        }
 
         fun tryRegister(): Boolean {
             val at = ActivityThread.currentActivityThread() ?: return false
@@ -119,12 +112,20 @@ object HMAHooker : BaseHooker<HookerContext>() {
         }
 
         override fun onReceive(context: Context, intent: Intent) {
-            val config = SystemServerMain.config ?: return
-            val packageName = intent.data?.schemeSpecificPart
-            if (packageName != null && packageName != lastChange) {
-                lastChange = packageName
-                updateTable(config)
-            }
+            future?.cancel(false)
+
+            if (scheduler.isShutdown) return
+            future = scheduler.schedule(
+                { updateConfig() },
+                5000L,
+                TimeUnit.MILLISECONDS
+            )
+        }
+
+        private fun updateConfig() = handler.post {
+            val service = SystemServerMain.service
+            val config = SystemServerMain.config?.config ?: return@post
+            DexMethods.HMAService_syncConfig.call(service, config.toString())
         }
     }
 }

@@ -193,6 +193,13 @@ object DexMethods {
         usingEqStrings(" not attached to a context.")
     }
 
+    val HMAService_compileConfig by methodFinder {
+        declaredClass = DexClasses.HMAService.name
+        modifiers = Modifier.STATIC
+        paramTypes("icu.nullptr.hidemyapplist.common.JsonConfig")
+        returnType(Map::class.java)
+    }
+
     val HMAService_getInstalledPackages by methodFinder {
         declaredClass = DexClasses.HMAService.name
         name = ServiceClient_getInstalledPackages.name
@@ -206,17 +213,11 @@ object DexMethods {
         paramCount = 0
     }
 
-    val HMAService_compileConfig by methodFinder {
+    val HMAService_syncConfig by methodFinder {
         declaredClass = DexClasses.HMAService.name
-        modifiers = Modifier.STATIC
-        paramTypes("icu.nullptr.hidemyapplist.common.JsonConfig")
-        returnType(Map::class.java)
-    }
-
-    val HMAService_shouldHide by methodFinder {
-        declaredClass = DexClasses.HMAService.name
-        returnType = "boolean"
-        paramCount(min = 2)
+        name = ServiceClient_syncConfig.name
+        returnType = "void"
+        paramTypes(String::class.java)
     }
 
     val JsonConfig_parse by methodFinder {

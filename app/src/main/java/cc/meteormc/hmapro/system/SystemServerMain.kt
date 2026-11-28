@@ -27,6 +27,7 @@ object SystemServerMain {
     lateinit var pms: IPackageManager
     private var isInitialized = AtomicBoolean(false)
     private val launchTasks = ArrayDeque<() -> Unit>()
+    private val cleanerRegistry = ArrayDeque<() -> Unit>()
     var config: HMAConfig? = null
         get() {
             val config = DexFields.HMAService_config.get<Any?>(service)
@@ -92,6 +93,10 @@ object SystemServerMain {
             return null
         }
 
+        while (cleanerRegistry.isNotEmpty()) {
+            cleanerRegistry.removeFirst().invoke()
+        }
+
         return buildMap {
             this["service"] = service
             this["pms"] = pms
@@ -99,6 +104,10 @@ object SystemServerMain {
                 this["config"] = config!!.rawJson
             }
         }
+    }
+
+    fun registerCleaner(block: () -> Unit) {
+        cleanerRegistry.add(block)
     }
     
     internal fun onPmsAttach(pms: IPackageManager) {

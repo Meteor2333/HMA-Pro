@@ -118,7 +118,7 @@ object HMAHooker : BaseHooker<HookerContext>() {
             if (scheduler.isShutdown) return
             future = scheduler.schedule(
                 { updateConfig() },
-                5000L,
+                1000L,
                 TimeUnit.MILLISECONDS
             )
         }

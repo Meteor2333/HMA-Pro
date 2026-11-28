@@ -43,6 +43,10 @@ import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.data.LogItem
 import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.service.ServiceClient
+import cc.meteormc.hmapro.manager.ui.component.EmptyContent
+import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
+import cc.meteormc.hmapro.manager.ui.component.PullToRefresh
+import cc.meteormc.hmapro.manager.ui.component.button.CancelButton
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
 import cc.meteormc.hmapro.manager.ui.util.LocalPreferencesState
 import cc.meteormc.hmapro.manager.ui.util.copy
@@ -51,10 +55,6 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.component.button.CancelButton
-import cc.meteormc.hmapro.manager.ui.component.EmptyContent
-import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
-import cc.meteormc.hmapro.manager.ui.component.PullToRefresh
 import cc.meteormc.hmapro.manager.util.LogParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -98,7 +98,7 @@ fun LogsPage(outerPadding: PaddingValues) {
         }
 
         LogCache.raw = raw
-        LogCache.parsed = LogParser.parse(raw)
+        LogCache.parsed = LogParser.parse(raw).reversed()
         logs = LogCache.parsed
         isRefreshing = false
     }

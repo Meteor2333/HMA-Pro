@@ -42,6 +42,7 @@ import cc.meteormc.hmapro.R
 import cc.meteormc.hmapro.manager.data.ModuleStatus
 import cc.meteormc.hmapro.manager.service.ConfigManager
 import cc.meteormc.hmapro.manager.service.ServiceClient
+import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalModuleStatus
@@ -53,7 +54,6 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.component.PageTopAppBar
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card

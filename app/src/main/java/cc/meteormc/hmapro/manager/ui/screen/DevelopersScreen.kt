@@ -22,11 +22,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cc.meteormc.hmapro.manager.ui.component.button.BackButton
 import cc.meteormc.hmapro.manager.ui.util.painterResourceBy
 import cc.meteormc.hmapro.manager.ui.util.stringResourceBy
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
 import cc.meteormc.hmapro.manager.ui.util.withSafeHorizontal
-import cc.meteormc.hmapro.manager.ui.component.button.BackButton
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Scaffold

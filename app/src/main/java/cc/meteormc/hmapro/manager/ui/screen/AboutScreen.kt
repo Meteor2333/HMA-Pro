@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.dropUnlessStarted
 import cc.meteormc.hmapro.R
+import cc.meteormc.hmapro.manager.ui.component.aurora.AuroraBackground
+import cc.meteormc.hmapro.manager.ui.component.button.BackButton
 import cc.meteormc.hmapro.manager.ui.nav.Route
 import cc.meteormc.hmapro.manager.ui.util.LocalHMAVersion
 import cc.meteormc.hmapro.manager.ui.util.LocalNavigator
@@ -58,8 +60,6 @@ import cc.meteormc.hmapro.manager.ui.util.stringResourceFromModule
 import cc.meteormc.hmapro.manager.ui.util.then
 import cc.meteormc.hmapro.manager.ui.util.useBlur
 import cc.meteormc.hmapro.manager.ui.util.verticalScrollEffect
-import cc.meteormc.hmapro.manager.ui.component.button.BackButton
-import cc.meteormc.hmapro.manager.ui.component.aurora.AuroraBackground
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.Card

@@ -46,7 +46,7 @@ object SystemServerMain {
 
     init {
         registerCleaner {
-            cleanerRegistry.clear()
+            launchTasks.clear()
             config = null
         }
     }
@@ -96,12 +96,12 @@ object SystemServerMain {
     }
 
     fun reload(): Map<String, Any>? {
-        if (!isInitialized.get()) {
-            return null
-        }
-
         while (cleanerRegistry.isNotEmpty()) {
             cleanerRegistry.removeFirst().invoke()
+        }
+
+        if (!isInitialized.get()) {
+            return null
         }
 
         return buildMap {

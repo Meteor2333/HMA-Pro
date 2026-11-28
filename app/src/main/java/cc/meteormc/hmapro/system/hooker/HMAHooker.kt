@@ -21,6 +21,7 @@ import cc.meteormc.xposedkit.hook.BaseHooker
 import cc.meteormc.xposedkit.hook.HookHandle
 import cc.meteormc.xposedkit.hook.HookerContext
 import cc.meteormc.xposedkit.reflect
+import cc.meteormc.xposedkit.util.WeakDelegate
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
@@ -87,12 +88,14 @@ object HMAHooker : BaseHooker<HookerContext>() {
     }
 
     private object PackageChangeReceiver : BroadcastReceiver() {
+        private var context by WeakDelegate<Context>()
         private var future: ScheduledFuture<*>? = null
         private val handler = Handler(Looper.getMainLooper())
         private val scheduler = Executors.newSingleThreadScheduledExecutor()
 
         init {
             SystemServerMain.registerCleaner {
+                context?.unregisterReceiver(this)
                 future?.cancel(true)
                 handler.removeCallbacksAndMessages(null)
                 scheduler.shutdownNow()
@@ -109,6 +112,7 @@ object HMAHooker : BaseHooker<HookerContext>() {
                 addDataScheme("package")
             }
             context.registerReceiver(this, filter)
+            this.context = context
             return true
         }
 
